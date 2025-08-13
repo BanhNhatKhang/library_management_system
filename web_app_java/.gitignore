@@ -1,0 +1,21 @@
+# Ignore build và IDE files toàn dự án
+**/target/
+**/build/
+**/.idea/
+**/.vscode/
+**/node_modules/
+**/.DS_Store
+**/Thumbs.db
+
+# Ignore file cấu hình nhạy cảm
+**/application.properties
+**/application-dev.properties
+**/.env
+
+# Ignore Docker volumes và compose thực tế
+**/db_data/
+**/compose.yaml
+**/docker-compose.yaml
+
+# Ignore log files
+**/*.log
