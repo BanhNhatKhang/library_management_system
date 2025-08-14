@@ -31,7 +31,6 @@ public class DonHang {
     }
     @Enumerated(EnumType.STRING)
     @Column(name = "TRANGTHAI", columnDefinition = "TRANGTHAI_DONHANG", nullable = false)
-    @org.hibernate.annotations.Type(type = "pgsql_enum")
     private TrangThaiDonHang trangThai;
 
     @ManyToOne(optional = false)
@@ -44,7 +43,35 @@ public class DonHang {
         joinColumns = @JoinColumn(name = "MADONHANG"),
         inverseJoinColumns = @JoinColumn(name = "MAUUDAI")
     )
-
     private Set<UuDai> uuDais = new HashSet<>();
+
+    public DonHang() {}
+
+    public DonHang(String maDonHang, LocalDate ngayDat, BigDecimal tongTien, TrangThaiDonHang trangThai) {
+        this.maDonHang = maDonHang;
+        this.ngayDat = ngayDat;
+        this.tongTien = tongTien;
+        this.trangThai = trangThai;
+    }
+
+    // Getters và Setters cho DonHang
+
+    public String getMaDonHang() { return maDonHang; }
+    public void setMaDonHang(String maDonHang) { this.maDonHang = maDonHang; }
+
+    public LocalDate getNgayDat() { return ngayDat; }
+    public void setNgayDat(LocalDate ngayDat) { this.ngayDat = ngayDat; }
+
+    public BigDecimal getTongTien() { return tongTien; }
+    public void setTongTien(BigDecimal tongTien) { this.tongTien = tongTien; }
+
+    public TrangThaiDonHang getTrangThai() { return trangThai; }
+    public void setTrangThai(TrangThaiDonHang trangThai) { this.trangThai = trangThai; }
+
+    public DocGia getDocGia() { return docGia; }
+    public void setDocGia(DocGia docGia) { this.docGia = docGia; }
+
+    public Set<UuDai> getUuDais() { return uuDais; }
+    public void setUuDais(Set<UuDai> uuDais) { this.uuDais = uuDais; }
 
 }

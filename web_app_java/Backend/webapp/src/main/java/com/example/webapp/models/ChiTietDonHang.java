@@ -36,4 +36,31 @@ public class ChiTietDonHang {
     @JoinColumn(name = "MASACH", referencedColumnName = "MASACH", nullable = false)
     private Sach sach;
 
+    public ChiTietDonHang() {}
+
+    public ChiTietDonHang(ChiTietDonHangId id, int soLuong, BigDecimal donGia, DonHang donHang, Sach sach) {
+        this.id = id;
+        this.soLuong = soLuong;
+        this.donGia = donGia;
+        this.donHang = donHang;
+        this.sach = sach;
+    }
+
+    // Getters và Setters cho ChiTietDonHang
+
+    public ChiTietDonHangId getId() { return id; }
+    public void setId(ChiTietDonHangId id) { this.id = id; }
+
+    public int getSoLuong() { return soLuong; }
+    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+
+    public BigDecimal getDonGia() { return donGia; }
+    public void setDonGia(BigDecimal donGia) { this.donGia = donGia; }
+
+    public DonHang getDonHang() { return donHang; }
+    public void setDonHang(DonHang donHang) { this.donHang = donHang; }
+
+    public Sach getSach() { return sach; }
+    public void setSach(Sach sach) { this.sach = sach; }
+
 }

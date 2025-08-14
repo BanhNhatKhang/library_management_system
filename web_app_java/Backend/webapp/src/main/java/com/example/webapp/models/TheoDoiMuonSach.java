@@ -28,7 +28,6 @@ public class TheoDoiMuonSach {
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "TRANGTHAIMUON", columnDefinition = "TRANGTHAI_MUON", nullable = false)
-    @org.hibernate.annotations.Type(type = "pgsql_enum")
     private TrangThaiMuon trangThaiMuon;
 
     @ManyToOne(optional = false)
@@ -44,4 +43,33 @@ public class TheoDoiMuonSach {
     @ManyToOne(optional = true)
     @JoinColumn(name = "MANHANVIEN", referencedColumnName = "MANHANVIEN")
     private NhanVien nhanVien;
+
+    public TheoDoiMuonSach() {}
+
+    public TheoDoiMuonSach(TheoDoiMuonSachId id, LocalDate ngayTra, TrangThaiMuon trangThaiMuon) {
+        this.id = id;
+        this.ngayTra = ngayTra;
+        this.trangThaiMuon = trangThaiMuon;
+    }
+
+    // Getters và Setters cho TheoDoiMuonSach
+
+    public TheoDoiMuonSachId getId() { return id; }
+    public void setId(TheoDoiMuonSachId id) { this.id = id; }
+
+    public LocalDate getNgayTra() {return ngayTra;}
+    public void setNgayTra(LocalDate ngayTra) {this.ngayTra = ngayTra;}
+
+    public TrangThaiMuon getTrangThaiMuon() { return trangThaiMuon; }
+    public void setTrangThaiMuon(TrangThaiMuon trangThaiMuon) { this.trangThaiMuon = trangThaiMuon; }
+
+    public DocGia getDocGia() { return docGia; }
+    public void setDocGia(DocGia docGia) { this.docGia = docGia; }
+
+    public Sach getSach() { return sach; }
+    public void setSach(Sach sach) { this.sach = sach; }
+
+    public NhanVien getNhanVien() { return nhanVien; }
+    public void setNhanVien(NhanVien nhanVien) { this.nhanVien = nhanVien; }
+
 }

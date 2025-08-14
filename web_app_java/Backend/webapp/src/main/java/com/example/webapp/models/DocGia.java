@@ -28,7 +28,6 @@ public class DocGia {
     }
     @Enumerated(EnumType.STRING)
     @Column(name = "VAITRO", columnDefinition = "VAITRO_DOCGIA")
-    @org.hibernate.annotations.Type(type = "pgsql_enum")
     private VaiTroDocGia vaiTro = VaiTroDocGia.DOCGIA;
 
     public enum GioiTinh {
@@ -38,7 +37,6 @@ public class DocGia {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "GIOITINH", columnDefinition = "GIOI_TINH", nullable = false)
-    @org.hibernate.annotations.Type(type = "pgsql_enum")
     private GioiTinh gioiTinh;
 
     @Column(name = "DIACHI", columnDefinition = "TEXT")
@@ -67,8 +65,57 @@ public class DocGia {
     }
     @Enumerated(EnumType.STRING)
     @Column(name = "TRANGTHAI", columnDefinition = "TRANGTHAI_DOCGIA")
-    @org.hibernate.annotations.Type(type = "pgsql_enum")
     private TrangThaiDocGia trangThai = TrangThaiDocGia.HOATDONG;
 
+    public DocGia() {}
+
+    public DocGia(String maDocGia, String hoLot, String ten, VaiTroDocGia vaiTro, GioiTinh gioiTinh, String diaChi, LocalDate ngaySinh, String dienThoai, String email, String matKhau, TrangThaiDocGia trangThai) {
+        this.maDocGia = maDocGia;
+        this.hoLot = hoLot;
+        this.ten = ten;
+        this.vaiTro = vaiTro;
+        this.gioiTinh = gioiTinh;
+        this.diaChi = diaChi;
+        this.ngaySinh = ngaySinh;
+        this.dienThoai = dienThoai;
+        this.email = email;
+        this.matKhau = matKhau;
+        this.trangThai = trangThai;
+    }
+
+    // Getters và Setters cho DocGia
+
+    public String getMaDocGia() { return maDocGia; }
+    public void setMaDocGia(String maDocGia) { this.maDocGia = maDocGia; }
+
+    public String getHoLot() { return hoLot; }
+    public void setHoLot(String hoLot) { this.hoLot = hoLot; }
+
+    public String getTen() { return ten; }
+    public void setTen(String ten) { this.ten = ten; }
+
+    public VaiTroDocGia getVaiTro() { return vaiTro; }
+    public void setVaiTro(VaiTroDocGia vaiTro) { this.vaiTro = vaiTro; }
+
+    public GioiTinh getGioiTinh() { return gioiTinh; }
+    public void setGioiTinh(GioiTinh gioiTinh) { this.gioiTinh = gioiTinh; }
+
+    public String getDiaChi() { return diaChi; }
+    public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
+
+    public LocalDate getNgaySinh() { return ngaySinh; }
+    public void setNgaySinh(LocalDate ngaySinh) { this.ngaySinh = ngaySinh; }
+
+    public String getDienThoai() { return dienThoai; }
+    public void setDienThoai(String dienThoai) { this.dienThoai = dienThoai; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getMatKhau() { return matKhau; }
+    public void setMatKhau(String matKhau) { this.matKhau = matKhau; }
+
+    public TrangThaiDocGia getTrangThai() { return trangThai; }
+    public void setTrangThai(TrangThaiDocGia trangThai) { this.trangThai = trangThai; }
 
 }

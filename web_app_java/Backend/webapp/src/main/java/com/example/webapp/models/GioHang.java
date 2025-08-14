@@ -33,11 +33,36 @@ public class GioHang {
     @JoinColumn(name = "MASACH", referencedColumnName = "MASACH", nullable = false)
     private Sach sach;
 
+    public GioHang() {}
+
+    public GioHang(GioHangId id, int soLuong, LocalDate ngayThem) {
+        this.id = id;
+        this.soLuong = soLuong;
+        this.ngayThem = ngayThem;
+    }
+
     @PrePersist
     public void prePersist() {
         if (ngayThem == null) {
             ngayThem = LocalDate.now();
         }
     }
+
+    // Getters và Setters cho GioHang
+
+    public GioHangId getId() { return id; }
+    public void setId(GioHangId id) { this.id = id; }
+
+    public int getSoLuong() { return soLuong; }
+    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+
+    public LocalDate getNgayThem() { return ngayThem; }
+    public void setNgayThem(LocalDate ngayThem) { this.ngayThem = ngayThem; }
+
+    public DocGia getDocGia() { return docGia; }
+    public void setDocGia(DocGia docGia) { this.docGia = docGia; }
+
+    public Sach getSach() { return sach; }
+    public void setSach(Sach sach) { this.sach = sach; }
 
 }  

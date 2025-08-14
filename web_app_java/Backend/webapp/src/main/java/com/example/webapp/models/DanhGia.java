@@ -35,5 +35,30 @@ public class DanhGia {
     @JoinColumn(name = "MASACH", referencedColumnName = "MASACH", nullable = false)
     private Sach sach;
 
+    public DanhGia() {}
+
+    public DanhGia(DanhGiaId id, String binhLuan, BigDecimal diem) {
+        this.id = id;
+        this.binhLuan = binhLuan;
+        this.diem = diem;
+    }
+
+    // Getters và Setters cho DanhGia
+
+    public DanhGiaId getId() { return id; }
+    public void setId(DanhGiaId id) { this.id = id; }
+
+    public String getBinhLuan() { return binhLuan; }
+    public void setBinhLuan(String binhLuan) { this.binhLuan = binhLuan; }
+
+    public BigDecimal getDiem() { return diem; }
+    public void setDiem(BigDecimal diem) { this.diem = diem; }
+
+    public DocGia getDocGia() { return docGia; }
+    public void setDocGia(DocGia docGia) { this.docGia = docGia; }
+
+    public Sach getSach() { return sach; }
+    public void setSach(Sach sach) { this.sach = sach; }
+
 }
 

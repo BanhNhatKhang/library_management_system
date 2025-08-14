@@ -30,6 +30,17 @@ public class ChiTietDonHangUuDaiId implements Serializable {
         this.maUuDai = maUuDai;
     }
 
+    // Getters và Setters cho ChiTietDonHangUuDaiId
+
+    public String getMaDonHang() { return maDonHang; }
+    public void setMaDonHang(String maDonHang) { this.maDonHang = maDonHang; }
+
+    public String getMaSach() { return maSach; }
+    public void setMaSach(String maSach) { this.maSach = maSach; }
+
+    public String getMaUuDai() { return maUuDai; }
+    public void setMaUuDai(String maUuDai) { this.maUuDai = maUuDai; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

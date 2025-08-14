@@ -26,11 +26,23 @@ public class DanhGiaId implements java.io.Serializable {
     private LocalDate ngayDanhGia;
 
     public DanhGiaId() {}
+
     public DanhGiaId(String maDocGia, String maSach, LocalDate ngayDanhGia) {
         this.ngayDanhGia = ngayDanhGia;
         this.maDocGia = maDocGia;
         this.maSach = maSach;
     }
+
+   // Getters và Setters cho DanhGiaId
+
+    public String getMaDocGia() { return maDocGia; }
+    public void setMaDocGia(String maDocGia) { this.maDocGia = maDocGia; }
+
+    public String getMaSach() { return maSach; }
+    public void setMaSach(String maSach) { this.maSach = maSach; }
+
+    public LocalDate getNgayDanhGia() { return ngayDanhGia; }
+    public void setNgayDanhGia(LocalDate ngayDanhGia) { this.ngayDanhGia = ngayDanhGia; } 
 
    @Override
    public boolean equals(Object o) {

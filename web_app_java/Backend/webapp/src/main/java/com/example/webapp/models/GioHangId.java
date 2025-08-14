@@ -38,4 +38,13 @@ public class GioHangId implements Serializable {
     public int hashCode() {
         return Objects.hash(maDocGia, maSach);
     }
+
+    // Getters và Setters cho GioHangId
+
+    public String getMaDocGia() { return maDocGia; }
+    public void setMaDocGia(String maDocGia) { this.maDocGia = maDocGia; }
+
+    public String getMaSach() { return maSach; }
+    public void setMaSach(String maSach) { this.maSach = maSach; }
+    
 } 

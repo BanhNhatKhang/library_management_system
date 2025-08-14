@@ -35,7 +35,6 @@ public class UuDai {
     @NotNull
     @Column(name = "NGAYBATDAU", nullable = false)
     private LocalDate ngayBatDau;
-
     
     @NotNull
     @Column(name = "NGAYKETTHUC", nullable = false)
@@ -49,5 +48,39 @@ public class UuDai {
 
     @ManyToMany(mappedBy = "uuDais")
     private Set<DonHang> donHangs = new HashSet<>();
+
+    public UuDai() {}
+
+    public UuDai(String maUuDai, String tenUuDai, String moTa, BigDecimal phanTramGiam, LocalDate ngayBatDau, LocalDate ngayKetThuc) {
+        this.maUuDai = maUuDai;
+        this.tenUuDai = tenUuDai;
+        this.moTa = moTa;
+        this.phanTramGiam = phanTramGiam;
+        this.ngayBatDau = ngayBatDau;
+        this.ngayKetThuc = ngayKetThuc;
+    }
+
+    // Getters và Setters UuDai
+
+    public String getMaUuDai() { return maUuDai; }
+    public void setMaUuDai(String maUuDai) { this.maUuDai = maUuDai; }
+
+    public String getTenUuDai() { return tenUuDai; }
+    public void setTenUuDai(String tenUuDai) { this.tenUuDai = tenUuDai; }
+
+    public String getMoTa() { return moTa; }
+    public void setMoTa(String moTa) { this.moTa = moTa; }
+
+    public BigDecimal getPhanTramGiam() { return phanTramGiam; }
+    public void setPhanTramGiam(BigDecimal phanTramGiam) { this.phanTramGiam = phanTramGiam; }
+
+    public LocalDate getNgayBatDau() { return ngayBatDau; }
+    public void setNgayBatDau(LocalDate ngayBatDau) { this.ngayBatDau = ngayBatDau; }
+
+    public LocalDate getNgayKetThuc() { return ngayKetThuc; }
+    public void setNgayKetThuc(LocalDate ngayKetThuc) { this.ngayKetThuc = ngayKetThuc; }
+
+    public Set<DonHang> getDonHangs() { return donHangs; }
+    public void setDonHangs(Set<DonHang> donHangs) { this.donHangs = donHangs; }
 
 }
