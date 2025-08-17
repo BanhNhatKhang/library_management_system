@@ -1,14 +1,17 @@
 package com.example.webapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.math.BigDecimal;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.Set;
 import java.util.HashSet;
+import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "UUDAI")
@@ -47,6 +50,7 @@ public class UuDai {
     }
 
     @ManyToMany(mappedBy = "uuDais")
+    @JsonIgnore
     private Set<DonHang> donHangs = new HashSet<>();
 
     public UuDai() {}

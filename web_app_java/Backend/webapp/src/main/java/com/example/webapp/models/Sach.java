@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Min;
 public class Sach {
 
     @Id
+    @NotNull
     @Column(name = "MASACH", length = 30, nullable = false)
     private String maSach;
 
