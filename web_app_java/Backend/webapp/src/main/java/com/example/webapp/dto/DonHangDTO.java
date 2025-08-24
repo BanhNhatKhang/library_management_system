@@ -9,6 +9,7 @@ public class DonHangDTO {
     private String maDonHang;
     private LocalDate ngayDat;
     private BigDecimal tongTien;
+    private String maDocGia;
     private DonHang.TrangThaiDonHang trangThai;
 
     public String getMaDonHang() {return maDonHang;}
@@ -19,6 +20,9 @@ public class DonHangDTO {
 
     public BigDecimal getTongTien() {return tongTien;}
     public void setTongTien(BigDecimal tongTien) {this.tongTien = tongTien;}
+
+    public String getMaDocGia() {return maDocGia;}
+    public void setMaDocGia(String maDocGia) {this.maDocGia = maDocGia;}
 
     public DonHang.TrangThaiDonHang getTrangThaiDonHang() {return trangThai;}
     public void setTrangThaiDonHang(DonHang.TrangThaiDonHang trangThai) {this.trangThai = trangThai;}

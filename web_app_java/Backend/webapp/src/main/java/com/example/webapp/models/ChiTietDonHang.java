@@ -2,9 +2,6 @@ package com.example.webapp.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Objects;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
 import java.math.BigDecimal;

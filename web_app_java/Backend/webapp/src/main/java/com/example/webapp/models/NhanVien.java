@@ -3,8 +3,6 @@ package com.example.webapp.models;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
-import java.util.Set;
-import java.util.HashSet;
 
 @Entity
 @Table(name = "NHANVIEN")

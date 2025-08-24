@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.time.LocalDate;
 
 @Embeddable
-public class DanhGiaId implements java.io.Serializable {
+public class DanhGiaId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

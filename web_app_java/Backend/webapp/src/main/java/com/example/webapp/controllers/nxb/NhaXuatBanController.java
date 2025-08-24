@@ -1,9 +1,10 @@
-package com.example.webapp.controllers;
+package com.example.webapp.controllers.nxb;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.example.webapp.dto.*;
 import com.example.webapp.models.NhaXuatBan;
 import com.example.webapp.services.NhaXuatBanService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -15,12 +16,12 @@ public class NhaXuatBanController {
     private NhaXuatBanService nhaXuatBanService;
 
     @GetMapping
-    public List<NhaXuatBan> getAllNhaXuatBan() {
+    public List<NhaXuatBanDTO> getAllNhaXuatBan() {
         return nhaXuatBanService.getAllNhaXuatBan();
     }
 
     @GetMapping("/{maNhaXuatBan}")
-    public NhaXuatBan getNhaXuatBanById(@PathVariable String maNhaXuatBan) {
+    public NhaXuatBanDTO getNhaXuatBanById(@PathVariable String maNhaXuatBan) {
         return nhaXuatBanService.getNhaXuatBanById(maNhaXuatBan)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà xuất bản với mã: " + maNhaXuatBan));
     }

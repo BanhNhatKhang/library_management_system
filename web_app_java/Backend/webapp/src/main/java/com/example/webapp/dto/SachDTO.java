@@ -2,6 +2,7 @@ package com.example.webapp.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public class SachDTO {
     private String maSach;
@@ -15,6 +16,8 @@ public class SachDTO {
     private String anhBia;
     private Double diemDanhGia;
     private Double giamGia;
+    private String nhaXuatBan;
+    private List<String> theLoais;
 
     public String getMaSach() {return maSach;}
     public void setMaSach(String maSach) {this.maSach = maSach;}
@@ -49,4 +52,11 @@ public class SachDTO {
     public Double getGiamGia() {return giamGia;}
     public void setGiamGia(Double giamGia) {this.giamGia = giamGia;}   
 
+    public String getNhaXuatBan() {return nhaXuatBan;}
+    public void setNhaXuatBan(String nhaXuatBan) { this.nhaXuatBan = nhaXuatBan; }
+
+    public List<String> getTheLoais() {return theLoais;}
+    public void setTheLoais(List<String> theLoais) {
+        this.theLoais = theLoais;
+    }
 }

@@ -1,8 +1,8 @@
-package com.example.webapp.controllers;
+package com.example.webapp.controllers.uudai;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.webapp.models.UuDai;
+import com.example.webapp.dto.UuDaiDTO;
 import com.example.webapp.services.UuDaiService;
 
 import java.time.LocalDate;
@@ -16,33 +16,34 @@ public class UuDaiController {
     private UuDaiService uuDaiService;
 
     @GetMapping
-    public List<UuDai> getAllUuDai() {
+    public List<UuDaiDTO> getAllUuDai() {
         return uuDaiService.getAllUuDai();
     }
 
     @GetMapping("/id/{maUuDai}")
-    public UuDai getUuDaiById(@PathVariable String maUuDai) {
-        return uuDaiService.getUuDaiById(maUuDai).orElseThrow(() -> new RuntimeException("Không tìm thấy ưu đãi với mã: "+maUuDai));
+    public UuDaiDTO getUuDaiById(@PathVariable String maUuDai) {
+        return uuDaiService.getUuDaiById(maUuDai)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy ưu đãi với mã: " + maUuDai));
     }
 
     @GetMapping("/ngaybatdau/{ngayBatDau}")
-    public List<UuDai> getUuDaiByNgayBatDau(@PathVariable LocalDate ngayBatDau) {
+    public List<UuDaiDTO> getUuDaiByNgayBatDau(@PathVariable LocalDate ngayBatDau) {
         return uuDaiService.getUuDaiByNgayBatDau(ngayBatDau);
     }
 
     @GetMapping("/ngayketthuc/{ngayKetThuc}")
-    public List<UuDai> getUuDaiByNgayKetThuc(@PathVariable LocalDate ngayKetThuc) {
+    public List<UuDaiDTO> getUuDaiByNgayKetThuc(@PathVariable LocalDate ngayKetThuc) {
         return uuDaiService.getUuDaiByNgayKetThuc(ngayKetThuc);
     }
 
     @PostMapping
-    public UuDai createUuDai(@RequestBody UuDai uuDai) {
-        return uuDaiService.saveUuDai(uuDai);
+    public UuDaiDTO createUuDai(@RequestBody UuDaiDTO uuDaiDTO) {
+        return uuDaiService.saveUuDai(uuDaiDTO);
     }
 
     @PutMapping("/{maUuDai}")
-    public UuDai updateUuDai(@PathVariable String maUuDai, @RequestBody UuDai uuDai) {
-        return uuDaiService.updateUuDai(maUuDai, uuDai);
+    public UuDaiDTO updateUuDai(@PathVariable String maUuDai, @RequestBody UuDaiDTO uuDaiDTO) {
+        return uuDaiService.updateUuDai(maUuDai, uuDaiDTO);
     }
 
     @DeleteMapping("/{maUuDai}")
@@ -50,5 +51,4 @@ public class UuDaiController {
         uuDaiService.deleteUuDai(maUuDai);
         return "Ưu đãi với mã " + maUuDai + " đã được xóa";
     }
-
 }

@@ -2,10 +2,7 @@ package com.example.webapp.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotNull;
-import java.util.Set;
-import java.util.HashSet;
 
 @Entity
 @Table(name = "DOCGIA")

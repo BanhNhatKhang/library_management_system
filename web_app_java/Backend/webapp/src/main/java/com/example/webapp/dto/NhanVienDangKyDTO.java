@@ -2,13 +2,14 @@ package com.example.webapp.dto;
 
 import java.time.LocalDate;
 
-public class NhanVienDTO {
+public class NhanVienDangKyDTO {
     private String maNhanVien;
     private String hoTen;
     private String email;
     private String dienThoai;
     private String diaChi;
     private LocalDate ngaySinh;
+    private String matKhau;
 
     public String getMaNhanVien() {
         return maNhanVien;
@@ -54,5 +55,12 @@ public class NhanVienDTO {
     }
     public void setDiaChi(String diaChi) {
         this.diaChi = diaChi;
+    }
+
+    public String getMatKhau() {
+        return matKhau;
+    }
+    public void setMatKhau(String matKhau) {
+        this.matKhau = matKhau;
     }
 }

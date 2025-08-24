@@ -2,9 +2,7 @@ package com.example.webapp.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 import jakarta.validation.constraints.Min;
 
 @Entity
@@ -20,7 +18,7 @@ public class GioHang {
     private int soLuong;
 
     @NotNull
-    @Column(name = "NGAYTHEM", insertable = false, nullable = false)
+    @Column(name = "NGAYTHEM", nullable = false)
     private LocalDate ngayThem;
 
     @ManyToOne(optional = false)

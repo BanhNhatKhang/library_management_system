@@ -1,6 +1,7 @@
 package com.example.webapp.services;
 
 import com.example.webapp.models.NhaXuatBan;
+import com.example.webapp.dto.NhaXuatBanDTO;
 import com.example.webapp.repository.NhaXuatBanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,12 +15,12 @@ public class NhaXuatBanService {
     @Autowired
     private NhaXuatBanRepository nhaXuatBanRepository;
 
-    public List<NhaXuatBan> getAllNhaXuatBan() {
-        return nhaXuatBanRepository.findAll();
+    public List<NhaXuatBanDTO> getAllNhaXuatBan() {
+        return nhaXuatBanRepository.findAll().stream().map(this::toDTO).toList();
     }
 
-    public Optional<NhaXuatBan> getNhaXuatBanById(String maNhaXuatBan) {
-        return nhaXuatBanRepository.findById(maNhaXuatBan);
+    public Optional<NhaXuatBanDTO> getNhaXuatBanById(String maNhaXuatBan) {
+        return nhaXuatBanRepository.findById(maNhaXuatBan).map(this::toDTO);
     }
 
     public NhaXuatBan saveNhaXuatBan(NhaXuatBan nhaXuatBan) {
@@ -36,5 +37,21 @@ public class NhaXuatBanService {
 
     public void deleteNhaXuatBan(String maNhaXuatBan) {
         nhaXuatBanRepository.deleteById(maNhaXuatBan);
+    }
+
+    public NhaXuatBanDTO toDTO(NhaXuatBan nhaXuatBan) {
+        NhaXuatBanDTO nhaXuatBanDTO = new NhaXuatBanDTO();
+        nhaXuatBanDTO.setMaNhaXuatBan(nhaXuatBan.getMaNhaXuatBan());
+        nhaXuatBanDTO.setTenNhaXuatBan(nhaXuatBan.getTenNhaXuatBan());
+        nhaXuatBanDTO.setDiaChi(nhaXuatBan.getDiaChi());
+        return nhaXuatBanDTO;
+    }
+
+    public NhaXuatBan toEntity(NhaXuatBanDTO nhaXuatBanDTO) {
+        NhaXuatBan nhaXuatBan = new NhaXuatBan();
+        nhaXuatBan.setMaNhaXuatBan(nhaXuatBanDTO.getMaNhaXuatBan());
+        nhaXuatBan.setTenNhaXuatBan(nhaXuatBanDTO.getTenNhaXuatBan());
+        nhaXuatBan.setDiaChi(nhaXuatBanDTO.getDiaChi());
+        return nhaXuatBan;
     }
 }

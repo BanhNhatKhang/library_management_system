@@ -1,11 +1,15 @@
 package com.example.webapp.dto;
 
 import java.time.LocalDate;
+import com.example.webapp.models.DocGia;
 
 public class DocGiaDTO {
     private String maDocGia;
-    private String hoTen;
+    private String hoLot;
+    private String ten;
     private String email;
+    private DocGia.GioiTinh gioiTinh;
+    private String diaChi;
     private String dienThoai;
     private LocalDate ngaySinh;
 
@@ -17,12 +21,20 @@ public class DocGiaDTO {
         this.maDocGia = maDocGia;
     }
 
-    public String getHoTen() {
-        return hoTen;
+    public String getHoLot() {
+        return hoLot;
     }
 
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
+    public void setHoLot(String hoLot) {
+        this.hoLot = hoLot;
+    }
+
+    public String getTen() {
+        return ten;
+    }
+
+    public void setTen(String ten) {
+        this.ten = ten;
     }
 
     public String getEmail() {
@@ -31,6 +43,22 @@ public class DocGiaDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public DocGia.GioiTinh getGioiTinh() {
+        return gioiTinh;
+    }
+
+    public void setGioiTinh(DocGia.GioiTinh gioiTinh) {
+        this.gioiTinh = gioiTinh;
+    }
+
+    public String getDiaChi() {
+        return diaChi;
+    }
+
+    public void setDiaChi(String diaChi) {
+        this.diaChi = diaChi;
     }
 
     public String getDienThoai() {

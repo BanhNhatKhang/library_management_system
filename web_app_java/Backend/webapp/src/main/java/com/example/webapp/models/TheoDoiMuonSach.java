@@ -1,9 +1,7 @@
 package com.example.webapp.models;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 import jakarta.validation.constraints.NotNull;
 
 @Entity

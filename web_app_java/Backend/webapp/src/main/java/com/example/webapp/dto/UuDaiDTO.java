@@ -1,15 +1,15 @@
 package com.example.webapp.dto;
 
-import java.util.Date;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class UuDaiDTO {
     private String maUuDai;
     private String tenUuDai;
     private String moTa;
     private BigDecimal phanTramGiam;
-    private Date ngayBatDau;
-    private Date ngayKetThuc;
+    private LocalDate ngayBatDau;
+    private LocalDate ngayKetThuc;
 
     // Getters and Setters
 
@@ -37,19 +37,19 @@ public class UuDaiDTO {
         this.moTa = moTa;
     }
 
-    public Date getNgayBatDau() {
+    public LocalDate getNgayBatDau() {
         return ngayBatDau;
     }
 
-    public void setNgayBatDau(Date ngayBatDau) {
+    public void setNgayBatDau(LocalDate ngayBatDau) {
         this.ngayBatDau = ngayBatDau;
     }
 
-    public Date getNgayKetThuc() {
+    public LocalDate getNgayKetThuc() {
         return ngayKetThuc;
     }
 
-    public void setNgayKetThuc(Date ngayKetThuc) {
+    public void setNgayKetThuc(LocalDate ngayKetThuc) {
         this.ngayKetThuc = ngayKetThuc;
     }
 

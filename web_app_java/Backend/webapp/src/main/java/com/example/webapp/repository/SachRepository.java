@@ -9,8 +9,8 @@ import java.util.Optional;
 public interface SachRepository extends JpaRepository<Sach, String> {
     Optional<Sach> findByMaSach(String maSach);
     Optional<Sach> findByTenSach(String tenSach);
-    List findByTacGia(String tacGia);
-    List findByNhaXuatBan_TenNhaXuatBan(String tenNhaXuatBan);
+    List<Sach> findByTacGia(String tacGia);
+    List<Sach> findByNhaXuatBan_TenNhaXuatBan(String tenNhaXuatBan);
     boolean existsByMaSach(String maSach);
     boolean existsByTenSach(String tenSach);
 }

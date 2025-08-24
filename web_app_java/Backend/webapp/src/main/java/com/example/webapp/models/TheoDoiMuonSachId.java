@@ -2,13 +2,12 @@ package com.example.webapp.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 import java.time.LocalDate;
 
 @Embeddable
-public class TheoDoiMuonSachId implements java.io.Serializable {
+public class TheoDoiMuonSachId implements Serializable {
 
     @Column(name = "MADOCGIA", length = 30, nullable = false)
     private String maDocGia;
@@ -52,6 +51,6 @@ public class TheoDoiMuonSachId implements java.io.Serializable {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(maDocGia, maSach, ngayMuon);
+        return Objects.hash(maDocGia, maSach, ngayMuon);
     }
 }

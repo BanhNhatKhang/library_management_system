@@ -1,4 +1,4 @@
-package com.example.webapp.controllers;
+package com.example.webapp.controllers.donhang;
 
 import com.example.webapp.models.DonHang;
 import com.example.webapp.services.DonHangService;
@@ -15,40 +15,30 @@ public class DonHangController {
     @Autowired
     private DonHangService donHangService;
 
-    private DonHang convertToDonHangEntity(DonHangDTO donHangDTO) {
-        DonHang donHang = new DonHang();
-        donHang.setMaDonHang(donHangDTO.getMaDonHang());
-        donHang.setNgayDat(donHangDTO.getNgayDat());
-        donHang.setTongTien(donHangDTO.getTongTien());
-        donHang.setTrangThai(donHangDTO.getTrangThaiDonHang());
-        return donHang;
-
-    }
-
     @GetMapping
-    public List<DonHang> getAllDonHang() {
+    public List<DonHangDTO> getAllDonHang() {
         return donHangService.getAllDonHang();
     }
 
     @GetMapping("/id/{maDonHang}")
-    public DonHang getDonHangById(@PathVariable String maDonHang) {
+    public DonHangDTO getDonHangById(@PathVariable String maDonHang) {
         return donHangService.getDonHangById(maDonHang)
                 .orElseThrow(() -> new RuntimeException("không tìm thấy mã đơn hàng với mã: " + maDonHang));
     }
 
     @GetMapping("/sdt/{dienThoai}")
-    public List<DonHang> getDonHangByDienThoai(@PathVariable String dienThoai) {
+    public List<DonHangDTO> getDonHangByDienThoai(@PathVariable String dienThoai) {
         return donHangService.getDonHangByDienThoai(dienThoai);
     }
 
     @GetMapping("/ten")
-    public List<DonHang> getDonHangByTenDocGia(@RequestParam String hoLot, @RequestParam String ten) {
+    public List<DonHangDTO> getDonHangByTenDocGia(@RequestParam String hoLot, @RequestParam String ten) {
         return donHangService.getDonHangByTenDocGia(hoLot,ten);
     }
 
     @PostMapping
     public DonHang createDonHang(@RequestBody DonHangRequestDTO request) {
-        DonHang donHang = convertToDonHangEntity(request.getDonHang());
+        DonHang donHang = donHangService.toEntity(request.getDonHang());
         return donHangService.saveDonHang(donHang, request.getMaDocGia(), request.getMaUuDaiList());
     }
 

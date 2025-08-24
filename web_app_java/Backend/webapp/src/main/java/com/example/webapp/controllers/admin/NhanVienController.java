@@ -1,8 +1,9 @@
-package com.example.webapp.controllers;
+package com.example.webapp.controllers.admin;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.webapp.models.NhanVien;
+import com.example.webapp.dto.*;
 import com.example.webapp.services.NhanVienService;
 
 import java.util.List;
@@ -15,23 +16,25 @@ public class NhanVienController {
     private NhanVienService nhanVienService;
 
     @GetMapping
-    public List<NhanVien> getAllNhanVien() {
+    public List<NhanVienDTO> getAllNhanVien() {
         return nhanVienService.getAllNhanVien();
     }
 
     @GetMapping("/{maNhanVien}")
-    public NhanVien getNhanVienById(@PathVariable String maNhanVien) {
+    public NhanVienDTO getNhanVienById(@PathVariable String maNhanVien) {
         return nhanVienService.getNhanVienById(maNhanVien)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với mã: " + maNhanVien));
     }
 
     @PostMapping
-    public NhanVien createNhanVien(@RequestBody NhanVien nhanVien) {
+    public NhanVien createNhanVien(@RequestBody NhanVienDangKyDTO nhanVienDangKyDTO) {
+        NhanVien nhanVien = nhanVienService.toEntity(nhanVienDangKyDTO);
         return nhanVienService.saveNhanVien(nhanVien);
     }
 
     @PutMapping("/{maNhanVien}")
-    public NhanVien updateNhanVien(@PathVariable String maNhanVien, @RequestBody NhanVien nhanVien) {
+    public NhanVien updateNhanVien(@PathVariable String maNhanVien, @RequestBody NhanVienDTO nhanVienDTO) {
+        NhanVien nhanVien = nhanVienService.toEntity(nhanVienDTO);
         return nhanVienService.updateNhanVien(maNhanVien, nhanVien);
     }
 

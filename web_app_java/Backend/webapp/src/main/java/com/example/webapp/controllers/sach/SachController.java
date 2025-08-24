@@ -1,4 +1,4 @@
-package com.example.webapp.controllers;
+package com.example.webapp.controllers.sach;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,52 +15,37 @@ public class SachController {
     @Autowired
     private SachService sachService;
 
-    private Sach convertToSachEntity(SachDTO sachDTO) {
-        Sach sach = new Sach();
-        sach.setMaSach(sachDTO.getMaSach());
-        sach.setTenSach(sachDTO.getTenSach());
-        sach.setSoQuyen(sachDTO.getSoQuyen());
-        sach.setDonGia(sachDTO.getDonGia());
-        sach.setSoLuong(sachDTO.getSoLuong());
-        sach.setNamXuatBan(sachDTO.getNamXuatBan());
-        sach.setTacGia(sachDTO.getTacGia());
-        sach.setMoTa(sachDTO.getMoTa());
-        sach.setAnhBia(sachDTO.getAnhBia());
-        sach.setDiemDanhGia(sachDTO.getDiemDanhGia());
-        sach.setGiamGia(sachDTO.getGiamGia());
-        return sach;
-    }
 
     @GetMapping
-    public List<Sach> getAllSach() {
+    public List<SachDTO> getAllSach() {
         return sachService.getAllSach();
     }
 
     @GetMapping("/ten/{tenSach}")
-    public Sach getSachByTen(@PathVariable String tenSach) {
+    public SachDTO getSachByTen(@PathVariable String tenSach) {
         return sachService.getSachByTen(tenSach)
                 .orElseThrow (() -> new RuntimeException("Không tìm thấy sách với tên sách: " + tenSach));
     }
 
     @GetMapping("/id/{maSach}")
-    public Sach getSachByMaSach(@PathVariable String maSach) {
+    public SachDTO getSachByMaSach(@PathVariable String maSach) {
         return sachService.getSachById(maSach)
                 .orElseThrow (() -> new RuntimeException("Không tìm thấy sách có mã sách: " + maSach));
     }
 
     @GetMapping("/tacgia/{tenTacGia}")
-    public List<Sach> getSachByTenTacGia(@PathVariable String tacGia) {
-        return sachService.getSachByTacGia(tacGia);
+    public List<SachDTO> getSachByTenTacGia(@PathVariable String tenTacGia) {
+        return sachService.getSachByTacGia(tenTacGia);
     }
 
     @GetMapping("/nxb/{tenNhaXuatBan}")
-    public List<Sach> getSachByNhaXuatBan(@PathVariable String tenNhaXuatBan) {
+    public List<SachDTO> getSachByNhaXuatBan(@PathVariable String tenNhaXuatBan) {
         return sachService.getSachByNhaXuatBan(tenNhaXuatBan);
     }
 
     @PostMapping
     public Sach createSach(@RequestBody SachRequestDTO request) {
-        Sach sach = convertToSachEntity(request.getSach());
+        Sach sach = sachService.toEntity(request.getSach());
         return sachService.saveSach(sach, request.getMaNhaXuatBan(), request.getMaTheLoaiList());
     }
 

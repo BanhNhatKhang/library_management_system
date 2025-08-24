@@ -1,8 +1,9 @@
-package   com.example.webapp.controllers;
+package   com.example.webapp.controllers.khachhang.docgia;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.webapp.models.DocGia;
+import com.example.webapp.dto.*;
 import com.example.webapp.services.DocGiaService;
 
 import java.util.List;
@@ -15,12 +16,12 @@ public class DocGiaController {
     private DocGiaService docGiaService;
 
     @GetMapping
-    public List<DocGia> getAllDocGia() {
+    public List<DocGiaDTO> getAllDocGia() {
         return docGiaService.getAllDocGia();
     }
 
     @GetMapping("/{maDocGia}")
-    public DocGia getDocGiaById(@PathVariable String maDocGia) {
+    public DocGiaDTO getDocGiaById(@PathVariable String maDocGia) {
         return docGiaService.getDocGiaById(maDocGia)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy độc giả với mã: " + maDocGia));
     }

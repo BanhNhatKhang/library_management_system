@@ -1,10 +1,6 @@
 package com.example.webapp.models;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Objects;
+import jakarta.persistence.*;;
 
 @Entity
 @Table(name = "CHITIETDONHANGUUDAI")

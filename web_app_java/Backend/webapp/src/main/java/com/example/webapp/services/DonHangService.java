@@ -1,6 +1,7 @@
 package com.example.webapp.services;
 
 import com.example.webapp.models.*;
+import com.example.webapp.dto.DonHangDTO;
 import com.example.webapp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,24 +21,24 @@ public class DonHangService {
     @Autowired
     private UuDaiRepository uuDaiRepository;
 
-    public List<DonHang> getAllDonHang() {
-        return donHangRepository.findAll();
+    public List<DonHangDTO> getAllDonHang() {
+        return donHangRepository.findAll().stream().map(this::toDTO).toList();
     }
 
-    public Optional<DonHang> getDonHangById(String maDonHang) {
-        return donHangRepository.findById(maDonHang);
+    public Optional<DonHangDTO> getDonHangById(String maDonHang) {
+        return donHangRepository.findById(maDonHang).map(this::toDTO);
     }
 
-    public List<DonHang> getDonHangByMaDocGia(String maDocGia) {
-        return donHangRepository.findByDocGia_MaDocGia(maDocGia);
+    public List<DonHangDTO> getDonHangByMaDocGia(String maDocGia) {
+        return donHangRepository.findByDocGia_MaDocGia(maDocGia).stream().map(this::toDTO).toList();
     }
 
-    public List<DonHang> getDonHangByTenDocGia(String hoLot, String ten) {
-        return donHangRepository.findByDocGia_HoLotIgnoreCaseContainingAndDocGia_TenIgnoreCaseContaining(hoLot,ten);
+    public List<DonHangDTO> getDonHangByTenDocGia(String hoLot, String ten) {
+        return donHangRepository.findByDocGia_HoLotIgnoreCaseContainingAndDocGia_TenIgnoreCaseContaining(hoLot,ten).stream().map(this::toDTO).toList();
     }
 
-     public List<DonHang> getDonHangByDienThoai(String dienThoai) {
-        return donHangRepository.findByDocGia_DienThoai(dienThoai);
+     public List<DonHangDTO> getDonHangByDienThoai(String dienThoai) {
+        return donHangRepository.findByDocGia_DienThoai(dienThoai).stream().map(this::toDTO).toList();
     }
 
     public DonHang saveDonHang(DonHang donHang, String maDocGia, List<String> maUuDaiList) {
@@ -56,15 +57,38 @@ public class DonHangService {
     }
 
     public DonHang updateDonHang(String maDonHang, DonHang donHang) {
-        if (!donHangRepository.existsByMaDonHang(maDonHang)) {
-            throw new RuntimeException("đơn hàng không hợp lệ không tồn tại");
-        }
-        donHang.setMaDonHang(maDonHang);
-        return donHangRepository.save(donHang);     
+        DonHang existing = donHangRepository.findById(maDonHang)
+            .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
+
+        
+        existing.setNgayDat(donHang.getNgayDat());
+        existing.setTongTien(donHang.getTongTien());
+        existing.setTrangThai(donHang.getTrangThai());
+
+        return donHangRepository.save(existing);     
     }
 
     public void deleteDonHang(String maDonHang) {
         donHangRepository.deleteById(maDonHang);
+    }
+
+    public DonHangDTO toDTO(DonHang donHang) {
+        DonHangDTO donHangDTO = new DonHangDTO();
+        donHangDTO.setMaDonHang(donHang.getMaDonHang());
+        donHangDTO.setMaDocGia(donHang.getDocGia().getMaDocGia());
+        donHangDTO.setNgayDat(donHang.getNgayDat());
+        donHangDTO.setTongTien(donHang.getTongTien());
+        donHangDTO.setTrangThaiDonHang(donHang.getTrangThai());
+        return donHangDTO;
+    }
+
+    public DonHang toEntity(DonHangDTO donHangDTO) {
+        DonHang donHang = new DonHang();
+        donHang.setMaDonHang(donHangDTO.getMaDonHang());
+        donHang.setNgayDat(donHangDTO.getNgayDat());
+        donHang.setTongTien(donHangDTO.getTongTien());
+        donHang.setTrangThai(donHangDTO.getTrangThaiDonHang());
+        return donHang;
     }
 
 }

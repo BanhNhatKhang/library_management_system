@@ -10,8 +10,8 @@ import java.util.Optional;
 public interface UuDaiRepository extends JpaRepository<UuDai, String> {
     Optional<UuDai> findByMaUuDai(String maUuDai);
     UuDai findByTenUuDai(String tenUuDai);
-    List findByNgayBatDau(LocalDate ngayBatDau);
-    List findByNgayKetThuc(LocalDate ngayKetThuc);
+    List<UuDai> findByNgayBatDau(LocalDate ngayBatDau);
+    List<UuDai> findByNgayKetThuc(LocalDate ngayKetThuc);
     boolean existsByMaUuDai(String maUuDai);
     boolean existsByTenUuDai(String tenUuDai);
 }
