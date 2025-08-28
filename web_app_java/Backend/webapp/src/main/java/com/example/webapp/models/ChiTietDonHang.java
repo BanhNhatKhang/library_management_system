@@ -16,7 +16,7 @@ public class ChiTietDonHang {
     @NotNull
     @Min(1)
     @Column(name = "SOLUONG", nullable = false)
-    private int soLuong;
+    private Integer soLuong;
 
     @NotNull
     @DecimalMin(value = "0.00", inclusive = true)
@@ -48,8 +48,8 @@ public class ChiTietDonHang {
     public ChiTietDonHangId getId() { return id; }
     public void setId(ChiTietDonHangId id) { this.id = id; }
 
-    public int getSoLuong() { return soLuong; }
-    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+    public Integer getSoLuong() { return soLuong; }
+    public void setSoLuong(Integer soLuong) { this.soLuong = soLuong; }
 
     public BigDecimal getDonGia() { return donGia; }
     public void setDonGia(BigDecimal donGia) { this.donGia = donGia; }
