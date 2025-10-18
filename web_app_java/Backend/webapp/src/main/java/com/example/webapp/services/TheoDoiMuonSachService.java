@@ -1,6 +1,8 @@
 package com.example.webapp.services;
 
 import com.example.webapp.models.*;
+import com.example.webapp.dto.DocGiaDTO;
+import com.example.webapp.dto.SachDTO;
 import com.example.webapp.dto.TheoDoiMuonSachDTO;
 import com.example.webapp.repository.DocGiaRepository;
 import com.example.webapp.repository.NhanVienRepository;
@@ -36,8 +38,19 @@ public class TheoDoiMuonSachService {
         return theoDoiMuonSachRepository.findByDocGia_MaDocGia(maDocGia).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    public Optional<TheoDoiMuonSach> findById(TheoDoiMuonSachId id) {
+        return theoDoiMuonSachRepository.findById(id);
+    }
+
     public Optional<TheoDoiMuonSachDTO> getById(TheoDoiMuonSachId id) {
         return theoDoiMuonSachRepository.findById(id).map(this::toDTO);
+    }
+
+    public List<TheoDoiMuonSachDTO> getByMaSach(String maSach) {
+        return theoDoiMuonSachRepository.findAll().stream()
+            .filter(tdms -> tdms.getSach().getMaSach().equals(maSach))
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
     public TheoDoiMuonSachDTO save(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
@@ -71,10 +84,33 @@ public class TheoDoiMuonSachService {
     }
 
     public TheoDoiMuonSachDTO update(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
-        TheoDoiMuonSachId id = new TheoDoiMuonSachId(theoDoiMuonSachDTO.getMaDocGia(), theoDoiMuonSachDTO.getMaSach(), theoDoiMuonSachDTO.getNgayMuon());
-        if (!theoDoiMuonSachRepository.existsById(id)) throw new RuntimeException("Không tìm thấy bản ghi");
-        TheoDoiMuonSach theoDoiMuonSach = toEntity(theoDoiMuonSachDTO);
-        return toDTO(theoDoiMuonSachRepository.save(theoDoiMuonSach));
+        TheoDoiMuonSachId id = new TheoDoiMuonSachId(
+            theoDoiMuonSachDTO.getMaDocGia(), 
+            theoDoiMuonSachDTO.getMaSach(), 
+            theoDoiMuonSachDTO.getNgayMuon()
+        );
+
+        // 1. Tìm Entity hiện có
+        TheoDoiMuonSach existingRecord = theoDoiMuonSachRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy bản ghi để cập nhật"));
+
+        // 2. Cập nhật các trường được phép thay đổi từ DTO
+        
+        if (theoDoiMuonSachDTO.getNgayTra() != null) {
+            existingRecord.setNgayTra(theoDoiMuonSachDTO.getNgayTra());
+        }
+        
+        if (theoDoiMuonSachDTO.getTrangThaiMuon() != null) {
+            existingRecord.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(theoDoiMuonSachDTO.getTrangThaiMuon()));
+        }
+        
+        if (theoDoiMuonSachDTO.getMaNhanVien() != null) {
+            NhanVien nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
+                .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
+            existingRecord.setNhanVien(nhanVien);
+        } 
+        // 3. Lưu Entity đã cập nhật
+        return toDTO(theoDoiMuonSachRepository.save(existingRecord));
     }
 
     public void delete(TheoDoiMuonSachId id) {
@@ -83,12 +119,25 @@ public class TheoDoiMuonSachService {
 
     private TheoDoiMuonSachDTO toDTO(TheoDoiMuonSach theoDoiMuonSach) {
         TheoDoiMuonSachDTO theoDoiMuonSachDTO = new TheoDoiMuonSachDTO();
+        
         theoDoiMuonSachDTO.setMaDocGia(theoDoiMuonSach.getId().getMaDocGia());
         theoDoiMuonSachDTO.setMaSach(theoDoiMuonSach.getId().getMaSach());
+        
         theoDoiMuonSachDTO.setNgayMuon(theoDoiMuonSach.getId().getNgayMuon());
         theoDoiMuonSachDTO.setNgayTra(theoDoiMuonSach.getNgayTra());
         theoDoiMuonSachDTO.setTrangThaiMuon(theoDoiMuonSach.getTrangThaiMuon().name());
-        theoDoiMuonSachDTO.setMaNhanVien(theoDoiMuonSach.getNhanVien() != null ? theoDoiMuonSach.getNhanVien().getMaNhanVien() : null);
+
+        if (theoDoiMuonSach.getNhanVien() != null) {
+            theoDoiMuonSachDTO.setMaNhanVien(theoDoiMuonSach.getNhanVien().getMaNhanVien()); 
+        }
+        
+        if (theoDoiMuonSach.getDocGia() != null) {
+            theoDoiMuonSachDTO.setDocGia(toDocGiaDTO(theoDoiMuonSach.getDocGia())); 
+        }
+        if (theoDoiMuonSach.getSach() != null) {
+            theoDoiMuonSachDTO.setSach(toSachDTO(theoDoiMuonSach.getSach())); 
+        }
+
         return theoDoiMuonSachDTO;
     }
 
@@ -100,4 +149,26 @@ public class TheoDoiMuonSachService {
         theoDoiMuonSach.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(theoDoiMuonSachDTO.getTrangThaiMuon()));
         return theoDoiMuonSach;
     }
+
+    private DocGiaDTO toDocGiaDTO(DocGia docGia) {
+        DocGiaDTO dto = new DocGiaDTO();
+        dto.setMaDocGia(docGia.getMaDocGia());
+        dto.setHoLot(docGia.getHoLot()); 
+        dto.setTen(docGia.getTen());
+        dto.setDienThoai(docGia.getDienThoai());
+        dto.setEmail(docGia.getEmail());
+        dto.setDiaChi(docGia.getDiaChi());
+        dto.setNgaySinh(docGia.getNgaySinh());
+        return dto;
+    }
+
+    private SachDTO toSachDTO(Sach sach) {
+        SachDTO dto = new SachDTO();
+        dto.setMaSach(sach.getMaSach());
+        dto.setTenSach(sach.getTenSach()); 
+        dto.setTacGia(sach.getTacGia());
+        dto.setTheLoais(sach.getTheLoais().stream().map(TheLoai::getTenTheLoai).toList());
+        return dto;
+    }
+
 }

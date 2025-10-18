@@ -1,0 +1,76 @@
+.dg-add {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+.dg-add h4 {
+  color: #2c3e50;
+  margin-bottom: 18px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* form card */
+.dg-add .bg-white {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  max-width: 980px;
+}
+
+/* grid layout (kept simple because no cover image) */
+.dg-add .row {
+  gap: 12px;
+}
+
+/* form controls */
+.dg-add label {
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 6px;
+  display: block;
+}
+.dg-add .form-control,
+.dg-add .form-select {
+  padding: 10px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.dg-add .form-control:focus,
+.dg-add .form-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.08);
+}
+
+/* actions */
+.dg-add .btn-primary {
+  background: #27ae60;
+  border-color: #27ae60;
+}
+.dg-add .btn-outline-secondary {
+  background: transparent;
+}
+
+/* small helper text */
+.dg-add .help {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* responsive */
+@media (max-width: 1024px) {
+  .dg-add .bg-white {
+    padding: 18px;
+  }
+}
+@media (max-width: 480px) {
+  .dg-add {
+    padding: 12px;
+  }
+  .dg-add h4 {
+    font-size: 18px;
+  }
+}

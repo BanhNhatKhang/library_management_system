@@ -1,0 +1,305 @@
+/* GitHub-style Login */
+.login-container {
+  min-height: 100vh;
+  background-color: #0d1117;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+    Helvetica, Arial, sans-serif;
+}
+
+.login-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 32px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+}
+
+/* Logo */
+.login-logo {
+  margin-bottom: 16px;
+}
+
+.login-logo svg {
+  fill: #f0f6fc;
+}
+
+/* Title */
+.login-title {
+  color: #f0f6fc;
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  margin: 0 0 20px 0;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  color: #f0f6fc;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.password-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.forgot-link {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #f0f6fc;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+}
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  background-color: #238636;
+  color: #ffffff;
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2ea043;
+}
+
+.btn-primary:disabled {
+  background-color: #21262d;
+  color: #8b949e;
+  cursor: not-allowed;
+}
+
+.btn-google {
+  width: 100%;
+  background-color: #21262d;
+  color: #f0f6fc;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-google:hover {
+  background-color: #30363d;
+}
+
+/* Divider */
+.divider {
+  margin: 16px 0;
+  position: relative;
+  text-align: center;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #30363d;
+}
+
+.divider span {
+  background-color: #161b22;
+  color: #8b949e;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Error message */
+.error-message {
+  background-color: #da3633;
+  color: #f0f6fc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin: -8px 0 8px 0;
+  text-align: left;
+}
+
+/* Footer */
+.login-footer {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background-color: #0d1117;
+}
+
+.login-footer p {
+  margin: 0;
+  color: #f0f6fc;
+  font-size: 14px;
+}
+
+.register-link {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+/* Page footer */
+.page-footer {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.page-footer a {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.page-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 24px;
+    margin: 0 16px;
+  }
+
+  .page-footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.register-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 32px;
+  width: 100%;
+  max-width: 600px; /* Rộng hơn cho form register */
+  text-align: center;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Form rows for side-by-side inputs */
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Select styling */
+select.form-control {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+  appearance: none;
+}
+
+select.form-control:focus {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2358a6ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* Success message */
+.success-message {
+  background-color: #238636;
+  color: #f0f6fc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin: -8px 0 8px 0;
+  text-align: left;
+}
+
+/* Responsive cho register */
+@media (max-width: 768px) {
+  .register-card {
+    max-width: 100%;
+    padding: 24px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    padding: 20px;
+    margin: 0 16px;
+  }
+}

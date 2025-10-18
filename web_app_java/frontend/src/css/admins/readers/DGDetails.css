@@ -1,0 +1,179 @@
+.dg-details {
+  background: #f8f9fb;
+  padding: 20px 30px;
+  border-radius: 12px;
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+}
+
+/* Header (top navigation) */
+.dg-details .header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.dg-details .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.dg-details .back-link:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+  color: white;
+  text-decoration: none;
+}
+
+.dg-details .page-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.dg-details .spacer {
+  width: 120px;
+}
+
+/* Tabs */
+.dg-details .tab-navigation {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.dg-details .tab-button {
+  background: transparent;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.dg-details .tab-button:hover {
+  color: #0d6efd;
+}
+
+.dg-details .tab-button.active {
+  color: #0d6efd;
+  border-bottom-color: #0d6efd;
+  font-weight: 600;
+}
+
+/* Card style (giống SachDetails) */
+.dg-details .tab-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Thông tin độc giả */
+.dg-details .info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dg-details .info-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 8px 0;
+}
+
+.dg-details .info-label {
+  font-weight: 600;
+  color: #444;
+}
+
+.dg-details .info-value {
+  color: #222;
+}
+
+/* Bảng dữ liệu */
+.dg-details table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dg-details table th,
+.dg-details table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: left;
+}
+
+.dg-details table th {
+  background-color: #f6f7fb;
+  font-weight: 600;
+  color: #333;
+}
+
+.dg-details table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Trạng thái mượn */
+.dg-details .trang-thai {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.dg-details .trang-thai.dang-muon {
+  background: #0d6efd;
+}
+
+.dg-details .trang-thai.qua-han {
+  background: #dc3545;
+}
+
+.dg-details .trang-thai.da-tra {
+  background: #198754;
+}
+
+/* No data */
+.dg-details .no-data {
+  text-align: center;
+  color: #999;
+  padding: 30px 0;
+  font-style: italic;
+}
+
+/* Nút chỉnh sửa */
+.dg-details .btn-edit {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dg-details .btn-edit:hover {
+  background: #0b5ed7;
+}

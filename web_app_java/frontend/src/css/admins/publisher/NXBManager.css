@@ -1,0 +1,198 @@
+.nxb-manager {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.nxb-manager h2 {
+  margin-bottom: 1rem;
+}
+
+.add-btn {
+  margin-bottom: 1rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.nxb-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.nxb-table th,
+.nxb-table td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.nxb-table th {
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2563eb;
+  font-size: 1em;
+  margin-right: 8px;
+}
+
+.delete-btn {
+  color: #ef4444;
+}
+
+.edit-btn:hover {
+  color: #fbbf24;
+}
+
+.delete-btn:hover {
+  color: #b91c1c;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 0 0;
+}
+
+.pagination button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.pagination button:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.delete-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #ef4444;
+  font-size: 1.25rem;
+}
+
+.modal-content {
+  padding: 1.5rem;
+}
+
+.modal-content p {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #374151;
+}
+
+.nxb-info {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid #fee2e2;
+}
+
+.nxb-details h4 {
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+  font-size: 1.1rem;
+}
+
+.nxb-details p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+  text-align: left;
+}
+
+.modal-actions {
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.cancel-btn,
+.confirm-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.confirm-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.cancel-btn:disabled,
+.confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

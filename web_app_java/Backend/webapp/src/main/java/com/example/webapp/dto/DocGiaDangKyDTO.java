@@ -2,17 +2,39 @@ package com.example.webapp.dto;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.*;
+
 public class DocGiaDangKyDTO {
 
     private String maDocGia;
+
+    @NotBlank(message = "Họ lót không được để trống")
     private String hoLot;
+
+    @NotBlank(message = "Tên không được để trống")
     private String ten;
+
     private String vaiTro;
+
+    @NotBlank(message = "Vui lòng xác định giới tính")
     private String gioiTinh;
+
+    @NotBlank(message = "Vui lòng điền đầy đủ địa chỉ")
     private String diaChi;
+
+    @Past(message = "Ngày sinh không hợp lệ")
     private LocalDate ngaySinh;
+
+    @NotBlank(message = "Vui lòng điền số điện thoại")
+    @Pattern(regexp = "\\d{10}", message = "Điện thoại phải đủ 10 chữ số")
     private String dienThoai;
+
+    @NotBlank(message = "Vui lòng điền email")
+    @Email(message = "Email không hợp lệ")
     private String email;
+
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 8, message = "Mật khẩu ít nhất phải có 8 ký tự")
     private String matKhau;
 
     // Getters and Setters

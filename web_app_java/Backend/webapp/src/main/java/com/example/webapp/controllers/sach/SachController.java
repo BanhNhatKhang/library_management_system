@@ -1,11 +1,23 @@
 package com.example.webapp.controllers.sach;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.webapp.models.Sach;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+// import com.example.webapp.models.Sach;
 import com.example.webapp.dto.*;
 import com.example.webapp.services.SachService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -43,21 +55,99 @@ public class SachController {
         return sachService.getSachByNhaXuatBan(tenNhaXuatBan);
     }
 
+    @GetMapping("/theloai/{maTheLoai}")
+    public List<SachDTO> getSachByMaTheLoai(@PathVariable String maTheLoai) {
+        return sachService.getSachByMaTheLoai(maTheLoai);
+    }
+
+    @GetMapping("/image/{folder}/{filename}")
+    public ResponseEntity<Resource> getImage(
+            @PathVariable String folder,
+            @PathVariable String filename) {
+        try {
+            Path filePath = Paths.get("uploads", folder, filename);
+            
+            if (!Files.exists(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Resource resource = new FileSystemResource(filePath);
+            String contentType = Files.probeContentType(filePath);
+            
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, contentType != null ? contentType : "image/jpeg")
+                    .body(resource);
+                    
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PostMapping
-    public Sach createSach(@RequestBody SachRequestDTO request) {
-        Sach sach = sachService.toEntity(request.getSach());
-        return sachService.saveSach(sach, request.getMaNhaXuatBan(), request.getMaTheLoaiList());
+    public ResponseEntity<SachDTO> createSach(
+            @RequestParam("maSach") String maSach,
+            @RequestParam("tenSach") String tenSach,
+            @RequestParam("soQuyen") int soQuyen,
+            @RequestParam("donGia") String donGia,
+            @RequestParam("soLuong") int soLuong,
+            @RequestParam("namXuatBan") String namXuatBan,
+            @RequestParam("tacGia") String tacGia,
+            @RequestParam("moTa") String moTa,
+            @RequestParam("nhaXuatBan") String nhaXuatBan,
+            @RequestParam("theLoais") String theLoaisJson,
+            @RequestParam("anhBia") MultipartFile anhBia) {
+        
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String[] theLoais = mapper.readValue(theLoaisJson, String[].class);
+            
+            SachDTO sachDTO = sachService.createSach(
+                maSach, tenSach, soQuyen, donGia, soLuong, 
+                namXuatBan, tacGia, moTa, nhaXuatBan, 
+                theLoais, anhBia
+            );
+            
+            return ResponseEntity.ok(sachDTO);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/{maSach}")
-    public Sach updateSach(@PathVariable String maSach, @RequestBody Sach sach) {
-        return sachService.updateSach(maSach, sach);
+    public ResponseEntity<SachDTO> updateSach(
+            @PathVariable String maSach,
+            @RequestParam("tenSach") String tenSach,
+            @RequestParam("soQuyen") int soQuyen,
+            @RequestParam("donGia") String donGia,
+            @RequestParam("soLuong") int soLuong,
+            @RequestParam("namXuatBan") String namXuatBan,
+            @RequestParam("tacGia") String tacGia,
+            @RequestParam("moTa") String moTa,
+            @RequestParam("nhaXuatBan") String nhaXuatBan,
+            @RequestParam("theLoais") String theLoaisJson,
+            @RequestParam(value = "anhBia", required = false) MultipartFile anhBia) {
+        
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String[] theLoais = mapper.readValue(theLoaisJson, String[].class);
+            
+            SachDTO sachDTO = sachService.updateSach(
+                maSach, tenSach, soQuyen, donGia, soLuong, 
+                namXuatBan, tacGia, moTa, nhaXuatBan, 
+                theLoais, anhBia
+            );
+            
+            return sachDTO != null ? ResponseEntity.ok(sachDTO) : ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{maSach}")
-    public String deleteSach(@PathVariable String maSach) {
-        sachService.deleteSach(maSach);
-        return "Sách với mã " + maSach + " đã được xóa thành công";
+    public ResponseEntity<Void> deleteSach(@PathVariable String id) {
+        boolean deleted = sachService.deleteSach(id);
+        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
 }

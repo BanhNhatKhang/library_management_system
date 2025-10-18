@@ -1,0 +1,89 @@
+.muon-details {
+  background: #f8f9fb;
+  padding: 20px 30px;
+  border-radius: 12px;
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+}
+
+/* Header */
+.muon-details .header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.muon-details .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.muon-details .back-link:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+.muon-details .page-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+.muon-details .spacer {
+  width: 120px;
+}
+
+/* Info layout */
+.muon-details .info-section {
+  margin-bottom: 20px;
+}
+
+.muon-details .info-item {
+  margin-bottom: 10px;
+}
+
+.muon-details .info-label {
+  font-weight: bold;
+}
+
+.muon-details .info-value {
+  color: #555;
+}
+
+/* Table */
+.muon-details table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.muon-details table th,
+.muon-details table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  text-align: left;
+}
+
+.muon-details table th {
+  background-color: #f1f1f1;
+}
+
+.muon-details table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* No data */
+.muon-details .no-data {
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+}

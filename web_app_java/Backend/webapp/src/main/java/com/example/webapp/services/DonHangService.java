@@ -42,17 +42,33 @@ public class DonHangService {
     }
 
     public DonHang saveDonHang(DonHang donHang, String maDocGia, List<String> maUuDaiList) {
+        if (donHang.getMaDonHang() == null || donHang.getMaDonHang().isBlank()) {
+            // Lấy ngày hiện tại định dạng yyyyMMdd
+            java.time.LocalDate today = java.time.LocalDate.now();
+            String datePart = today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+            // Đếm số đơn hàng đã tạo hôm nay (tùy theo DB, ở đây ta đếm tổng rồi +1)
+            long count = donHangRepository.count() + 1;
+
+            // Tạo mã dạng DH20251010-001
+            String newId = String.format("DH%s-%03d", datePart, count);
+            donHang.setMaDonHang(newId);
+        }
+
         DocGia docGia = docGiaRepository.findById(maDocGia)
             .orElseThrow(() -> new RuntimeException("Độc giả không tồn tại"));
         donHang.setDocGia(docGia);
 
         Set<UuDai> uuDais = new HashSet<>();
-        for (String maUuDai : maUuDaiList) {
-            UuDai uuDai = uuDaiRepository.findById(maUuDai)
-                .orElseThrow(() -> new RuntimeException("Ưu đãi không tồn tại"));
-            uuDais.add(uuDai);
+        if (maUuDaiList != null && !maUuDaiList.isEmpty()) {
+            for (String maUuDai : maUuDaiList) {
+                UuDai uuDai = uuDaiRepository.findById(maUuDai)
+                    .orElseThrow(() -> new RuntimeException("Ưu đãi không tồn tại: " + maUuDai));
+                uuDais.add(uuDai);
+            }
         }
         donHang.setUuDais(uuDais);
+
         return donHangRepository.save(donHang);
     }
 

@@ -10,7 +10,17 @@ public class TheoDoiMuonSachDTO {
     private String trangThaiMuon;
     private String maNhanVien;
 
+    private DocGiaDTO docGia;
+    private SachDTO sach;
+
     // Getters và Setters
+
+    public DocGiaDTO getDocGia() { return docGia; }
+    public void setDocGia(DocGiaDTO docGia) { this.docGia = docGia; }
+    
+    public SachDTO getSach() { return sach; }
+    public void setSach(SachDTO sach) { this.sach = sach; }
+
     public String getMaDocGia() { return maDocGia; }
     public void setMaDocGia(String maDocGia) { this.maDocGia = maDocGia; }
 

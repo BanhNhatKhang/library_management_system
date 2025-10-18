@@ -26,6 +26,11 @@ public class TheoDoiMuonSachController {
         return theoDoiMuonSachService.getByMaDocGia(maDocGia);
     }
 
+    @GetMapping("/sach/{maSach}")
+    public List<TheoDoiMuonSachDTO> getByMaSach(@PathVariable String maSach) {
+        return theoDoiMuonSachService.getByMaSach(maSach);
+    }
+
     @GetMapping("/item")
     public Optional<TheoDoiMuonSachDTO> getById(@RequestParam String maDocGia, @RequestParam String maSach, @RequestParam String ngayMuon) {
         TheoDoiMuonSachId id = new TheoDoiMuonSachId(maDocGia, maSach, java.time.LocalDate.parse(ngayMuon));

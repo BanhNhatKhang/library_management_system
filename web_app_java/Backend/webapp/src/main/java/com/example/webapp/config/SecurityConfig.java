@@ -1,41 +1,43 @@
 package com.example.webapp.config;
 
-import com.example.webapp.models.DocGia;
-import com.example.webapp.repository.DocGiaRepository;
+// import com.example.webapp.repository.DocGiaRepository;
+import com.example.webapp.security.JwtAuthFilter;
+
+// import org.springframework.web.servlet.config.annotation.CorsRegistry;
+// import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+// import org.springframework.lang.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+// import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
 
-    private final DocGiaRepository docGiaRepository;
+    // private final DocGiaRepository docGiaRepository;
+    @Autowired
+    private UserDetailService userDetailService;
 
-    public SecurityConfig(DocGiaRepository docGiaRepository) {
-        this.docGiaRepository = docGiaRepository;
-    }
+    // public SecurityConfig(DocGiaRepository docGiaRepository) {
+    //     this.docGiaRepository = docGiaRepository;
+    // }
 
     // Dịch vụ load user từ DB
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            DocGia docGia = docGiaRepository.findByEmail(username);
-            if (docGia == null) {
-                throw new UsernameNotFoundException("Không tìm thấy độc giả: " + username);
-            }
-            return User.withUsername(docGia.getEmail())
-                    .password(docGia.getMatKhau())
-                    .roles("DOCGIA")
-                    .build();
-        };
+        return userDetailService;
     }
 
     // Mã hóa mật khẩu
@@ -52,18 +54,56 @@ public class SecurityConfig {
 
     // Cấu hình HTTP security
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/ws/**", "/xacthuc/dangnhap", "/xacthuc/dangky").permitAll()
+                .requestMatchers(
+                    "/api/xacthuc/**", // Đăng nhập/Đăng ký
+                    "/api/home/**",    // Trang chủ
+                    "/api/sach/**",    // Chi tiết sách
+                    "/api/theloai/**", // Thể loại
+                    "/api/nhaxuatban/**", // Nhà xuất bản
+                    "/api/uudai/**"       // Ưu đãi
+                ).permitAll()
+                
+                .requestMatchers(
+                    "/api/nhanvien/**"
+                ).hasAnyRole("ADMIN", "NHANVIEN") 
+                
+                .requestMatchers(
+                    "/api/docgia/thongtin/**", 
+                    "/api/donhang/**",
+                    "/api/theodoimuonsach/**",
+                    "/api/thongbao/**"
+                ).hasRole("DOCGIA") 
+
+                .requestMatchers(
+                    "/api/user/me" 
+                ).authenticated()
+                
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form
-                .loginPage("/xacthuc/dangnhap")
-                .permitAll()
-            )
-            .logout(logout -> logout.permitAll());
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
+
+    
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://localhost:8080");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 }

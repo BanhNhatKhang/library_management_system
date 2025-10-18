@@ -1,0 +1,167 @@
+.dg-manager {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.dg-manager h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dg-manager h2::before {
+  content: "📋";
+  font-size: 1.4rem;
+}
+
+/* Nút thêm mới */
+.dg-manager .add-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.dg-manager .add-btn:hover {
+  background: #1e40af;
+}
+
+/* Ô tìm kiếm */
+.dg-manager .search-box {
+  margin-bottom: 1rem;
+}
+
+.dg-manager .search-box input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.dg-manager .search-box input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+/* Bảng */
+.dg-manager table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.dg-manager th,
+.dg-manager td {
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem;
+  text-align: left;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.dg-manager th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+/* Cột hành động */
+.dg-manager td:last-child {
+  text-align: center;
+}
+
+.dg-manager .action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0 4px;
+  font-size: 1rem;
+  transition: transform 0.15s;
+}
+
+.dg-manager .action-btn:hover {
+  transform: scale(1.15);
+}
+
+.dg-manager .view-btn {
+  color: #2563eb;
+}
+
+.dg-manager .edit-btn {
+  color: #fbbf24;
+}
+
+.dg-manager .delete-btn {
+  color: #ef4444;
+}
+
+/* Trạng thái rỗng */
+.dg-manager .text-center {
+  padding: 2rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Pagination (đồng bộ với SachManager) */
+.dg-manager .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+.dg-manager .pagination button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.dg-manager .pagination button:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.dg-manager .pagination span {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.dg-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dg-manager-header .search-box {
+  width: 300px;
+}
+
+.dg-manager-header .search-box input {
+  width: 100%;
+}
+
+/* Responsive nhỏ */
+@media (max-width: 768px) {
+  .dg-manager th,
+  .dg-manager td {
+    font-size: 0.9rem;
+  }
+}

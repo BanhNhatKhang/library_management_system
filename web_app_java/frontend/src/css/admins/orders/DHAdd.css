@@ -1,0 +1,76 @@
+.dh-add {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+.dh-add h4 {
+  color: #2c3e50;
+  margin-bottom: 18px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* form card */
+.dh-add .bg-white {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  max-width: 980px;
+}
+
+/* grid layout */
+.dh-add .row {
+  gap: 12px;
+}
+
+/* form controls */
+.dh-add label {
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 6px;
+  display: block;
+}
+.dh-add .form-control,
+.dh-add .form-select {
+  padding: 10px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.dh-add .form-control:focus,
+.dh-add .form-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.08);
+}
+
+/* actions */
+.dh-add .btn-primary {
+  background: #27ae60;
+  border-color: #27ae60;
+}
+.dh-add .btn-outline-secondary {
+  background: transparent;
+}
+
+/* helper text */
+.dh-add .help {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* responsive */
+@media (max-width: 1024px) {
+  .dh-add .bg-white {
+    padding: 18px;
+  }
+}
+@media (max-width: 480px) {
+  .dh-add {
+    padding: 12px;
+  }
+  .dh-add h4 {
+    font-size: 18px;
+  }
+}

@@ -1,0 +1,301 @@
+.add-sach {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.add-sach h2 {
+  color: #2c3e50;
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-sach-form {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 1200px;
+}
+
+.form-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.form-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+/* Dòng 1: Mã sách, Tên sách, Tác giả, Nhà xuất bản */
+.form-row-1 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Dòng 2: Đơn giá, Số quyển, Số lượng, Năm xuất bản */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Dòng 3: Thể loại và Mô tả */
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input:hover,
+.form-group select:hover {
+  border-color: #bdc3c7;
+}
+
+/* Thể loại select */
+.theloai-select {
+  height: 120px !important;
+  resize: vertical;
+}
+
+.theloai-help {
+  color: #7f8c8d;
+  font-size: 12px;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+/* Mô tả textarea */
+.mota-textarea {
+  height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Ảnh bìa - căn giữa với 3 dòng */
+.image-upload-section {
+  border: 2px dashed #e1e8ed;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background-color: #fafbfc;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-upload-section:hover {
+  border-color: #3498db;
+  background-color: #f8f9fa;
+}
+
+.image-upload-section input[type="file"] {
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  width: 100%;
+}
+
+.image-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+}
+
+.upload-placeholder {
+  color: #7f8c8d;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.upload-placeholder p {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+/* Form actions */
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 2px solid #ecf0f1;
+}
+
+.cancel-btn,
+.submit-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.cancel-btn {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #7f8c8d;
+  transform: translateY(-2px);
+}
+
+.submit-btn {
+  background-color: #27ae60;
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #229954;
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Required indicator */
+.form-group label::after {
+  content: " *";
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.form-group.optional label::after {
+  display: none;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .form-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .form-row-1,
+  .form-row-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .image-upload-section {
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .add-sach {
+    padding: 15px;
+  }
+
+  .add-sach-form {
+    padding: 20px;
+  }
+
+  .form-row-1,
+  .form-row-2,
+  .form-row-3 {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .form-container {
+    gap: 15px;
+  }
+
+  .image-upload-section {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-sach h2 {
+    font-size: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}

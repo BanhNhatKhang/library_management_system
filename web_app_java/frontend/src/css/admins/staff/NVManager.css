@@ -1,0 +1,155 @@
+.nv-manager {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.nv-manager h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nv-manager .add-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.nv-manager .add-btn:hover {
+  background: #1e40af;
+}
+
+.nv-manager .search-box {
+  margin-bottom: 1rem;
+}
+
+.nv-manager .search-box input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.nv-manager .search-box input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+.nv-manager table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.nv-manager th,
+.nv-manager td {
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem;
+  text-align: left;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.nv-manager th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.nv-manager td:last-child {
+  text-align: center;
+}
+
+.nv-manager .action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0 4px;
+  font-size: 1rem;
+  transition: transform 0.15s;
+}
+
+.nv-manager .action-btn:hover {
+  transform: scale(1.15);
+}
+
+.nv-manager .view-btn {
+  color: #2563eb;
+}
+
+.nv-manager .edit-btn {
+  color: #fbbf24;
+}
+
+.nv-manager .delete-btn {
+  color: #ef4444;
+}
+
+.nv-manager .text-center {
+  padding: 2rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.nv-manager .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+.nv-manager .pagination button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.nv-manager .pagination button:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.nv-manager .pagination span {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.nv-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.nv-manager-header .search-box {
+  width: 300px;
+}
+
+.nv-manager-header .search-box input {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .nv-manager th,
+  .nv-manager td {
+    font-size: 0.9rem;
+  }
+}
