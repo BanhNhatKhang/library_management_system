@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../../axiosConfig";
 import "../../../css/admins/books/SachEdit.css";
 
 interface TheLoai {

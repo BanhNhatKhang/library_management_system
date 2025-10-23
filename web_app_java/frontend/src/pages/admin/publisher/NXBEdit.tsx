@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../../axiosConfig";
 import "../../../css/admins/publisher/NXBEdit.css";
 
 interface NhaXuatBan {

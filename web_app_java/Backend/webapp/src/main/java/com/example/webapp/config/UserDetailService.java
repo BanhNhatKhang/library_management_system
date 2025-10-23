@@ -40,7 +40,7 @@ public class UserDetailService implements UserDetailsService {
         if (nv != null) {
             return User.withUsername(nv.getEmail())
                     .password(nv.getMatKhau())
-                    .roles("ADMIN")
+                    .roles(nv.getVaiTro().name())
                     .build();
         }
 

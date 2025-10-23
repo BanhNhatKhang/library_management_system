@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../../axiosConfig";
 import "../../../css/admins/staff/NVEdit.css";
 
 interface NhanVien {

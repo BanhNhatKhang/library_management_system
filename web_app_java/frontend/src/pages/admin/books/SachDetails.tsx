@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../../axiosConfig";
 import "../../../css/admins/books/SachDetails.css";
 
 interface Sach {

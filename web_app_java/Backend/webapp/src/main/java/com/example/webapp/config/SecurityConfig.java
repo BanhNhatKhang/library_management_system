@@ -60,24 +60,29 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/xacthuc/**", // Đăng nhập/Đăng ký
-                    "/api/home/**",    // Trang chủ
-                    "/api/sach/**",    // Chi tiết sách
-                    "/api/theloai/**", // Thể loại
-                    "/api/nhaxuatban/**", // Nhà xuất bản
-                    "/api/uudai/**"       // Ưu đãi
+                    "/api/xacthuc/**", 
+                    "/api/home/**",
+                    "/api/sach/image/**"         
                 ).permitAll()
                 
                 .requestMatchers(
-                    "/api/nhanvien/**"
-                ).hasAnyRole("ADMIN", "NHANVIEN") 
-                
+                    "/api/admin/**",
+                    "/api/sach/**",   
+                    "/api/theloai/**",
+                    "/api/nhaxuatban/**", 
+                    "/api/uudai/**",
+                    "/api/docgia/**",    
+                    "/api/nhanvien/**",  
+                    "/api/donhang/**",   
+                    "/api/thongbao/**",  
+                    "/api/chitietdonhang/**", 
+                    "/api/muontra/**" 
+                ).hasAnyRole("ADMIN", "NHANVIEN", "THUTHU", "QUANLY") 
+
                 .requestMatchers(
                     "/api/docgia/thongtin/**", 
-                    "/api/donhang/**",
-                    "/api/theodoimuonsach/**",
-                    "/api/thongbao/**"
-                ).hasRole("DOCGIA") 
+                    "/api/theodoimuonsach/**"
+                ).hasRole("DOCGIA")
 
                 .requestMatchers(
                     "/api/user/me" 

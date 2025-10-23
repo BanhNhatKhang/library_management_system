@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
 
-type UserRole = "ADMIN" | "DOCGIA" | null;
+type UserRole = "ADMIN" | "DOCGIA" | "NHANVIEN" | "THUTHU" | "QUANLY" | null;
 
 interface AuthContextType {
   role: UserRole;
@@ -17,7 +17,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
-    if (savedRole === "ADMIN" || savedRole === "DOCGIA") {
+    if (
+      savedRole === "ADMIN" ||
+      savedRole === "DOCGIA" ||
+      savedRole === "NHANVIEN" ||
+      savedRole === "THUTHU" ||
+      savedRole === "QUANLY"
+    ) {
       setRoleState(savedRole);
     }
   }, []);

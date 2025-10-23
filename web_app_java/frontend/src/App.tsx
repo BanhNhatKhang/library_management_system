@@ -45,7 +45,12 @@ import MuonEdit from "./pages/admin/borrow/MuonEdit";
 function App() {
   const { role } = useAuth();
 
-  if (role === "ADMIN") {
+  if (
+    role === "ADMIN" ||
+    role === "NHANVIEN" ||
+    role === "THUTHU" ||
+    role === "QUANLY"
+  ) {
     return (
       <Routes>
         <Route path="/admin" element={<SidebarAdmin />}>

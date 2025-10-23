@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../../axiosConfig";
 import "../../../css/admins/publisher/NXBAdd.css";
 
 const NXBAdd = () => {

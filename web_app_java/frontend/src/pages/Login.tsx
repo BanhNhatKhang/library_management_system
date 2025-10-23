@@ -34,8 +34,13 @@ const Login = () => {
 
       localStorage.setItem("authToken", data.token);
 
-      if (data.role === "ADMIN" || data.role === "NHANVIEN") {
-        setRole("ADMIN");
+      if (
+        data.role === "ADMIN" ||
+        data.role === "NHANVIEN" ||
+        data.role === "THUTHU" ||
+        data.role === "QUANLY"
+      ) {
+        setRole(data.role);
         localStorage.setItem("role", data.role);
         navigate("/admin/dashboard");
       } else {

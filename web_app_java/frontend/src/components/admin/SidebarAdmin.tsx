@@ -1,10 +1,20 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import "../../css/admins/SidebarAdmin.css";
 
 const SidebarAdmin = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("role");
+      localStorage.removeItem("userName");
+      navigate("/dangnhap");
+    }
+  };
 
   return (
     <div className="admin-layout">
@@ -154,6 +164,12 @@ const SidebarAdmin = () => {
                 <i className="fas fa-robot"></i>
                 <span>Quản Lý AI</span>
               </Link>
+            </li>
+            <li>
+              <button onClick={handleLogout} className="logout-btn">
+                <i className="fas fa-sign-out-alt"></i>
+                <span>Đăng Xuất</span>
+              </button>
             </li>
           </ul>
         </nav>

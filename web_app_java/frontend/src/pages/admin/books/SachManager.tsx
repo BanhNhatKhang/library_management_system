@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../../../axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../css/admins/books/SachManager.css";
 

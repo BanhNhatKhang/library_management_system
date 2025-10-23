@@ -11,15 +11,21 @@ import java.util.Date;
 import java.util.Collections;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class JwtUtil {
 
-    private static Key key;
+    private static String secret;
+
+    @Value("${jwt.secret}")
+    public void setSecret(String secretValue) {
+        JwtUtil.secret = secretValue;
+    }
 
     private static Key getKey() {
-        if (key == null) {
-            key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-        }
-        return key;
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public static String generateToken(String subject, String role) {
@@ -67,9 +73,13 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            
+
             return !claims.getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException e) {
+            System.out.println("JWT Validation Failed - Error: " + e.getMessage()); // Thêm log này
+            return false;
+        } catch (IllegalArgumentException e) {
+            System.out.println("JWT Validation Failed - Error: Token trống/không hợp lệ");
             return false;
         }
     }

@@ -46,18 +46,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             username = JwtUtil.getUsernameFromToken(token);
         }
 
+        System.out.println("JWT Filter - Path: " + path);
+        System.out.println("JWT Filter - Token received: " + (token != null));
+        System.out.println("JWT Filter - Extracted Username: " + username);
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 var userDetails = userDetailsService.loadUserByUsername(username);
-                if (JwtUtil.validateJwtToken(token)) {
+
+                boolean isTokenValid = JwtUtil.validateJwtToken(token);
+                System.out.println("JWT Filter - Token Valid: " + isTokenValid);
+                
+                if (isTokenValid) {
+                    // Lấy role từ JWT
+                    String role = JwtUtil.extractRole(token);
+                    // Tạo authority đúng chuẩn ROLE_*
+                    var authorities = java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
+
+                    System.out.println("JWT Filter - Granted Authorities: " + authorities);
+
                     UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception e) {
-                System.out.println("Error loading user details: " + e.getMessage());
+                    System.out.println("Error loading user details or validating token: " + e.getMessage());
             }
+
         }
         
         filterChain.doFilter(request, response);
@@ -66,9 +82,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private boolean isPublicPath(String path) {
         return path.startsWith("/api/xacthuc/") ||
                path.startsWith("/api/home") ||
-               path.startsWith("/api/theloai") ||
-               path.startsWith("/api/sach") ||
-               path.startsWith("/api/nhaxuatban") ||
-               path.startsWith("/api/uudai");
+               path.startsWith("/api/sach/image");
     }
 }
