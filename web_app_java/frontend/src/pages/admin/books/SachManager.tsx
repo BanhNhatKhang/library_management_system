@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../../../../axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
-import "../../../css/admins/books/SachManager.css";
+import styles from "../../../css/admins/books/SachManager.module.css";
 
 interface Sach {
   maSach: string;
@@ -106,8 +106,8 @@ const SachManager = () => {
   });
 
   // Phân trang
-  const rowsPerPage = 10;
-  const totalPages = Math.ceil(sortedList.length / rowsPerPage);
+  const rowsPerPage = 4;
+  const totalPages = Math.max(1, Math.ceil(sortedList.length / rowsPerPage));
   const paginatedList = sortedList.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
@@ -124,9 +124,12 @@ const SachManager = () => {
   };
 
   return (
-    <div className="sach-manager">
+    <div className={styles["sach-manager"]}>
       <h2>📚 Quản Lý Sách</h2>
-      <button className="add-btn" onClick={() => navigate("/admin/sach/add")}>
+      <button
+        className={styles["add-btn"]}
+        onClick={() => navigate("/admin/sach/add")}
+      >
         + Thêm sách
       </button>
 
@@ -134,7 +137,7 @@ const SachManager = () => {
         <p>Đang tải...</p>
       ) : (
         <>
-          <table className="sach-table">
+          <table className={styles["sach-table"]}>
             <thead>
               <tr>
                 <th
@@ -229,14 +232,14 @@ const SachManager = () => {
                     </Link>
                     <Link
                       to={`/admin/sach/edit/${sach.maSach}`}
-                      className="edit-btn"
+                      className={styles["edit-btn"]}
                       title="Sửa"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
                     <button
-                      className="delete-btn"
+                      className={styles["delete-btn"]}
                       title="Xóa"
                       onClick={() => handleDeleteClick(sach)}
                     >
@@ -249,7 +252,7 @@ const SachManager = () => {
           </table>
 
           {totalPages > 1 && (
-            <div className="pagination">
+            <div className={styles["pagination"]}>
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
@@ -272,17 +275,20 @@ const SachManager = () => {
 
       {/* Modal xác nhận xóa */}
       {showDeleteModal && sachToDelete && (
-        <div className="modal-overlay" onClick={handleCancelDelete}>
-          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className={styles["modal-overlay"]} onClick={handleCancelDelete}>
+          <div
+            className={styles["delete-modal"]}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles["modal-header"]}>
               <h3>⚠️ Xác nhận xóa sách</h3>
             </div>
 
-            <div className="modal-content">
+            <div className={styles["modal-content"]}>
               <p>Bạn có chắc chắn muốn xóa sách này không?</p>
 
-              <div className="book-info">
-                <div className="book-image">
+              <div className={styles["book-info"]}>
+                <div className={styles["book-image"]}>
                   <img
                     src={
                       sachToDelete.anhBia
@@ -297,7 +303,7 @@ const SachManager = () => {
                     alt={sachToDelete.tenSach}
                   />
                 </div>
-                <div className="book-details">
+                <div className={styles["book-details"]}>
                   <h4>{sachToDelete.tenSach}</h4>
                   <p>
                     <strong>Mã sách:</strong> {sachToDelete.maSach}
@@ -313,16 +319,16 @@ const SachManager = () => {
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className={styles["modal-actions"]}>
               <button
-                className="cancel-btn"
+                className={styles["cancel-btn"]}
                 onClick={handleCancelDelete}
                 disabled={deleting}
               >
                 Không
               </button>
               <button
-                className="confirm-btn"
+                className={styles["confirm-btn"]}
                 onClick={handleConfirmDelete}
                 disabled={deleting}
               >

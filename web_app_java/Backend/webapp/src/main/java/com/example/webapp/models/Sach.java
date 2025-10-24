@@ -1,5 +1,7 @@
 package com.example.webapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
@@ -69,6 +71,10 @@ public class Sach {
     )
     private Set<TheLoai> theLoais = new HashSet<>();
 
+    @ManyToMany(mappedBy = "sachs")
+    @JsonIgnore
+    private Set<UuDai> uuDais = new HashSet<>();
+
     public Sach() {}
 
     public Sach(String maSach, String tenSach, BigDecimal donGia, int soQuyen, int soLuong, LocalDate namXuatBan, String tacGia, String moTa, String anhBia, Double diemDanhGia, Double giamGia) {
@@ -125,5 +131,8 @@ public class Sach {
 
     public NhaXuatBan getNhaXuatBan() { return nhaXuatBan; }
     public void setNhaXuatBan(NhaXuatBan nhaXuatBan) { this.nhaXuatBan = nhaXuatBan; }
+
+    public Set<UuDai> getUuDais() { return uuDais; }
+    public void setUuDais(Set<UuDai> uuDais) { this.uuDais = uuDais; }
 
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/books/SachAdd.css";
+import styles from "../../../css/admins/books/SachAdd.module.css";
 
 interface TheLoai {
   maTheLoai: string;
@@ -121,16 +121,16 @@ const SachAdd = () => {
   };
 
   return (
-    <div className="add-sach">
+    <div className={styles["add-sach"]}>
       <h2>📚 Thêm Sách Mới</h2>
 
-      <form onSubmit={handleSubmit} className="add-sach-form">
-        <div className="form-container">
+      <form onSubmit={handleSubmit} className={styles["add-sach-form"]}>
+        <div className={styles["form-container"]}>
           {/* Cột trái - Thông tin chính */}
-          <div className="form-left">
+          <div className={styles["form-left"]}>
             {/* Dòng 1: Mã sách, Tên sách, Tác giả, Nhà xuất bản */}
-            <div className="form-row-1">
-              <div className="form-group">
+            <div className={styles["form-row-1"]}>
+              <div className={styles["form-group"]}>
                 <label htmlFor="maSach">Mã sách</label>
                 <input
                   type="text"
@@ -144,7 +144,7 @@ const SachAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tenSach">Tên sách</label>
                 <input
                   type="text"
@@ -158,7 +158,7 @@ const SachAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tacGia">Tác giả</label>
                 <input
                   type="text"
@@ -172,7 +172,7 @@ const SachAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="nhaXuatBan">Nhà xuất bản</label>
                 <select
                   id="nhaXuatBan"
@@ -192,8 +192,8 @@ const SachAdd = () => {
             </div>
 
             {/* Dòng 2: Đơn giá, Số quyển, Số lượng, Năm xuất bản */}
-            <div className="form-row-2">
-              <div className="form-group">
+            <div className={styles["form-row-2"]}>
+              <div className={styles["form-group"]}>
                 <label htmlFor="donGia">Đơn giá (VNĐ)</label>
                 <input
                   type="number"
@@ -208,7 +208,7 @@ const SachAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="soQuyen">Số quyển</label>
                 <input
                   type="number"
@@ -222,7 +222,7 @@ const SachAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="soLuong">Số lượng</label>
                 <input
                   type="number"
@@ -236,7 +236,7 @@ const SachAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="namXuatBan">Năm xuất bản</label>
                 <input
                   type="date"
@@ -250,9 +250,9 @@ const SachAdd = () => {
             </div>
 
             {/* Dòng 3: Thể loại và Mô tả */}
-            <div className="form-row-3">
+            <div className={styles["form-row-3"]}>
               {/* Thể loại */}
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="theLoais">Thể loại</label>
                 <select
                   id="theLoais"
@@ -261,7 +261,7 @@ const SachAdd = () => {
                   value={formData.theLoais}
                   onChange={handleTheLoaiChange}
                   required
-                  className="theloai-select"
+                  className={styles["theloai-select"]}
                 >
                   {theLoais.map((tl) => (
                     <option key={tl.maTheLoai} value={tl.maTheLoai}>
@@ -269,20 +269,20 @@ const SachAdd = () => {
                     </option>
                   ))}
                 </select>
-                <div className="theloai-help">
+                <div className={styles["theloai-help"]}>
                   Giữ Ctrl và click để chọn nhiều thể loại
                 </div>
               </div>
 
               {/* Mô tả */}
-              <div className="form-group optional">
+              <div className={`${styles["form-group"]} ${styles["optional"]}`}>
                 <label htmlFor="moTa">Mô tả</label>
                 <textarea
                   id="moTa"
                   name="moTa"
                   value={formData.moTa}
                   onChange={handleInputChange}
-                  className="mota-textarea"
+                  className={styles["mota-textarea"]}
                   placeholder="Nhập mô tả chi tiết về sách..."
                 />
               </div>
@@ -290,10 +290,10 @@ const SachAdd = () => {
           </div>
 
           {/* Cột phải - Ảnh bìa */}
-          <div className="form-right">
-            <div className="form-group">
+          <div className={styles["form-right"]}>
+            <div className={styles["form-group"]}>
               <label htmlFor="anhBia">Ảnh bìa</label>
-              <div className="image-upload-section">
+              <div className={styles["image-upload-section"]}>
                 <input
                   type="file"
                   id="anhBia"
@@ -302,11 +302,11 @@ const SachAdd = () => {
                   required
                 />
                 {previewImage ? (
-                  <div className="image-preview">
+                  <div className={styles["image-preview"]}>
                     <img src={previewImage} alt="Preview" />
                   </div>
                 ) : (
-                  <div className="upload-placeholder">
+                  <div className={styles["upload-placeholder"]}>
                     <p>Chọn ảnh bìa sách</p>
                     <small>Hỗ trợ: JPG, PNG, GIF</small>
                   </div>
@@ -317,15 +317,19 @@ const SachAdd = () => {
         </div>
 
         {/* Form actions */}
-        <div className="form-actions">
+        <div className={styles["form-actions"]}>
           <button
             type="button"
             onClick={() => navigate("/admin/sach")}
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
           >
             ✖ Hủy
           </button>
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles["submit-btn"]}
+          >
             {loading ? "⏳ Đang thêm..." : "✓ Thêm sách"}
           </button>
         </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/borrow/MuonDetails.css";
+import styles from "../../../css/admins/borrow/MuonDetails.module.css";
 
 interface DocGia {
   maDocGia: string;
@@ -72,62 +72,83 @@ const MuonDetails: React.FC = () => {
   }
 
   return (
-    <div className="muon-details">
-      <div className="header-container">
-        <Link to="/admin/muontra" className="back-link">
+    <div className={styles["muon-details"]}>
+      <div className={styles["header-container"]}>
+        <Link to="/admin/muontra" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <h2 className="page-title">📖 Chi tiết phiếu mượn</h2>
+        <h2 className={styles["page-title"]}>📖 Chi tiết phiếu mượn</h2>
       </div>
 
-      <div className="info-section">
+      <div className={styles["info-section"]}>
         <h3>Thông tin độc giả</h3>
-        <p>
-          <strong>Mã độc giả:</strong> {muonSach.docGia.maDocGia}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Mã độc giả: </span>
+          <span className={styles["info-value"]}>
+            {muonSach.docGia.maDocGia}
+          </span>
         </p>
-        <p>
-          <strong>Họ và tên:</strong> {muonSach.docGia.hoLot}{" "}
-          {muonSach.docGia.ten}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Họ và tên: </span>
+          <span className={styles["info-value"]}>
+            {muonSach.docGia.hoLot} {muonSach.docGia.ten}
+          </span>
         </p>
-        <p>
-          <strong>Điện thoại:</strong> {muonSach.docGia.dienThoai}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Điện thoại: </span>
+          <span className={styles["info-value"]}>
+            {muonSach.docGia.dienThoai}
+          </span>
         </p>
-        <p>
-          <strong>Email:</strong> {muonSach.docGia.email}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Email: </span>
+          <span className={styles["info-value"]}>{muonSach.docGia.email}</span>
         </p>
-        <p>
-          <strong>Địa chỉ:</strong> {muonSach.docGia.diaChi}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Địa chỉ: </span>
+          <span className={styles["info-value"]}>{muonSach.docGia.diaChi}</span>
         </p>
       </div>
-      <div className="info-section">
+
+      <div className={styles["info-section"]}>
         <h3>Thông tin sách</h3>
-        <p>
-          <strong>Mã sách:</strong> {muonSach.sach.maSach}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Mã sách: </span>
+          <span className={styles["info-value"]}>{muonSach.sach.maSach}</span>
         </p>
-        <p>
-          <strong>Tên sách:</strong> {muonSach.sach.tenSach}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Tên sách: </span>
+          <span className={styles["info-value"]}>{muonSach.sach.tenSach}</span>
         </p>
-        <p>
-          <strong>Tác giả:</strong> {muonSach.sach.tacGia}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Tác giả: </span>
+          <span className={styles["info-value"]}>{muonSach.sach.tacGia}</span>
         </p>
-        <p>
-          <strong>Thể loại:</strong> {muonSach.sach.theLoai}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Thể loại: </span>
+          <span className={styles["info-value"]}>{muonSach.sach.theLoai}</span>
         </p>
       </div>
-      <div className="info-section">
+
+      <div className={styles["info-section"]}>
         <h3>Thông tin phiếu mượn</h3>
-        <p>
-          <strong>Ngày mượn:</strong>{" "}
-          {new Date(muonSach.ngayMuon).toLocaleDateString("vi-VN")}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Ngày mượn: </span>
+          <span className={styles["info-value"]}>
+            {new Date(muonSach.ngayMuon).toLocaleDateString("vi-VN")}
+          </span>
         </p>
-        <p>
-          <strong>Ngày trả:</strong>{" "}
-          {muonSach.ngayTra
-            ? new Date(muonSach.ngayTra).toLocaleDateString("vi-VN")
-            : "Chưa trả"}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Ngày trả: </span>
+          <span className={styles["info-value"]}>
+            {muonSach.ngayTra
+              ? new Date(muonSach.ngayTra).toLocaleDateString("vi-VN")
+              : "Chưa trả"}
+          </span>
         </p>
-        <p>
-          <strong>Trạng thái:</strong> {muonSach.trangThaiMuon}
+        <p className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Trạng thái: </span>
+          <span className={styles["info-value"]}>{muonSach.trangThaiMuon}</span>
         </p>
       </div>
     </div>

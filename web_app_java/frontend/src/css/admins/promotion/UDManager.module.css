@@ -1,0 +1,139 @@
+/* UDManager.css */
+.ud-manager {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.ud-manager h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ud-manager h2::before {
+  content: "🎁"; /* Biểu tượng ưu đãi mới */
+  font-size: 1.4rem;
+}
+
+/* Nút thêm mới */
+.ud-manager .add-btn {
+  background: #27ae60; /* Màu xanh lá cho Add (thay vì xanh dương) */
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.ud-manager .add-btn:hover {
+  background: #1e8449;
+}
+
+/* Ô tìm kiếm */
+.ud-manager .search-box {
+  margin-bottom: 1rem;
+}
+
+.ud-manager .search-box input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.ud-manager .search-box input:focus {
+  border-color: #27ae60; /* Màu xanh lá focus */
+  box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.25);
+}
+
+/* Bảng */
+.ud-manager table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.ud-manager th,
+.ud-manager td {
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem;
+  text-align: left;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.ud-manager th {
+  background: #f0f7f2; /* Nền đầu bảng nhạt hơn */
+  font-weight: 600;
+}
+
+/* Cột hành động */
+.ud-manager td:last-child {
+  text-align: center;
+}
+
+.ud-manager .action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0 4px;
+  font-size: 1rem;
+  transition: transform 0.15s;
+}
+
+.ud-manager .action-btn:hover {
+  transform: scale(1.15);
+}
+
+.ud-manager .view-btn {
+  color: #3498db; /* Màu xanh dương cho View */
+}
+
+.ud-manager .edit-btn {
+  color: #f39c12; /* Màu vàng cam cho Edit */
+}
+
+.ud-manager .delete-btn {
+  color: #c0392b; /* Màu đỏ đậm hơn cho Delete */
+}
+
+/* Trạng thái rỗng */
+.ud-manager .text-center {
+  padding: 2rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Header */
+.ud-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ud-manager-header .search-box {
+  width: 300px;
+}
+
+.ud-manager-header .search-box input {
+  width: 100%;
+}
+
+/* Responsive nhỏ */
+@media (max-width: 768px) {
+  .ud-manager th,
+  .ud-manager td {
+    font-size: 0.9rem;
+  }
+}

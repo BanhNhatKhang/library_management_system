@@ -53,6 +53,18 @@ public class UuDai {
     @JsonIgnore
     private Set<DonHang> donHangs = new HashSet<>();
 
+    @ManyToMany(cascade = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+    })
+    @JoinTable(
+        name = "SACH_UUDAI", 
+        joinColumns = @JoinColumn(name = "MAUUDAI"),
+        inverseJoinColumns = @JoinColumn(name = "MASACH")
+    )
+    @JsonIgnore 
+    private Set<Sach> sachs = new HashSet<>();
+
     public UuDai() {}
 
     public UuDai(String maUuDai, String tenUuDai, String moTa, BigDecimal phanTramGiam, LocalDate ngayBatDau, LocalDate ngayKetThuc) {
@@ -86,5 +98,8 @@ public class UuDai {
 
     public Set<DonHang> getDonHangs() { return donHangs; }
     public void setDonHangs(Set<DonHang> donHangs) { this.donHangs = donHangs; }
+
+    public Set<Sach> getSachs() { return sachs; }
+    public void setSachs(Set<Sach> sachs) { this.sachs = sachs;}
 
 }

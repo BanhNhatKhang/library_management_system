@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/borrow/MuonManager.css";
+import styles from "../../../css/admins/borrow/MuonManager.module.css";
 
 interface MuonRequest {
   maDocGia: string;
@@ -98,14 +98,17 @@ const MuonManager: React.FC = () => {
   );
 
   return (
-    <div className="muon-manager">
+    <div className={styles["muon-manager"]}>
       <h2>Quản lý mượn sách</h2>
-      <div className="muon-manager-header">
-        <button className="add-btn" onClick={() => navigate("/admin/muon/add")}>
+      <div className={styles["muon-manager-header"]}>
+        <button
+          className={styles["add-btn"]}
+          onClick={() => navigate("/admin/muon/add")}
+        >
           + Thêm yêu cầu mượn
         </button>
 
-        <div className="search-box">
+        <div className={styles["search-box"]}>
           <input
             type="text"
             placeholder="Tìm theo mã độc giả / sách / trạng thái"
@@ -139,7 +142,7 @@ const MuonManager: React.FC = () => {
                   {r.trangThaiMuon === "CHODUYET" ? (
                     <>
                       <button
-                        className="action-btn approve-btn"
+                        className={`${styles["action-btn"]} ${styles["approve-btn"]}`}
                         onClick={() =>
                           handleApprove(r.maDocGia, r.maSach, r.ngayMuon)
                         }
@@ -148,7 +151,7 @@ const MuonManager: React.FC = () => {
                         <i className="fa fa-check-circle" />
                       </button>
                       <button
-                        className="action-btn reject-btn"
+                        className={`${styles["action-btn"]} ${styles["reject-btn"]}`}
                         onClick={() =>
                           handleReject(r.maDocGia, r.maSach, r.ngayMuon)
                         }

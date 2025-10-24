@@ -1,0 +1,134 @@
+/* UDDetails.css */
+.ud-details {
+  background: #f8f9fb;
+  padding: 20px 30px;
+  border-radius: 12px;
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+}
+
+/* Header */
+.ud-details .header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.ud-details .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #7f8c8d; /* Màu xám đậm cho nút Back */
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.ud-details .back-link:hover {
+  background-color: #95a5a6;
+  transform: translateY(-1px);
+}
+
+.ud-details .page-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+.ud-details .spacer {
+  width: 120px;
+}
+
+/* Tabs */
+.ud-details .tab-navigation {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.ud-details .tab-button {
+  background: transparent;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+.ud-details .tab-button:hover {
+  color: #27ae60; /* Màu xanh lá hover */
+}
+.ud-details .tab-button.active {
+  color: #27ae60; /* Màu xanh lá active */
+  border-bottom-color: #27ae60;
+  font-weight: 600;
+}
+
+/* Card */
+.ud-details .tab-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Info layout */
+.ud-details .info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ud-details .info-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 8px 0;
+}
+
+.ud-details .info-label {
+  font-weight: 600;
+  color: #444;
+}
+.ud-details .info-value {
+  color: #222;
+}
+
+/* Table */
+.ud-details table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ud-details table th,
+.ud-details table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: left;
+}
+
+.ud-details table th {
+  background-color: #f6f7fb;
+  font-weight: 600;
+  color: #333;
+}
+
+.ud-details table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* No data */
+.ud-details .no-data {
+  text-align: center;
+  color: #999;
+  padding: 30px 0;
+  font-style: italic;
+}

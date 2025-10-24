@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import "../css/Login.css";
+import styles from "../css/Login.module.css";
 
 interface JwtResponse {
   token: string;
@@ -58,10 +58,10 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className={styles["login-container"]}>
+      <div className={styles["login-card"]}>
         {/* Logo */}
-        <div className="login-logo">
+        <div className={styles["login-logo"]}>
           <svg
             height="48"
             aria-hidden="true"
@@ -75,16 +75,16 @@ const Login = () => {
         </div>
 
         {/* Tiêu đề */}
-        <h1 className="login-title">Đăng nhập vào BookShare</h1>
+        <h1 className={styles["login-title"]}>Đăng nhập vào BookShare</h1>
 
         {/* Form */}
-        <form className="login-form" onSubmit={handleLogin}>
-          <div className="form-group">
+        <form className={styles["login-form"]} onSubmit={handleLogin}>
+          <div className={styles["form-group"]}>
             <label htmlFor="login_field">Email hoặc số điện thoại</label>
             <input
               type="text"
               id="login_field"
-              className="form-control"
+              className={styles["form-control"]}
               value={emailOrPhone}
               onChange={(e) => setEmailOrPhone(e.target.value)}
               required
@@ -92,36 +92,40 @@ const Login = () => {
             />
           </div>
 
-          <div className="form-group">
-            <div className="password-label">
+          <div className={styles["form-group"]}>
+            <div className={styles["password-label"]}>
               <label htmlFor="password">Mật khẩu</label>
-              <a href="/forgot-password" className="forgot-link">
+              <a href="/forgot-password" className={styles["forgot-link"]}>
                 Quên mật khẩu?
               </a>
             </div>
             <input
               type="password"
               id="password"
-              className="form-control"
+              className={styles["form-control"]}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className={styles["error-message"]}>{error}</div>}
 
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <button
+            type="submit"
+            className={styles["btn-primary"]}
+            disabled={loading}
+          >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
-        <div className="divider">
+        <div className={styles["divider"]}>
           <span>hoặc</span>
         </div>
 
         {/* Google Login */}
-        <button className="btn-google" type="button">
+        <button className={styles["btn-google"]} type="button">
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
@@ -144,10 +148,10 @@ const Login = () => {
         </button>
 
         {/* Footer */}
-        <div className="login-footer">
+        <div className={styles["login-footer"]}>
           <p>
             Mới với BookShare?{" "}
-            <a href="/register" className="register-link">
+            <a href="/register" className={styles["register-link"]}>
               Tạo tài khoản
             </a>
           </p>
@@ -155,7 +159,7 @@ const Login = () => {
       </div>
 
       {/* Footer links */}
-      <div className="page-footer">
+      <div className={styles["page-footer"]}>
         <a href="/terms">Điều khoản</a>
         <a href="/privacy">Quyền riêng tư</a>
         <a href="/contact">Liên hệ hỗ trợ</a>

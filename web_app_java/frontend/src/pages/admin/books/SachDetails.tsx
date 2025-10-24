@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/books/SachDetails.css";
+import styles from "../../../css/admins/books/SachDetails.module.css";
 
 interface Sach {
   maSach: string;
@@ -85,45 +85,51 @@ const SachDetails = () => {
 
   if (loading) {
     return (
-      <div className="sach-details">
-        <div className="loading">⏳ Đang tải thông tin sách...</div>
+      <div className={styles["sach-details"]}>
+        <div className={styles["loading"]}>⏳ Đang tải thông tin sách...</div>
       </div>
     );
   }
 
   if (error || !sach) {
     return (
-      <div className="sach-details">
-        <Link to="/admin/sach" className="back-link">
+      <div className={styles["sach-details"]}>
+        <Link to="/admin/sach" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div className="error">{error || "❌ Không tìm thấy sách!"}</div>
+        <div className={styles["error"]}>
+          {error || "❌ Không tìm thấy sách!"}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="sach-details">
-      <div className="header-container">
-        <Link to="/admin/sach" className="back-link">
+    <div className={styles["sach-details"]}>
+      <div className={styles["header-container"]}>
+        <Link to="/admin/sach" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
 
-        <h2 className="page-title">📖 Chi tiết sách</h2>
+        <h2 className={styles["page-title"]}>📖 Chi tiết sách</h2>
 
-        <div className="spacer"></div>
+        <div className={styles["spacer"]}></div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="tab-navigation">
+      <div className={styles["tab-navigation"]}>
         <button
-          className={`tab-button ${activeTab === "info" ? "active" : ""}`}
+          className={`${styles["tab-button"]} ${
+            activeTab === "info" ? styles["active"] : ""
+          }`}
           onClick={() => setActiveTab("info")}
         >
           📄 Thông tin
         </button>
         <button
-          className={`tab-button ${activeTab === "phieu-muon" ? "active" : ""}`}
+          className={`${styles["tab-button"]} ${
+            activeTab === "phieu-muon" ? styles["active"] : ""
+          }`}
           onClick={() => setActiveTab("phieu-muon")}
         >
           📋 Phiếu mượn ({phieuMuonList.length})
@@ -131,61 +137,62 @@ const SachDetails = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="tab-content">
+      <div className={styles["tab-content"]}>
         {activeTab === "info" && (
-          <div className="tab-panel">
-            <div className="sach-info-section">
-              <div className="sach-content">
-                <div className="sach-image">
-                  <img
-                    src={
-                      sach.anhBia
-                        ? (() => {
-                            const pathParts = sach.anhBia.split("/");
-                            const folder = pathParts[0];
-                            const filename = pathParts[1];
-                            return `http://localhost:8080/api/sach/image/${folder}/${filename}`;
-                          })()
-                        : ""
-                    }
-                    alt={sach.tenSach}
-                  />
-                </div>
+          <div className={styles["tab-panel"]}>
+            <div className={styles["sach-info-section"]}>
+              <div className={styles["sach-content"]}>
+                <img
+                  className={styles["img"]}
+                  src={
+                    sach.anhBia
+                      ? (() => {
+                          const pathParts = sach.anhBia.split("/");
+                          const folder = pathParts[0];
+                          const filename = pathParts[1];
+                          return `http://localhost:8080/api/sach/image/${folder}/${filename}`;
+                        })()
+                      : ""
+                  }
+                  alt={sach.tenSach}
+                />
 
-                <div className="sach-info">
-                  <div className="info-item">
-                    <span className="info-label">Mã sách:</span>
-                    <span className="info-value">{sach.maSach}</span>
+                <div className={styles["sach-info"]}>
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Mã sách:</span>
+                    <span className={styles["info-value"]}>{sach.maSach}</span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Tên sách:</span>
-                    <span className="info-value">{sach.tenSach}</span>
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Tên sách:</span>
+                    <span className={styles["info-value"]}>{sach.tenSach}</span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Tác giả:</span>
-                    <span className="info-value">{sach.tacGia}</span>
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Tác giả:</span>
+                    <span className={styles["info-value"]}>{sach.tacGia}</span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Nhà xuất bản:</span>
-                    <span className="info-value">{sach.nhaXuatBan}</span>
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Nhà xuất bản:</span>
+                    <span className={styles["info-value"]}>
+                      {sach.nhaXuatBan}
+                    </span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Năm xuất bản:</span>
-                    <span className="info-value">
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Năm xuất bản:</span>
+                    <span className={styles["info-value"]}>
                       {formatDate(sach.namXuatBan)}
                     </span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Thể loại:</span>
-                    <div className="info-value">
-                      <div className="theloai-tags">
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Thể loại:</span>
+                    <div className={styles["info-value"]}>
+                      <div className={styles["theloai-tags"]}>
                         {sach.theLoais?.map((theLoai, index) => (
-                          <span key={index} className="theloai-tag">
+                          <span key={index} className={styles["theloai-tag"]}>
                             {theLoai}
                           </span>
                         ))}
@@ -193,45 +200,55 @@ const SachDetails = () => {
                     </div>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Số quyển:</span>
-                    <span className="info-value">{sach.soQuyen}</span>
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Số quyển:</span>
+                    <span className={styles["info-value"]}>{sach.soQuyen}</span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Số lượng:</span>
-                    <span className="info-value">{sach.soLuong}</span>
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Số lượng:</span>
+                    <span className={styles["info-value"]}>{sach.soLuong}</span>
                   </div>
 
-                  <div className="info-item">
-                    <span className="info-label">Đơn giá:</span>
-                    <span className="info-value price">
+                  <div className={styles["info-item"]}>
+                    <span className={styles["info-label"]}>Đơn giá:</span>
+                    <span
+                      className={`${styles["info-value"]} ${styles["price"]}`}
+                    >
                       {formatPrice(sach.donGia)}
                     </span>
                   </div>
 
                   {sach.diemDanhGia && (
-                    <div className="info-item">
-                      <span className="info-label">Đánh giá:</span>
-                      <span className="info-value rating">
+                    <div className={styles["info-item"]}>
+                      <span className={styles["info-label"]}>Đánh giá:</span>
+                      <span
+                        className={`${styles["info-value"]} ${styles["rating"]}`}
+                      >
                         ⭐ {sach.diemDanhGia}/5
                       </span>
                     </div>
                   )}
 
                   {sach.giamGia && (
-                    <div className="info-item">
-                      <span className="info-label">Giảm giá:</span>
-                      <span className="info-value discount">
+                    <div className={styles["info-item"]}>
+                      <span className={styles["info-label"]}>Giảm giá:</span>
+                      <span
+                        className={`${styles["info-value"]} ${styles["discount"]}`}
+                      >
                         {sach.giamGia}%
                       </span>
                     </div>
                   )}
 
                   {sach.moTa && (
-                    <div className="info-item">
-                      <span className="info-label">Mô tả:</span>
-                      <div className="info-value mota-content">{sach.moTa}</div>
+                    <div className={styles["info-item"]}>
+                      <span className={styles["info-label"]}>Mô tả:</span>
+                      <div
+                        className={`${styles["info-value"]} ${styles["mota-content"]}`}
+                      >
+                        {sach.moTa}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -241,15 +258,15 @@ const SachDetails = () => {
         )}
 
         {activeTab === "phieu-muon" && (
-          <div className="tab-panel">
-            <div className="phieu-muon-section">
+          <div className={styles["tab-panel"]}>
+            <div className={styles["phieu-muon-section"]}>
               {phieuMuonList.length === 0 ? (
-                <div className="no-data">
+                <div className={styles["no-data"]}>
                   <p>📚 Hiện tại không có ai đang mượn sách này</p>
                 </div>
               ) : (
-                <div className="table-container">
-                  <table className="phieu-muon-table">
+                <div className={styles["table-container"]}>
+                  <table className={styles["phieu-muon-table"]}>
                     <thead>
                       <tr>
                         <th>Mã độc giả</th>
@@ -269,9 +286,9 @@ const SachDetails = () => {
                           </td>
                           <td>
                             <span
-                              className={`trang-thai ${getTrangThaiClass(
-                                pm.trangThaiMuon
-                              )}`}
+                              className={`${styles["trang-thai"]} ${
+                                styles[getTrangThaiClass(pm.trangThaiMuon)]
+                              }`}
                             >
                               {pm.trangThaiMuon}
                             </span>

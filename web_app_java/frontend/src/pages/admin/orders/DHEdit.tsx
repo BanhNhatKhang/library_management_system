@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/orders/DHEdit.css";
+import styles from "../../../css/admins/orders/DHEdit.module.css";
 
 interface DonHang {
   maDonHang?: string;
@@ -55,11 +55,11 @@ const DHEdit: React.FC = () => {
   };
 
   return (
-    <div className="dh-edit">
+    <div className={styles["dh-edit"]}>
       <h2>{maDonHang ? "Cập nhật đơn hàng" : "Thêm đơn hàng mới"}</h2>
 
-      <form onSubmit={handleSubmit} className="form-container">
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className={styles["form-container"]}>
+        <div className={styles["form-group"]}>
           <label>Mã độc giả</label>
           <input
             type="text"
@@ -70,7 +70,7 @@ const DHEdit: React.FC = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Ngày đặt</label>
           <input
             type="date"
@@ -81,7 +81,7 @@ const DHEdit: React.FC = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Tổng tiền</label>
           <input
             type="number"
@@ -92,7 +92,7 @@ const DHEdit: React.FC = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Trạng thái</label>
           <select
             name="trangThai"
@@ -106,13 +106,13 @@ const DHEdit: React.FC = () => {
           </select>
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="save-btn">
+        <div className={styles["form-actions"]}>
+          <button type="submit" className={styles["save-btn"]}>
             💾 Lưu
           </button>
           <button
             type="button"
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
             onClick={() => navigate("/admin/donhang")}
           >
             ↩ Quay lại

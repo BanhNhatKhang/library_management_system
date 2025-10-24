@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/orders/DHDetails.css";
+import styles from "../../../css/admins/orders/DHDetails.module.css";
 
 interface DocGia {
   maDocGia: string;
@@ -95,32 +95,59 @@ const DHDetails: React.FC = () => {
     );
 
   return (
-    <div className="dh-details">
-      <div className="header-container">
-        <Link to="/admin/donhang" className="back-link">
+    <div className={styles["dh-details"]}>
+      <div className={styles["header-container"]}>
+        <Link to="/admin/donhang" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <h2 className="page-title">📦 Chi tiết đơn hàng</h2>
-        <div className="spacer"></div>
+        <h2 className={styles["page-title"]}>📦 Chi tiết đơn hàng</h2>
+        <div className={styles["spacer"]}></div>
       </div>
 
       {/* Tabs */}
-      <div className="tab-navigation">
+      <div className={styles["tab-navigation"]}>
         <button
-          className={`tab-button ${active === "docgia" ? "active" : ""}`}
+          className={styles["tab-button"]}
           onClick={() => setActive("docgia")}
+          style={
+            active === "docgia"
+              ? {
+                  color: "#0d6efd",
+                  borderBottomColor: "#0d6efd",
+                  fontWeight: 600,
+                }
+              : undefined
+          }
         >
           👤 Độc giả
         </button>
         <button
-          className={`tab-button ${active === "chitiet" ? "active" : ""}`}
+          className={styles["tab-button"]}
           onClick={() => setActive("chitiet")}
+          style={
+            active === "chitiet"
+              ? {
+                  color: "#0d6efd",
+                  borderBottomColor: "#0d6efd",
+                  fontWeight: 600,
+                }
+              : undefined
+          }
         >
           📚 Sách trong đơn ({chiTietList.length})
         </button>
         <button
-          className={`tab-button ${active === "uudai" ? "active" : ""}`}
+          className={styles["tab-button"]}
           onClick={() => setActive("uudai")}
+          style={
+            active === "uudai"
+              ? {
+                  color: "#0d6efd",
+                  borderBottomColor: "#0d6efd",
+                  fontWeight: 600,
+                }
+              : undefined
+          }
         >
           🎁 Ưu đãi ({donHang.uuDais?.length || 0})
         </button>
@@ -130,49 +157,55 @@ const DHDetails: React.FC = () => {
       <div className="tab-content">
         {/* Thông tin độc giả */}
         {active === "docgia" && (
-          <div className="tab-panel">
+          <div className={styles["tab-panel"]}>
             {docGia ? (
-              <div className="info-section">
-                <div className="info-item">
-                  <span className="info-label">Mã độc giả:</span>
-                  <span className="info-value">{docGia.maDocGia}</span>
+              <div className={styles["info-section"]}>
+                <div className={styles["info-item"]}>
+                  <span className={styles["info-label"]}>Mã độc giả:</span>
+                  <span className={styles["info-value"]}>
+                    {docGia.maDocGia}
+                  </span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Họ tên:</span>
-                  <span className="info-value">
+                <div className={styles["info-item"]}>
+                  <span className={styles["info-label"]}>Họ tên:</span>
+                  <span className={styles["info-value"]}>
                     {docGia.hoLot} {docGia.ten}
                   </span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Điện thoại:</span>
-                  <span className="info-value">{docGia.dienThoai}</span>
+                <div className={styles["info-item"]}>
+                  <span className={styles["info-label"]}>Điện thoại:</span>
+                  <span className={styles["info-value"]}>
+                    {docGia.dienThoai}
+                  </span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Email:</span>
-                  <span className="info-value">{docGia.email}</span>
+                <div className={styles["info-item"]}>
+                  <span className={styles["info-label"]}>Email:</span>
+                  <span className={styles["info-value"]}>{docGia.email}</span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Ngày đặt hàng:</span>
-                  <span className="info-value">
+                <div className={styles["info-item"]}>
+                  <span className={styles["info-label"]}>Ngày đặt hàng:</span>
+                  <span className={styles["info-value"]}>
                     {formatDate(donHang.ngayDat)}
                   </span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Tổng tiền:</span>
-                  <span className="info-value">
+                <div className={styles["info-item"]}>
+                  <span className={styles["info-label"]}>Tổng tiền:</span>
+                  <span className={styles["info-value"]}>
                     {formatPrice(donHang.tongTien)}
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="no-data">❌ Không tìm thấy thông tin độc giả</div>
+              <div className={styles["no-data"]}>
+                ❌ Không tìm thấy thông tin độc giả
+              </div>
             )}
           </div>
         )}
 
         {/* Chi tiết sách trong đơn */}
         {active === "chitiet" && (
-          <div className="tab-panel">
+          <div className={styles["tab-panel"]}>
             {chiTietList.length > 0 ? (
               <table>
                 <thead>
@@ -195,14 +228,16 @@ const DHDetails: React.FC = () => {
                 </tbody>
               </table>
             ) : (
-              <div className="no-data">📚 Không có sách trong đơn hàng</div>
+              <div className={styles["no-data"]}>
+                📚 Không có sách trong đơn hàng
+              </div>
             )}
           </div>
         )}
 
         {/* Ưu đãi */}
         {active === "uudai" && (
-          <div className="tab-panel">
+          <div className={styles["tab-panel"]}>
             {donHang.uuDais && donHang.uuDais.length > 0 ? (
               <table>
                 <thead>
@@ -227,7 +262,9 @@ const DHDetails: React.FC = () => {
                 </tbody>
               </table>
             ) : (
-              <div className="no-data">🎁 Không có ưu đãi áp dụng</div>
+              <div className={styles["no-data"]}>
+                🎁 Không có ưu đãi áp dụng
+              </div>
             )}
           </div>
         )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/publisher/NXBAdd.css";
+import styles from "../../../css/admins/publisher/NXBAdd.module.css";
 
 const NXBAdd = () => {
   const navigate = useNavigate();
@@ -47,15 +47,15 @@ const NXBAdd = () => {
   };
 
   return (
-    <div className="add-nxb">
+    <div className={styles["add-nxb"]}>
       <h2>🏢 Thêm Nhà Xuất Bản Mới</h2>
 
-      <form onSubmit={handleSubmit} className="add-nxb-form">
-        <div className="form-container">
+      <form onSubmit={handleSubmit} className={styles["add-nxb-form"]}>
+        <div className={styles["form-container"]}>
           {/* Form chính */}
-          <div className="form-main">
-            <div className="form-row">
-              <div className="form-group">
+          <div className={styles["form-main"]}>
+            <div className={styles["form-row"]}>
+              <div className={styles["form-group"]}>
                 <label htmlFor="maNhaXuatBan">Mã nhà xuất bản</label>
                 <input
                   type="text"
@@ -69,7 +69,7 @@ const NXBAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tenNhaXuatBan">Tên nhà xuất bản</label>
                 <input
                   type="text"
@@ -84,8 +84,11 @@ const NXBAdd = () => {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+            <div className={styles["form-row"]}>
+              <div
+                className={styles["form-group"]}
+                style={{ gridColumn: "1 / -1" }}
+              >
                 <label htmlFor="diaChi">Địa chỉ</label>
                 <input
                   type="text"
@@ -103,15 +106,19 @@ const NXBAdd = () => {
         </div>
 
         {/* Form actions */}
-        <div className="form-actions">
+        <div className={styles["form-actions"]}>
           <button
             type="button"
             onClick={() => navigate("/admin/nxb")}
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
           >
             ✖ Hủy
           </button>
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles["submit-btn"]}
+          >
             {loading ? "⏳ Đang thêm..." : "✓ Thêm nhà xuất bản"}
           </button>
         </div>

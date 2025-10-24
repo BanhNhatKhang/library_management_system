@@ -1,26 +1,26 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import styles from "../../../css/admins/borrow/MuonAdd.module.css";
+import styles from "../../../css/admins/promotion/UDAdd.module.css";
 
-const MuonAdd: React.FC = () => {
+const UDAdd: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    maDocGia: "",
-    maSach: "",
-    ngayMuon: "",
-    ngayTra: "",
-    trangThaiMuon: "DANGMUON", // Thêm trường trạng thái mượn (giá trị mặc định)
-    maNhanVien: "",
+    maUuDai: "",
+    tenUuDai: "",
+    moTa: "",
+    phanTramGiam: "0",
+    ngayBatDau: "",
+    ngayKetThuc: "",
   });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
+    setForm((p) => ({
+      ...p,
       [name]: value,
     }));
   };
@@ -30,31 +30,31 @@ const MuonAdd: React.FC = () => {
     setLoading(true);
     try {
       const requestBody = {
-        maDocGia: form.maDocGia,
-        maSach: form.maSach,
-        ngayMuon: form.ngayMuon,
-        ngayTra: form.ngayTra, // Gửi ngày trả
-        trangThaiMuon: form.trangThaiMuon, // Gửi trạng thái mượn
-        maNhanVien: form.maNhanVien, // Gửi mã nhân viên
+        maUuDai: form.maUuDai,
+        tenUuDai: form.tenUuDai,
+        moTa: form.moTa,
+        phanTramGiam: Number(form.phanTramGiam),
+        ngayBatDau: form.ngayBatDau,
+        ngayKetThuc: form.ngayKetThuc,
       };
 
-      await axios.post("/api/theodoimuonsach", requestBody);
-      alert("Thêm phiếu mượn thành công");
-      navigate("/admin/muon");
+      await axios.post("/api/uudai", requestBody);
+      alert("Thêm ưu đãi thành công");
+      navigate("/admin/uudai");
     } catch (err) {
       console.error(err);
-      alert("Có lỗi khi thêm phiếu mượn");
+      alert("Có lỗi khi thêm ưu đãi");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={`${styles["muon-add"]} p-3`}>
-      <Link to="/admin/muontra" className="btn btn-secondary mb-3">
+    <div className={`${styles["ud-add"]} p-3`}>
+      <Link to="/admin/uudai" className="btn btn-secondary mb-3">
         ← Quay lại danh sách
       </Link>
-      <h4> Thêm Phiếu Mượn</h4>
+      <h4>➕ Thêm ưu đãi</h4>
 
       <form
         onSubmit={submit}
@@ -62,72 +62,73 @@ const MuonAdd: React.FC = () => {
       >
         <div className="row">
           <div className="col-md-6 mb-2">
-            <label>Mã độc giả</label>
+            <label>Mã ưu đãi</label>
             <input
-              name="maDocGia"
+              name="maUuDai"
               className="form-control"
-              value={form.maDocGia}
+              value={form.maUuDai}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="col-md-6 mb-2">
+            <label>Tên ưu đãi</label>
+            <input
+              name="tenUuDai"
+              className="form-control"
+              value={form.tenUuDai}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="col-md-6 mb-2">
-            <label>Mã sách</label>
+            <label>Ngày bắt đầu</label>
             <input
-              name="maSach"
-              className="form-control"
-              value={form.maSach}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="col-md-6 mb-2">
-            <label>Ngày mượn</label>
-            <input
-              name="ngayMuon"
+              name="ngayBatDau"
               type="date"
               className="form-control"
-              value={form.ngayMuon}
+              value={form.ngayBatDau}
               onChange={handleChange}
               required
             />
           </div>
-
           <div className="col-md-6 mb-2">
-            <label>Ngày trả</label>
+            <label>Ngày kết thúc</label>
             <input
-              name="ngayTra"
+              name="ngayKetThuc"
               type="date"
               className="form-control"
-              value={form.ngayTra}
+              value={form.ngayKetThuc}
               onChange={handleChange}
+              required
             />
           </div>
 
           <div className="col-md-6 mb-2">
-            <label>Trạng thái mượn</label>
-            <select
-              name="trangThaiMuon"
+            <label>Phần trăm giảm (%)</label>
+            <input
+              name="phanTramGiam"
+              type="number"
               className="form-control"
-              value={form.trangThaiMuon}
+              min="0"
+              max="100"
+              step="0.01"
+              value={form.phanTramGiam}
               onChange={handleChange}
               required
-            >
-              <option value="DANG_MUON">Đang mượn</option>
-              <option value="DA_TRA">Đã trả</option>
-            </select>
+            />
+            <div className="help">Nhập phần trăm giảm (ví dụ: 10.5).</div>
           </div>
 
-          <div className="col-md-6 mb-2">
-            <label>Mã nhân viên</label>
-            <input
-              name="maNhanVien"
+          <div className="col-12 mb-2">
+            <label>Mô tả</label>
+            <textarea
+              name="moTa"
+              rows={3}
               className="form-control"
-              value={form.maNhanVien}
+              value={form.moTa}
               onChange={handleChange}
-              required
             />
           </div>
         </div>
@@ -136,7 +137,7 @@ const MuonAdd: React.FC = () => {
           <button className="btn btn-primary me-2" disabled={loading}>
             {loading ? "Đang lưu..." : "Lưu"}
           </button>
-          <Link to="/admin/muontra" className="btn btn-outline-secondary">
+          <Link to="/admin/uudai" className="btn btn-outline-secondary">
             Hủy
           </Link>
         </div>
@@ -145,4 +146,4 @@ const MuonAdd: React.FC = () => {
   );
 };
 
-export default MuonAdd;
+export default UDAdd;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/category/TheLoaiDetails.css";
+import styles from "../../../css/admins/category/TheLoaiDetails.module.css";
 
 interface TheLoai {
   maTheLoai: string;
@@ -54,71 +54,83 @@ const TheLoaiDetails = () => {
 
   if (loading) {
     return (
-      <div className="theloai-details">
-        <div className="loading">⏳ Đang tải thông tin thể loại...</div>
+      <div className={styles["theloai-details"]}>
+        <div className={styles["loading"]}>
+          ⏳ Đang tải thông tin thể loại...
+        </div>
       </div>
     );
   }
 
   if (error || !theLoai) {
     return (
-      <div className="theloai-details">
-        <Link to="/admin/theloai" className="back-link">
+      <div className={styles["theloai-details"]}>
+        <Link to="/admin/theloai" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div className="error">{error || "❌ Không tìm thấy thể loại!"}</div>
+        <div className={styles["error"]}>
+          {error || "❌ Không tìm thấy thể loại!"}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="theloai-details">
-      <Link to="/admin/theloai" className="back-link">
+    <div className={styles["theloai-details"]}>
+      <Link to="/admin/theloai" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
 
-      <h2 className="page-title">🏷️ Chi tiết thể loại</h2>
+      <h2 className={styles["page-title"]}>🏷️ Chi tiết thể loại</h2>
 
-      <div className="main-container">
+      <div className={styles["main-container"]}>
         {/* Cột trái - Thông tin thể loại */}
-        <div className="theloai-info-section">
-          <h3 className="theloai-info-title">Thông tin chi tiết</h3>
+        <div className={styles["theloai-info-section"]}>
+          <h3 className={styles["theloai-info-title"]}>Thông tin chi tiết</h3>
 
-          <div className="theloai-content">
-            <div className="theloai-info">
-              <div className="info-item">
-                <span className="info-label">Mã thể loại:</span>
-                <span className="info-value">{theLoai.maTheLoai}</span>
+          <div className={styles["theloai-content"]}>
+            <div className={styles["theloai-info"]}>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Mã thể loại:</span>
+                <span className={styles["info-value"]}>
+                  {theLoai.maTheLoai}
+                </span>
               </div>
 
-              <div className="info-item">
-                <span className="info-label">Tên thể loại:</span>
-                <span className="info-value">{theLoai.tenTheLoai}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Tên thể loại:</span>
+                <span className={styles["info-value"]}>
+                  {theLoai.tenTheLoai}
+                </span>
               </div>
 
-              <div className="info-item">
-                <span className="info-label">Số sách thuộc thể loại:</span>
-                <span className="info-value stats">{sachList.length} sách</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>
+                  Số sách thuộc thể loại:
+                </span>
+                <span className={`${styles["info-value"]} ${styles["stats"]}`}>
+                  {sachList.length} sách
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Cột phải - Sách thuộc thể loại */}
-        <div className="sach-section">
-          <h3 className="sach-title">
+        <div className={styles["sach-section"]}>
+          <h3 className={styles["sach-title"]}>
             📚 Sách thuộc thể loại ({sachList.length})
           </h3>
 
           {sachList.length === 0 ? (
-            <div className="no-data">
+            <div className={styles["no-data"]}>
               <p>📚 Hiện tại chưa có sách nào thuộc thể loại này</p>
             </div>
           ) : (
-            <div className="sach-grid">
+            <div className={styles["sach-grid"]}>
               {sachList.map((sach) => (
-                <div key={sach.maSach} className="sach-card">
-                  <div className="sach-image">
+                <div key={sach.maSach} className={styles["sach-card"]}>
+                  <div className={styles["sach-image"]}>
                     <img
                       src={
                         sach.anhBia
@@ -137,15 +149,21 @@ const TheLoaiDetails = () => {
                       }}
                     />
                   </div>
-                  <div className="sach-info">
-                    <h4 className="sach-name">{sach.tenSach}</h4>
-                    <p className="sach-author">Tác giả: {sach.tacGia}</p>
-                    <p className="sach-price">{formatPrice(sach.donGia)}</p>
-                    <p className="sach-quantity">Số lượng: {sach.soLuong}</p>
-                    <div className="sach-actions">
+                  <div className={styles["sach-info"]}>
+                    <h4 className={styles["sach-name"]}>{sach.tenSach}</h4>
+                    <p className={styles["sach-author"]}>
+                      Tác giả: {sach.tacGia}
+                    </p>
+                    <p className={styles["sach-price"]}>
+                      {formatPrice(sach.donGia)}
+                    </p>
+                    <p className={styles["sach-quantity"]}>
+                      Số lượng: {sach.soLuong}
+                    </p>
+                    <div className={styles["sach-actions"]}>
                       <Link
                         to={`/admin/sach/${sach.maSach}`}
-                        className="view-btn"
+                        className={styles["view-btn"]}
                         title="Xem chi tiết"
                       >
                         <i className="fas fa-eye"></i> Xem

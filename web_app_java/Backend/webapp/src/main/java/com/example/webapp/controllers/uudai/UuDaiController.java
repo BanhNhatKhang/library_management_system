@@ -2,7 +2,7 @@ package com.example.webapp.controllers.uudai;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.webapp.dto.UuDaiDTO;
+import com.example.webapp.dto.*;
 import com.example.webapp.services.UuDaiService;
 
 import java.time.LocalDate;
@@ -34,6 +34,11 @@ public class UuDaiController {
     @GetMapping("/ngayketthuc/{ngayKetThuc}")
     public List<UuDaiDTO> getUuDaiByNgayKetThuc(@PathVariable LocalDate ngayKetThuc) {
         return uuDaiService.getUuDaiByNgayKetThuc(ngayKetThuc);
+    }
+
+    @GetMapping("/sach/{maUuDai}")
+    public List<SachDTO> getSachByUuDaiId(@PathVariable String maUuDai) {
+        return uuDaiService.getSachByUuDaiId(maUuDai); 
     }
 
     @PostMapping

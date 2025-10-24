@@ -76,8 +76,8 @@ public class SecurityConfig {
                     "/api/donhang/**",   
                     "/api/thongbao/**",  
                     "/api/chitietdonhang/**", 
-                    "/api/muontra/**" 
-                ).hasAnyRole("ADMIN", "NHANVIEN", "THUTHU", "QUANLY") 
+                    "/api/theodoimuonsach/**" 
+                ).hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY") 
 
                 .requestMatchers(
                     "/api/docgia/thongtin/**", 

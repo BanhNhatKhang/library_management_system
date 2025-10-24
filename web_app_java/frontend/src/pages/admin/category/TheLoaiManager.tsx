@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../../../../axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
-import "../../../css/admins/category/TheLoaiManager.css";
+import styles from "../../../css/admins/category/TheLoaiManager.module.css";
 
 interface TheLoai {
   maTheLoai: string;
@@ -106,10 +106,10 @@ const TheLoaiManager = () => {
   };
 
   return (
-    <div className="theloai-manager">
+    <div className={styles["theloai-manager"]}>
       <h2>🏷️ Quản Lý Thể Loại</h2>
       <button
-        className="add-btn"
+        className={styles["add-btn"]}
         onClick={() => navigate("/admin/theloai/add")}
       >
         + Thêm thể loại
@@ -119,7 +119,7 @@ const TheLoaiManager = () => {
         <p>Đang tải...</p>
       ) : (
         <>
-          <table className="theloai-table">
+          <table className={styles["theloai-table"]}>
             <thead>
               <tr>
                 <th
@@ -162,14 +162,14 @@ const TheLoaiManager = () => {
                     </Link>
                     <Link
                       to={`/admin/theloai/edit/${theLoai.maTheLoai}`}
-                      className="edit-btn"
+                      className={styles["edit-btn"]}
                       title="Sửa"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
                     <button
-                      className="delete-btn"
+                      className={styles["delete-btn"]}
                       title="Xóa"
                       onClick={() => handleDeleteClick(theLoai)}
                     >
@@ -182,7 +182,7 @@ const TheLoaiManager = () => {
           </table>
 
           {totalPages > 1 && (
-            <div className="pagination">
+            <div className={styles["pagination"]}>
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
@@ -205,17 +205,20 @@ const TheLoaiManager = () => {
 
       {/* Modal xác nhận xóa */}
       {showDeleteModal && theLoaiToDelete && (
-        <div className="modal-overlay" onClick={handleCancelDelete}>
-          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className={styles["modal-overlay"]} onClick={handleCancelDelete}>
+          <div
+            className={styles["delete-modal"]}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles["modal-header"]}>
               <h3>⚠️ Xác nhận xóa thể loại</h3>
             </div>
 
-            <div className="modal-content">
+            <div className={styles["modal-content"]}>
               <p>Bạn có chắc chắn muốn xóa thể loại này không?</p>
 
-              <div className="theloai-info">
-                <div className="theloai-details">
+              <div className={styles["theloai-info"]}>
+                <div className={styles["theloai-details"]}>
                   <h4>{theLoaiToDelete.tenTheLoai}</h4>
                   <p>
                     <strong>Mã thể loại:</strong> {theLoaiToDelete.maTheLoai}
@@ -224,16 +227,16 @@ const TheLoaiManager = () => {
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className={styles["modal-actions"]}>
               <button
-                className="cancel-btn"
+                className={styles["cancel-btn"]}
                 onClick={handleCancelDelete}
                 disabled={deleting}
               >
                 Không
               </button>
               <button
-                className="confirm-btn"
+                className={styles["confirm-btn"]}
                 onClick={handleConfirmDelete}
                 disabled={deleting}
               >

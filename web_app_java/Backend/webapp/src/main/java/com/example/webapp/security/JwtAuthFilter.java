@@ -1,5 +1,6 @@
 package com.example.webapp.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -31,7 +36,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         System.out.println("Request path: " + path);
         
-        // Bỏ qua kiểm tra JWT cho các API public
         if (isPublicPath(path)) {
             filterChain.doFilter(request, response);
             return;
@@ -39,43 +43,80 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
         String token = null;
-        String username = null;
 
         if (header != null && header.startsWith("Bearer ")) {
             token = header.substring(7);
-            username = JwtUtil.getUsernameFromToken(token);
         }
 
         System.out.println("JWT Filter - Path: " + path);
         System.out.println("JWT Filter - Token received: " + (token != null));
-        System.out.println("JWT Filter - Extracted Username: " + username);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                var userDetails = userDetailsService.loadUserByUsername(username);
-
                 boolean isTokenValid = JwtUtil.validateJwtToken(token);
                 System.out.println("JWT Filter - Token Valid: " + isTokenValid);
-                
-                if (isTokenValid) {
-                    // Lấy role từ JWT
-                    String role = JwtUtil.extractRole(token);
-                    // Tạo authority đúng chuẩn ROLE_*
-                    var authorities = java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
 
-                    System.out.println("JWT Filter - Granted Authorities: " + authorities);
+                if (isTokenValid) {
+                    // Try to get username and role from JwtUtil first
+                    String username = JwtUtil.getUsernameFromToken(token); // may be null
+                    String role = JwtUtil.extractRole(token); // may be null
+                    System.out.println("JWT Filter - Extracted Username: " + username);
+                    System.out.println("JWT Filter - Extracted Role: " + role);
+
+                    // If JwtUtil didn't return claims, decode payload as fallback
+                    if ((username == null || role == null)) {
+                        try {
+                            String[] parts = token.split("\\.");
+                            if (parts.length >= 2) {
+                                String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+                                ObjectMapper om = new ObjectMapper();
+                                Map<String, Object> claims = om.readValue(payloadJson, Map.class);
+                                if (username == null) {
+                                    Object sub = claims.get("sub");
+                                    if (sub != null) username = sub.toString();
+                                }
+                                if (role == null) {
+                                    Object r = claims.get("role");
+                                    if (r == null) r = claims.get("roles");
+                                    if (r != null) role = r.toString();
+                                }
+                                System.out.println("JWT Filter - Fallback parsed subject:" + username + " role:" + role);
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("JWT Filter - fallback parse failed: " + ex.getMessage());
+                        }
+                    }
+
+                    // Build authorities to be permissive: include both "ROLE_x" and raw "x"
+                    Set<org.springframework.security.core.GrantedAuthority> authorities = new HashSet<>();
+                    if (role != null && !role.isBlank()) {
+                        authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(role)); // raw
+                        authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role)); // prefixed
+                    }
+
+                    Object principal = null;
+                    if (username != null) {
+                        try {
+                            principal = userDetailsService.loadUserByUsername(username);
+                        } catch (Exception e) {
+                            // If loading user fails, fall back to using username string as principal
+                            principal = username;
+                        }
+                    } else {
+                        principal = token; // least-ideal fallback
+                    }
 
                     UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                        new UsernamePasswordAuthenticationToken(principal, null, authorities);
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    System.out.println("JWT Filter - Authentication set: principal=" + (username != null ? username : "token") + " authorities=" + authorities);
                 }
             } catch (Exception e) {
-                    System.out.println("Error loading user details or validating token: " + e.getMessage());
+                System.out.println("Error in JWT filter: " + e.getMessage());
             }
-
         }
-        
+
         filterChain.doFilter(request, response);
     }
     

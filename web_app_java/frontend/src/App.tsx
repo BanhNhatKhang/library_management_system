@@ -41,6 +41,16 @@ import MuonManager from "./pages/admin/borrow/MuonManager";
 import MuonAdd from "./pages/admin/borrow/MuonAdd";
 import MuonDetails from "./pages/admin/borrow/MuonDetails";
 import MuonEdit from "./pages/admin/borrow/MuonEdit";
+// ưu đãi
+import UDManager from "./pages/admin/promotion/UDManager";
+import UDAdd from "./pages/admin/promotion/UDAdd";
+import UDDetails from "./pages/admin/promotion/UDDetails";
+import UDEdit from "./pages/admin/promotion/UDEdit";
+// thông báo
+import TBManager from "./pages/admin/notification/TBManager";
+import TBAdd from "./pages/admin/notification/TBAdd";
+import TBDetails from "./pages/admin/notification/TBDetails";
+import TBEdit from "./pages/admin/notification/TBEdit";
 
 function App() {
   const { role } = useAuth();
@@ -96,6 +106,16 @@ function App() {
             path="muon/:maDocGia/:maSach/:ngayMuon"
             element={<MuonDetails />}
           />
+          {/* Ưu đãi */}
+          <Route path="uudai" element={<UDManager />} />
+          <Route path="uudai/:maUuDai" element={<UDDetails />} />
+          <Route path="uudai/add" element={<UDAdd />} />
+          <Route path="uudai/edit/:maUuDai" element={<UDEdit />} />
+          {/* Thông báo */}
+          <Route path="thongbao" element={<TBManager />} />
+          <Route path="thongbao/:id" element={<TBDetails />} />
+          <Route path="thongbao/add" element={<TBAdd />} />
+          <Route path="thongbao/edit/:id" element={<TBEdit />} />
         </Route>
         <Route path="/" element={<Dashboard />} />
         <Route path="*" element={<Dashboard />} />

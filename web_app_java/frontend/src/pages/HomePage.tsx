@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import "../css/HomePage.css";
+import styles from "../css/HomePage.module.css";
 
 interface SachDTO {
   maSach: string;
@@ -70,21 +70,23 @@ function HomePage() {
     };
 
     return (
-      <div className="book-card">
+      <div className={styles["book-card"]}>
         <Link to={`/sach/${book.maSach}`}>
-          <div className="book-image-container">
+          <div className={styles["book-image-container"]}>
             <img src={`/api/sach/image/${book.anhBia}`} alt={book.tenSach} />
             {giamGia > 0 && (
-              <span className="discount-badge">
+              <span className={styles["discount-badge"]}>
                 -{((giamGia || 0) * 100).toFixed(0)}%
               </span>
             )}
           </div>
-          <p className="book-title">{book.tenSach}</p>
-          <p className="book-price">
+          <p className={styles["book-title"]}>{book.tenSach}</p>
+          <p className={styles["book-price"]}>
             {formatCurrency(discountedPrice)}
             {giamGia > 0 && (
-              <span className="original-price">{formatCurrency(donGia)}</span>
+              <span className={styles["original-price"]}>
+                {formatCurrency(donGia)}
+              </span>
             )}
           </p>
         </Link>
@@ -94,21 +96,21 @@ function HomePage() {
 
   return (
     <div className="container mt-4">
-      <div className="flash-sale-section">
-        <div className="sale-header">
-          <h2 className="sale-title">
+      <div className={styles["flash-sale-section"]}>
+        <div className={styles["sale-header"]}>
+          <h2 className={styles["sale-title"]}>
             <i className="fas fa-bolt me-2"></i>
             FLASH SALE
           </h2>
-          <div className="countdown">
-            Kết thúc trong: <span className="timer">00:00:00</span>{" "}
+          <div className={styles["countdown"]}>
+            Kết thúc trong: <span className={styles["timer"]}>00:00:00</span>{" "}
           </div>
-          <Link to="/flash-sale" className="view-all-link">
+          <Link to="/flash-sale" className={styles["view-all-link"]}>
             Xem tất cả
           </Link>
         </div>
 
-        <div className="sale-books-grid">
+        <div className={styles["sale-books-grid"]}>
           {flashSaleBooks.map((book) => (
             <BookCard key={book.maSach} book={book} />
           ))}
@@ -117,17 +119,17 @@ function HomePage() {
 
       <hr className="my-5" />
 
-      <div className="category-display-section">
-        <h2 className="section-title">Danh mục sản phẩm</h2>
-        <div className="home-categories-grid">
+      <div className={styles["category-display-section"]}>
+        <h2 className={styles["section-title"]}>Danh mục sản phẩm</h2>
+        <div className={styles["home-categories-grid"]}>
           {homeCategoriesDisplay.map((cat) => (
             <Link
               key={cat.maTheLoai}
               to={`/the-loai/${cat.maTheLoai}`}
-              className="home-category-item"
+              className={styles["home-category-item"]}
             >
               <i className="fas fa-book-open"></i>
-              <span className="category-name">{cat.tenTheLoai}</span>
+              <span className={styles["category-name"]}>{cat.tenTheLoai}</span>
             </Link>
           ))}
         </div>
@@ -135,15 +137,15 @@ function HomePage() {
 
       <hr className="my-5" />
 
-      <div className="all-books-section">
-        <h2 className="section-title">Gợi ý hôm nay</h2>
-        <div className="all-books-grid">
+      <div className={styles["all-books-section"]}>
+        <h2 className={styles["section-title"]}>Gợi ý hôm nay</h2>
+        <div className={styles["all-books-grid"]}>
           {allBooks.slice(0, MAX_DISPLAY_BOOKS).map((book) => (
             <BookCard key={book.maSach} book={book} />
           ))}
         </div>
         <div className="text-center mt-5">
-          <Link to="/sach/tat-ca" className="btn-view-all-books">
+          <Link to="/sach/tat-ca" className={styles["btn-view-all-books"]}>
             Xem tất cả
           </Link>
         </div>

@@ -1,12 +1,15 @@
 package com.example.webapp.services;
 
+import com.example.webapp.models.Sach;
 import com.example.webapp.models.UuDai;
+import com.example.webapp.dto.SachDTO;
 import com.example.webapp.dto.UuDaiDTO;
 import com.example.webapp.repository.UuDaiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 
+import java.util.Set;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
@@ -16,6 +19,10 @@ public class UuDaiService {
 
     @Autowired
     private UuDaiRepository uuDaiRepository;
+
+    @Autowired
+    private SachService sachService;
+    
 
     public List<UuDaiDTO> getAllUuDai() {
         return uuDaiRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
@@ -31,6 +38,22 @@ public class UuDaiService {
 
     public Optional<UuDaiDTO> getUuDaiById(String maUuDai) {
         return uuDaiRepository.findByMaUuDai(maUuDai).map(this::toDTO);
+    }
+
+    public List<SachDTO> getSachByUuDaiId(String maUuDai) {
+        Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDai);
+
+        if (uuDaiOpt.isEmpty()) {
+            return List.of(); 
+        }
+
+        UuDai uuDai = uuDaiOpt.get();
+
+        Set<Sach> sachs = uuDai.getSachs(); 
+
+        return sachs.stream()
+                    .map(sachService::toDTO)
+                    .collect(Collectors.toList());
     }
 
     public UuDaiDTO saveUuDai(UuDaiDTO uuDaiDTO) {

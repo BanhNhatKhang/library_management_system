@@ -1,0 +1,74 @@
+.tb-add {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+.tb-add h4 {
+  color: #2c3e50;
+  margin-bottom: 18px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* form card */
+.tb-add .bg-white {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  max-width: 980px;
+}
+
+/* form controls */
+.tb-add label {
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 6px;
+  display: block;
+}
+.tb-add .form-control,
+.tb-add .form-select,
+.tb-add textarea.form-control {
+  padding: 10px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.tb-add .form-control:focus,
+.tb-add .form-select:focus,
+.tb-add textarea.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.08);
+}
+
+/* actions */
+.tb-add .btn-primary {
+  background: #007bff;
+  border-color: #007bff;
+}
+.tb-add .btn-outline-secondary {
+  background: transparent;
+}
+
+/* small helper text */
+.tb-add .help {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin-top: 6px;
+  display: block;
+}
+
+/* responsive */
+@media (max-width: 1024px) {
+  .tb-add .bg-white {
+    padding: 18px;
+  }
+}
+@media (max-width: 480px) {
+  .tb-add {
+    padding: 12px;
+  }
+  .tb-add h4 {
+    font-size: 18px;
+  }
+}

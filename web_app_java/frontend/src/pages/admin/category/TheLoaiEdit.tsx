@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/category/TheLoaiEdit.css";
+import styles from "../../../css/admins/category/TheLoaiEdit.module.css";
 
 interface TheLoai {
   maTheLoai: string;
@@ -83,36 +83,38 @@ const TheLoaiEdit = () => {
 
   if (loadingData) {
     return (
-      <div className="edit-theloai">
-        <div className="loading">⏳ Đang tải thông tin thể loại...</div>
+      <div className={styles["edit-theloai"]}>
+        <div className={styles["loading"]}>
+          ⏳ Đang tải thông tin thể loại...
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="edit-theloai">
-        <Link to="/admin/theloai" className="back-link">
+      <div className={styles["edit-theloai"]}>
+        <Link to="/admin/theloai" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div className="error">❌ {error}</div>
+        <div className={styles["error"]}>❌ {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="edit-theloai">
-      <Link to="/admin/theloai" className="back-link">
+    <div className={styles["edit-theloai"]}>
+      <Link to="/admin/theloai" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
 
       <h2>✏️ Chỉnh Sửa Thể Loại</h2>
 
-      <form onSubmit={handleSubmit} className="edit-theloai-form">
-        <div className="form-container">
-          <div className="form-main">
-            <div className="form-row">
-              <div className="form-group readonly">
+      <form onSubmit={handleSubmit} className={styles["edit-theloai-form"]}>
+        <div className={styles["form-container"]}>
+          <div className={styles["form-main"]}>
+            <div className={styles["form-row"]}>
+              <div className={`${styles["form-group"]} readonly`}>
                 <label htmlFor="maTheLoai">Mã thể loại</label>
                 <input
                   type="text"
@@ -124,7 +126,7 @@ const TheLoaiEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tenTheLoai">Tên thể loại</label>
                 <input
                   type="text"
@@ -142,15 +144,19 @@ const TheLoaiEdit = () => {
         </div>
 
         {/* Form actions */}
-        <div className="form-actions">
+        <div className={styles["form-actions"]}>
           <button
             type="button"
             onClick={() => navigate("/admin/theloai")}
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
           >
             ✖ Hủy
           </button>
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles["submit-btn"]}
+          >
             {loading ? "⏳ Đang cập nhật..." : "💾 Cập nhật thể loại"}
           </button>
         </div>

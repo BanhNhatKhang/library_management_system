@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/orders/DHManager.css";
+import styles from "../../../css/admins/orders/DHManager.module.css";
 
 interface DonHang {
   maDonHang: string;
@@ -44,17 +44,17 @@ const DHManager: React.FC = () => {
   );
 
   return (
-    <div className="dh-manager">
+    <div className={styles["dh-manager"]}>
       <h2>Quản lý đơn hàng</h2>
-      <div className="dh-manager-header">
+      <div className={styles["dh-manager-header"]}>
         <button
-          className="add-btn"
+          className={styles["add-btn"]}
           onClick={() => navigate("/admin/donhang/add")}
         >
           + Thêm đơn hàng
         </button>
 
-        <div className="search-box">
+        <div className={styles["search-box"]}>
           <input
             type="text"
             placeholder="Tìm theo mã / độc giả / trạng thái"

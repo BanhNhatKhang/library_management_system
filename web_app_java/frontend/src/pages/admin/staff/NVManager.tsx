@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/staff/NVManager.css";
+import styles from "../../../css/admins/staff/NVManager.module.css";
 
 interface NhanVien {
   maNhanVien: string;
@@ -46,17 +46,17 @@ const NVManager: React.FC = () => {
   );
 
   return (
-    <div className="nv-manager">
+    <div className={styles["nv-manager"]}>
       <h2>Quản lý nhân viên</h2>
-      <div className="nv-manager-header">
+      <div className={styles["nv-manager-header"]}>
         <button
-          className="add-btn"
+          className={styles["add-btn"]}
           onClick={() => navigate("/admin/nhanvien/add")}
         >
           + Thêm nhân viên
         </button>
 
-        <div className="search-box">
+        <div className={styles["search-box"]}>
           <input
             type="text"
             placeholder="Tìm theo tên / điện thoại / email"
@@ -114,7 +114,7 @@ const NVManager: React.FC = () => {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center">
+                <td colSpan={6} className={styles["text-center"]}>
                   Không tìm thấy kết quả
                 </td>
               </tr>

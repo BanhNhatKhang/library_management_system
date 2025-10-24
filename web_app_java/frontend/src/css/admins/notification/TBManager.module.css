@@ -1,0 +1,109 @@
+.tb-manager {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.tb-manager h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Nút thêm mới */
+.tb-manager .add-btn {
+  background: #007bff; /* Blue for notifications */
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.tb-manager .add-btn:hover {
+  background: #0056b3;
+}
+
+/* Ô tìm kiếm */
+.tb-manager .search-box input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.tb-manager .search-box input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Bảng */
+.tb-manager table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.tb-manager th,
+.tb-manager td {
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem;
+  text-align: left;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.tb-manager th {
+  background: #e9ecef; /* Light gray header */
+  font-weight: 600;
+}
+
+/* Header */
+.tb-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tb-manager-header .search-box {
+  width: 300px;
+}
+
+/* Trạng thái đã đọc */
+.tb-manager .status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tb-manager .status-read {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.tb-manager .status-unread {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tb-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .tb-manager-header .search-box {
+    width: 100%;
+  }
+}

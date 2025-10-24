@@ -76,6 +76,7 @@
 }
 .sach-table td img {
   width: 80px;
+  margin-top: 5px;
   height: 112px;
   object-fit: cover;
   border-radius: 8px;

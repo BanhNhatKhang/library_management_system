@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/category/TheLoaiAdd.css";
+import styles from "../../../css/admins/category/TheLoaiAdd.module.css";
 
 const TheLoaiAdd = () => {
   const navigate = useNavigate();
@@ -46,15 +46,15 @@ const TheLoaiAdd = () => {
   };
 
   return (
-    <div className="add-theloai">
+    <div className={styles["add-theloai"]}>
       <h2>🏷️ Thêm Thể Loại Mới</h2>
 
-      <form onSubmit={handleSubmit} className="add-theloai-form">
-        <div className="form-container">
+      <form onSubmit={handleSubmit} className={styles["add-theloai-form"]}>
+        <div className={styles["form-container"]}>
           {/* Form chính */}
-          <div className="form-main">
-            <div className="form-row">
-              <div className="form-group">
+          <div className={styles["form-main"]}>
+            <div className={styles["form-row"]}>
+              <div className={styles["form-group"]}>
                 <label htmlFor="maTheLoai">Mã thể loại</label>
                 <input
                   type="text"
@@ -68,7 +68,7 @@ const TheLoaiAdd = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tenTheLoai">Tên thể loại</label>
                 <input
                   type="text"
@@ -86,15 +86,19 @@ const TheLoaiAdd = () => {
         </div>
 
         {/* Form actions */}
-        <div className="form-actions">
+        <div className={styles["form-actions"]}>
           <button
             type="button"
             onClick={() => navigate("/admin/theloai")}
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
           >
             ✖ Hủy
           </button>
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles["submit-btn"]}
+          >
             {loading ? "⏳ Đang thêm..." : "✓ Thêm thể loại"}
           </button>
         </div>

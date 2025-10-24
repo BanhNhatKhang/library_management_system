@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import "../../css/admins/SidebarAdmin.css";
+import styles from "../../css/admins/SidebarAdmin.module.css";
 
 const SidebarAdmin = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -17,16 +17,18 @@ const SidebarAdmin = () => {
   };
 
   return (
-    <div className="admin-layout">
+    <div className={styles["admin-layout"]}>
       {/* Sidebar */}
       <aside
-        className={`sidebar${isCollapsed ? " collapsed" : ""}`}
+        className={`${styles["sidebar"]} ${
+          isCollapsed ? styles["collapsed"] : ""
+        }`}
         tabIndex={0}
       >
-        <div className="sidebar-header">
+        <div className={styles["sidebar-header"]}>
           <h2>Admin</h2>
           <button
-            className="collapse-btn"
+            className={styles["collapse-btn"]}
             onClick={() => setIsCollapsed((prev) => !prev)}
             aria-label={isCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
           >
@@ -38,13 +40,15 @@ const SidebarAdmin = () => {
           </button>
         </div>
 
-        <nav className="sidebar-menu">
+        <nav className={styles["sidebar-menu"]}>
           <ul>
             <li>
               <Link
                 to="/admin/dashboard"
                 className={
-                  location.pathname === "/admin/dashboard" ? "active" : ""
+                  location.pathname === "/admin/dashboard"
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-tachometer-alt"></i>
@@ -55,7 +59,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/sach"
                 className={
-                  location.pathname.startsWith("/admin/sach") ? "active" : ""
+                  location.pathname.startsWith("/admin/sach")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-book"></i>
@@ -66,7 +72,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/theloai"
                 className={
-                  location.pathname.startsWith("/admin/theloai") ? "active" : ""
+                  location.pathname.startsWith("/admin/theloai")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-tags"></i>
@@ -77,7 +85,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/nxb"
                 className={
-                  location.pathname.startsWith("/admin/nxb") ? "active" : ""
+                  location.pathname.startsWith("/admin/nxb")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-building"></i>
@@ -88,7 +98,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/docgia"
                 className={
-                  location.pathname.startsWith("/admin/docgia") ? "active" : ""
+                  location.pathname.startsWith("/admin/docgia")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-users"></i>
@@ -100,8 +112,8 @@ const SidebarAdmin = () => {
                 to="/admin/nhanvien"
                 className={
                   location.pathname.startsWith("/admin/nhanvien")
-                    ? "active"
-                    : ""
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-user-tie"></i>
@@ -112,7 +124,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/donhang"
                 className={
-                  location.pathname.startsWith("/admin/donhang") ? "active" : ""
+                  location.pathname.startsWith("/admin/donhang")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-shopping-cart"></i>
@@ -123,7 +137,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/muontra"
                 className={
-                  location.pathname.startsWith("/admin/muontra") ? "active" : ""
+                  location.pathname.startsWith("/admin/muontra")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-exchange-alt"></i>
@@ -134,7 +150,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/uudai"
                 className={
-                  location.pathname.startsWith("/admin/uudai") ? "active" : ""
+                  location.pathname.startsWith("/admin/uudai")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-gift"></i>
@@ -146,8 +164,8 @@ const SidebarAdmin = () => {
                 to="/admin/thongbao"
                 className={
                   location.pathname.startsWith("/admin/thongbao")
-                    ? "active"
-                    : ""
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-bell"></i>
@@ -158,7 +176,9 @@ const SidebarAdmin = () => {
               <Link
                 to="/admin/ai"
                 className={
-                  location.pathname.startsWith("/admin/ai") ? "active" : ""
+                  location.pathname.startsWith("/admin/ai")
+                    ? styles["active"]
+                    : undefined
                 }
               >
                 <i className="fas fa-robot"></i>
@@ -166,7 +186,7 @@ const SidebarAdmin = () => {
               </Link>
             </li>
             <li>
-              <button onClick={handleLogout} className="logout-btn">
+              <button onClick={handleLogout} className={styles["logout-btn"]}>
                 <i className="fas fa-sign-out-alt"></i>
                 <span>Đăng Xuất</span>
               </button>
@@ -176,7 +196,7 @@ const SidebarAdmin = () => {
       </aside>
 
       {/* Nội dung chính */}
-      <main className="main-content">
+      <main className={styles["main-content"]}>
         <Outlet />
       </main>
     </div>

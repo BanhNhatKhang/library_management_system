@@ -272,7 +272,7 @@ public class SachService {
                 .replaceAll("[Đ]", "D");
     }
 
-    private SachDTO toDTO(Sach sach) {
+    public SachDTO toDTO(Sach sach) {
         SachDTO dto = new SachDTO();
         dto.setMaSach(sach.getMaSach());
         dto.setTenSach(sach.getTenSach());

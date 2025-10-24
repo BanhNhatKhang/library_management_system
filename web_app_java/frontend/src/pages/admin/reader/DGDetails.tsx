@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/readers/DGDetails.css";
+import styles from "../../../css/admins/readers/DGDetails.module.css";
 
 interface DocGia {
   maDocGia: string;
@@ -84,75 +84,85 @@ const DGDetails: React.FC = () => {
     p != null ? new Intl.NumberFormat("vi-VN").format(p) + " đ" : "—";
 
   return (
-    <div className="dg-details">
-      <div className="header-container">
-        <Link to="/admin/docgia" className="back-link">
+    <div className={styles["dg-details"]}>
+      <div className={styles["header-container"]}>
+        <Link to="/admin/docgia" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <h2 className="page-title">📖 Chi tiết độc giả</h2>
-        <div className="spacer"></div>
+        <h2 className={styles["page-title"]}>📖 Chi tiết độc giả</h2>
+        <div className={styles["spacer"]}></div>
       </div>
 
-      <div className="tab-navigation">
+      <div className={styles["tab-navigation"]}>
         <button
-          className={`tab-button ${active === "info" ? "active" : ""}`}
+          className={`${styles["tab-button"]} ${
+            active === "info" ? styles["active"] : ""
+          }`}
           onClick={() => setActive("info")}
         >
           📄 Thông tin
         </button>
         <button
-          className={`tab-button ${active === "sach-muon" ? "active" : ""}`}
+          className={`${styles["tab-button"]} ${
+            active === "sach-muon" ? styles["active"] : ""
+          }`}
           onClick={() => setActive("sach-muon")}
         >
           📚 Sách mượn ({muonList.length})
         </button>
         <button
-          className={`tab-button ${active === "don-hang" ? "active" : ""}`}
+          className={`${styles["tab-button"]} ${
+            active === "don-hang" ? styles["active"] : ""
+          }`}
           onClick={() => setActive("don-hang")}
         >
           🧾 Đơn hàng ({donHangList.length})
         </button>
       </div>
 
-      <div className="tab-content">
+      <div className={styles["tab-content"]}>
         {active === "info" && (
-          <div className="tab-panel">
-            <div className="info-section">
-              <div className="info-item">
-                <span className="info-label">Mã độc giả:</span>
-                <span className="info-value">{docGia.maDocGia}</span>
+          <div className={styles["tab-panel"]}>
+            <div className={styles["info-section"]}>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Mã độc giả:</span>
+                <span className={styles["info-value"]}>{docGia.maDocGia}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Họ tên:</span>
-                <span className="info-value">
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Họ tên:</span>
+                <span className={styles["info-value"]}>
                   {docGia.hoLot} {docGia.ten}
                 </span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Điện thoại:</span>
-                <span className="info-value">{docGia.dienThoai}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Điện thoại:</span>
+                <span className={styles["info-value"]}>{docGia.dienThoai}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Email:</span>
-                <span className="info-value">{docGia.email}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Email:</span>
+                <span className={styles["info-value"]}>{docGia.email}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Địa chỉ:</span>
-                <span className="info-value">{docGia.diaChi || "—"}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Địa chỉ:</span>
+                <span className={styles["info-value"]}>
+                  {docGia.diaChi || "—"}
+                </span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Ngày sinh:</span>
-                <span className="info-value">
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Ngày sinh:</span>
+                <span className={styles["info-value"]}>
                   {formatDate(docGia.ngaySinh)}
                 </span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Trạng thái:</span>
-                <span className="info-value">{docGia.trangThai || "—"}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Trạng thái:</span>
+                <span className={styles["info-value"]}>
+                  {docGia.trangThai || "—"}
+                </span>
               </div>
 
               <button
-                className="btn-edit"
+                className={styles["btn-edit"]}
                 onClick={() =>
                   (window.location.href = `/admin/docgia/edit/${docGia.maDocGia}`)
                 }
@@ -164,9 +174,9 @@ const DGDetails: React.FC = () => {
         )}
 
         {active === "sach-muon" && (
-          <div className="tab-panel">
+          <div className={styles["tab-panel"]}>
             {muonList.length === 0 ? (
-              <div className="no-data">📚 Không có sách mượn</div>
+              <div className={styles["no-data"]}>📚 Không có sách mượn</div>
             ) : (
               <table>
                 <thead>
@@ -178,22 +188,27 @@ const DGDetails: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {muonList.map((m) => (
-                    <tr key={`${m.maSach}-${m.ngayMuon}`}>
-                      <td>{m.maSach}</td>
-                      <td>{formatDate(m.ngayMuon)}</td>
-                      <td>{formatDate(m.ngayTra || "")}</td>
-                      <td>
-                        <span
-                          className={`trang-thai ${
-                            m.trangThaiMuon?.toLowerCase() || "dang-muon"
-                          }`}
-                        >
-                          {m.trangThaiMuon}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {muonList.map((m) => {
+                    const statusKey = (
+                      m.trangThaiMuon || "dang-muon"
+                    ).toLowerCase();
+                    return (
+                      <tr key={`${m.maSach}-${m.ngayMuon}`}>
+                        <td>{m.maSach}</td>
+                        <td>{formatDate(m.ngayMuon)}</td>
+                        <td>{formatDate(m.ngayTra || "")}</td>
+                        <td>
+                          <span
+                            className={`${styles["trang-thai"]} ${
+                              styles[statusKey] ?? ""
+                            }`}
+                          >
+                            {m.trangThaiMuon}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -201,9 +216,9 @@ const DGDetails: React.FC = () => {
         )}
 
         {active === "don-hang" && (
-          <div className="tab-panel">
+          <div className={styles["tab-panel"]}>
             {donHangList.length === 0 ? (
-              <div className="no-data">🧾 Chưa có đơn hàng</div>
+              <div className={styles["no-data"]}>🧾 Chưa có đơn hàng</div>
             ) : (
               <table>
                 <thead>

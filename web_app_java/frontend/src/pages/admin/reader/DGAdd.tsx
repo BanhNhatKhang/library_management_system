@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/readers/DGAdd.css";
+import styles from "../../../css/admins/readers/DGAdd.module.css";
 
 const DGAdd: React.FC = () => {
   const navigate = useNavigate();
@@ -40,12 +40,15 @@ const DGAdd: React.FC = () => {
   };
 
   return (
-    <div className="dg-add p-3">
+    <div className={`${styles["dg-add"]} p-3`}>
       <Link to="/admin/docgia" className="btn btn-secondary mb-3">
         ← Quay lại danh sách
       </Link>
       <h4>➕ Thêm độc giả</h4>
-      <form onSubmit={submit} className="mt-3 bg-white p-3 rounded">
+      <form
+        onSubmit={submit}
+        className={`mt-3 ${styles["bg-white"]} p-3 rounded`}
+      >
         <div className="row">
           <div className="col-md-6 mb-2">
             <label>Họ lót</label>

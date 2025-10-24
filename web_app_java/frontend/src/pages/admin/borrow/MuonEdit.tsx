@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/borrow/MuonEdit.css";
+import styles from "../../../css/admins/borrow/MuonEdit.module.css";
 
 interface LoanRequest {
   maDocGia: string;
@@ -59,10 +59,14 @@ const MuonEdit: React.FC = () => {
   };
 
   return (
-    <div className="muon-edit">
+    <div
+      className={`${styles["library-loan-management-muon-edit"]} ${
+        styles["muo-edit"] ?? ""
+      }`}
+    >
       <h2>Chỉnh sửa phiếu mượn</h2>
-      <form onSubmit={handleSubmit} className="form-container">
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className={styles["form-container"]}>
+        <div className={styles["form-group"]}>
           <label htmlFor="maDocGia">Mã độc giả</label>
           <input
             type="text"
@@ -73,7 +77,7 @@ const MuonEdit: React.FC = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label htmlFor="maSach">Mã sách</label>
           <input
             type="text"
@@ -84,7 +88,7 @@ const MuonEdit: React.FC = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label htmlFor="ngayMuon">Ngày mượn</label>
           <input
             type="date"
@@ -95,7 +99,7 @@ const MuonEdit: React.FC = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label htmlFor="ngayTra">Ngày trả</label>
           <input
             type="date"
@@ -105,7 +109,7 @@ const MuonEdit: React.FC = () => {
             onChange={handleChange}
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label htmlFor="trangThaiMuon">Trạng thái mượn</label>
           <select
             id="trangThaiMuon"
@@ -121,13 +125,23 @@ const MuonEdit: React.FC = () => {
             <option value="DANGMUON">Đang mượn</option>
           </select>
         </div>
-        <div className="form-actions">
-          <button type="submit" className="save-btn">
+        <div className={styles["form-group"]}>
+          <label htmlFor="maNhanVien">Mã nhân viên</label>
+          <input
+            type="text"
+            id="maNhanVien"
+            name="maNhanVien"
+            value={form.maNhanVien}
+            onChange={handleChange}
+          />
+        </div>
+        <div className={styles["form-actions"]}>
+          <button type="submit" className={styles["save-btn"]}>
             Lưu
           </button>
           <button
             type="button"
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
             onClick={() => navigate("/admin/muontra")}
           >
             Hủy

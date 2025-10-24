@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/staff/NVDetails.css";
+import styles from "../../../css/admins/staff/NVDetails.module.css";
 
 interface NhanVien {
   maNhanVien: string;
@@ -40,48 +40,52 @@ const NVDetails: React.FC = () => {
     );
 
   return (
-    <div className="nv-details">
-      <div className="header-container">
-        <Link to="/admin/nhanvien" className="back-link">
+    <div className={styles["nv-details"]}>
+      <div className={styles["header-container"]}>
+        <Link to="/admin/nhanvien" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <h2 className="page-title">📖 Chi tiết nhân viên</h2>
+        <h2 className={styles["page-title"]}>📖 Chi tiết nhân viên</h2>
       </div>
 
-      <div className="info-section">
-        <div className="info-item">
-          <span className="info-label">Mã nhân viên:</span>
-          <span className="info-value">{nhanVien.maNhanVien}</span>
+      <div className={styles["info-section"]}>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Mã nhân viên:</span>
+          <span className={styles["info-value"]}>{nhanVien.maNhanVien}</span>
         </div>
-        <div className="info-item">
-          <span className="info-label">Họ tên:</span>
-          <span className="info-value">{nhanVien.hoTen}</span>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Họ tên:</span>
+          <span className={styles["info-value"]}>{nhanVien.hoTen}</span>
         </div>
-        <div className="info-item">
-          <span className="info-label">Điện thoại:</span>
-          <span className="info-value">{nhanVien.dienThoai}</span>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Điện thoại:</span>
+          <span className={styles["info-value"]}>{nhanVien.dienThoai}</span>
         </div>
-        <div className="info-item">
-          <span className="info-label">Email:</span>
-          <span className="info-value">{nhanVien.email}</span>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Email:</span>
+          <span className={styles["info-value"]}>{nhanVien.email}</span>
         </div>
-        <div className="info-item">
-          <span className="info-label">Địa chỉ:</span>
-          <span className="info-value">{nhanVien.diaChi || "—"}</span>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Địa chỉ:</span>
+          <span className={styles["info-value"]}>{nhanVien.diaChi || "—"}</span>
         </div>
-        <div className="info-item">
-          <span className="info-label">Ngày sinh:</span>
-          <span className="info-value">{nhanVien.ngaySinh || "—"}</span>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Ngày sinh:</span>
+          <span className={styles["info-value"]}>
+            {nhanVien.ngaySinh || "—"}
+          </span>
         </div>
-        <div className="info-item">
-          <span className="info-label">Trạng thái:</span>
-          <span className="info-value">{nhanVien.trangThai || "—"}</span>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Trạng thái:</span>
+          <span className={styles["info-value"]}>
+            {nhanVien.trangThai || "—"}
+          </span>
         </div>
       </div>
 
       <Link
         to={`/admin/nhanvien/edit/${nhanVien.maNhanVien}`}
-        className="btn-edit"
+        className={styles["btn-edit"]}
       >
         ✏️ Chỉnh sửa
       </Link>

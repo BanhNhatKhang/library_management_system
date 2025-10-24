@@ -90,14 +90,9 @@
   align-items: flex-start;
 }
 
-.sach-image {
-  display: flex;
-  justify-content: center;
-}
-
-.sach-image img {
+img {
   width: 200px;
-  height: auto;
+  height: 600px;
   max-height: 320px;
   object-fit: contain;
   border-radius: 12px;
@@ -107,7 +102,7 @@
   display: block;
 }
 
-.sach-image img:hover {
+img:hover {
   transform: scale(1.05);
 }
 
@@ -383,9 +378,11 @@
     gap: 20px;
   }
 
-  .sach-image img {
-    width: 220px;
-    height: 300px;
+  .img {
+    width: 200px;
+    height: auto; /* Thay đổi: Đặt height: auto */
+    max-height: 270px; /* Thêm max-height để giới hạn kích thước */
+    margin: 0 auto;
   }
 
   .info-item {
@@ -425,9 +422,10 @@
     text-align: center;
   }
 
-  .sach-image img {
+  .img {
     width: 200px;
-    height: 270px;
+    height: auto; /* Thay đổi: Đặt height: auto */
+    max-height: 270px; /* Thêm max-height để giới hạn kích thước */
     margin: 0 auto;
   }
 
@@ -488,9 +486,10 @@
     min-width: auto;
   }
 
-  .sach-image img {
+  .img {
     width: 160px;
-    height: 220px;
+    height: auto; /* Thay đổi: Đặt height: auto */
+    max-height: 220px; /* Thêm max-height để giới hạn kích thước */
   }
 
   .tab-button {

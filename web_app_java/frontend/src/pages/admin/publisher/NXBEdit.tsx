@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/publisher/NXBEdit.css";
+import styles from "../../../css/admins/publisher/NXBEdit.module.css";
 
 interface NhaXuatBan {
   maNhaXuatBan: string;
@@ -87,36 +87,38 @@ const NXBEdit = () => {
 
   if (loadingData) {
     return (
-      <div className="edit-nxb">
-        <div className="loading">⏳ Đang tải thông tin nhà xuất bản...</div>
+      <div className={styles["edit-nxb"]}>
+        <div className={styles["loading"]}>
+          ⏳ Đang tải thông tin nhà xuất bản...
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="edit-nxb">
-        <Link to="/admin/nxb" className="back-link">
+      <div className={styles["edit-nxb"]}>
+        <Link to="/admin/nxb" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div className="error">❌ {error}</div>
+        <div className={styles["error"]}>❌ {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="edit-nxb">
-      <Link to="/admin/nxb" className="back-link">
+    <div className={styles["edit-nxb"]}>
+      <Link to="/admin/nxb" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
 
       <h2>✏️ Chỉnh Sửa Nhà Xuất Bản</h2>
 
-      <form onSubmit={handleSubmit} className="edit-nxb-form">
-        <div className="form-container">
-          <div className="form-main">
-            <div className="form-row">
-              <div className="form-group readonly">
+      <form onSubmit={handleSubmit} className={styles["edit-nxb-form"]}>
+        <div className={styles["form-container"]}>
+          <div className={styles["form-main"]}>
+            <div className={styles["form-row"]}>
+              <div className={`${styles["form-group"]} ${styles["readonly"]}`}>
                 <label htmlFor="maNhaXuatBan">Mã nhà xuất bản</label>
                 <input
                   type="text"
@@ -127,7 +129,7 @@ const NXBEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tenNhaXuatBan">Tên nhà xuất bản</label>
                 <input
                   type="text"
@@ -142,8 +144,11 @@ const NXBEdit = () => {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+            <div className={styles["form-row"]}>
+              <div
+                className={styles["form-group"]}
+                style={{ gridColumn: "1 / -1" }}
+              >
                 <label htmlFor="diaChi">Địa chỉ</label>
                 <input
                   type="text"
@@ -161,15 +166,19 @@ const NXBEdit = () => {
         </div>
 
         {/* Form actions */}
-        <div className="form-actions">
+        <div className={styles["form-actions"]}>
           <button
             type="button"
             onClick={() => navigate("/admin/nxb")}
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
           >
             ✖ Hủy
           </button>
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles["submit-btn"]}
+          >
             {loading ? "⏳ Đang cập nhật..." : "✓ Cập nhật"}
           </button>
         </div>

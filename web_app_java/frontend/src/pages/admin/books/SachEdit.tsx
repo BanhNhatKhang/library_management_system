@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/books/SachEdit.css";
+import styles from "../../../css/admins/books/SachEdit.module.css";
 
 interface TheLoai {
   maTheLoai: string;
@@ -208,38 +208,38 @@ const SachEdit = () => {
 
   if (loadingData) {
     return (
-      <div className="edit-sach">
-        <div className="loading">⏳ Đang tải thông tin sách...</div>
+      <div className={styles["edit-sach"]}>
+        <div className={styles["loading"]}>⏳ Đang tải thông tin sách...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="edit-sach">
-        <Link to="/admin/sach" className="back-link">
+      <div className={styles["edit-sach"]}>
+        <Link to="/admin/sach" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div className="error">❌ {error}</div>
+        <div className={styles["error"]}>❌ {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="edit-sach">
-      <Link to="/admin/sach" className="back-link">
+    <div className={styles["edit-sach"]}>
+      <Link to="/admin/sach" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
 
       <h2>✏️ Chỉnh Sửa Sách</h2>
 
-      <form onSubmit={handleSubmit} className="edit-sach-form">
-        <div className="form-container">
+      <form onSubmit={handleSubmit} className={styles["edit-sach-form"]}>
+        <div className={styles["form-container"]}>
           {/* Cột trái - Thông tin chính */}
-          <div className="form-left">
+          <div className={styles["form-left"]}>
             {/* Dòng 1: Mã sách, Tên sách, Tác giả, Nhà xuất bản */}
-            <div className="form-row-1">
-              <div className="form-group readonly">
+            <div className={styles["form-row-1"]}>
+              <div className={`${styles["form-group"]} ${styles["readonly"]}`}>
                 <label htmlFor="maSach">Mã sách</label>
                 <input
                   type="text"
@@ -251,7 +251,7 @@ const SachEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tenSach">Tên sách</label>
                 <input
                   type="text"
@@ -265,7 +265,7 @@ const SachEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="tacGia">Tác giả</label>
                 <input
                   type="text"
@@ -279,7 +279,7 @@ const SachEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="nhaXuatBan">Nhà xuất bản</label>
                 <select
                   id="nhaXuatBan"
@@ -299,8 +299,8 @@ const SachEdit = () => {
             </div>
 
             {/* Dòng 2: Đơn giá, Số quyển, Số lượng, Năm xuất bản */}
-            <div className="form-row-2">
-              <div className="form-group">
+            <div className={styles["form-row-2"]}>
+              <div className={styles["form-group"]}>
                 <label htmlFor="donGia">Đơn giá (VNĐ)</label>
                 <input
                   type="number"
@@ -315,7 +315,7 @@ const SachEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="soQuyen">Số quyển</label>
                 <input
                   type="number"
@@ -329,7 +329,7 @@ const SachEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="soLuong">Số lượng</label>
                 <input
                   type="number"
@@ -343,7 +343,7 @@ const SachEdit = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="namXuatBan">Năm xuất bản</label>
                 <input
                   type="date"
@@ -357,9 +357,9 @@ const SachEdit = () => {
             </div>
 
             {/* Dòng 3: Thể loại và Mô tả */}
-            <div className="form-row-3">
+            <div className={styles["form-row-3"]}>
               {/* Thể loại */}
-              <div className="form-group">
+              <div className={styles["form-group"]}>
                 <label htmlFor="theLoais">Thể loại</label>
                 <select
                   id="theLoais"
@@ -368,7 +368,7 @@ const SachEdit = () => {
                   value={formData.theLoais}
                   onChange={handleTheLoaiChange}
                   required
-                  className="theloai-select"
+                  className={styles["theloai-select"]}
                 >
                   {theLoais.map((tl) => (
                     <option key={tl.maTheLoai} value={tl.maTheLoai}>
@@ -376,20 +376,20 @@ const SachEdit = () => {
                     </option>
                   ))}
                 </select>
-                <div className="theloai-help">
+                <div className={styles["theloai-help"]}>
                   Giữ Ctrl và click để chọn nhiều thể loại
                 </div>
               </div>
 
               {/* Mô tả */}
-              <div className="form-group optional">
+              <div className={`${styles["form-group"]} ${styles["optional"]}`}>
                 <label htmlFor="moTa">Mô tả</label>
                 <textarea
                   id="moTa"
                   name="moTa"
                   value={formData.moTa}
                   onChange={handleInputChange}
-                  className="mota-textarea"
+                  className={styles["mota-textarea"]}
                   placeholder="Nhập mô tả chi tiết về sách..."
                 />
               </div>
@@ -397,10 +397,10 @@ const SachEdit = () => {
           </div>
 
           {/* Cột phải - Ảnh bìa */}
-          <div className="form-right">
-            <div className="form-group optional">
+          <div className={styles["form-right"]}>
+            <div className={`${styles["form-group"]} ${styles["optional"]}`}>
               <label htmlFor="anhBia">Ảnh bìa</label>
-              <div className="image-upload-section">
+              <div className={styles["image-upload-section"]}>
                 <input
                   type="file"
                   id="anhBia"
@@ -408,20 +408,20 @@ const SachEdit = () => {
                   onChange={handleFileChange}
                 />
                 {previewImage ? (
-                  <div className="image-preview">
+                  <div className={styles["image-preview"]}>
                     <img
                       src={previewImage}
                       alt="New Preview"
-                      className="preview-image"
+                      className={styles["preview-image"]}
                     />
-                    <div className="image-change-note">Ảnh mới</div>
+                    <div className={styles["image-change-note"]}>Ảnh mới</div>
                   </div>
                 ) : currentImageUrl ? (
-                  <div className="image-preview">
+                  <div className={styles["image-preview"]}>
                     <img
                       src={currentImageUrl}
                       alt="Current"
-                      className="current-image"
+                      className={styles["current-image"]}
                       onLoad={() => {
                         console.log(
                           "Image loaded successfully:",
@@ -429,7 +429,9 @@ const SachEdit = () => {
                         );
                       }}
                     />
-                    <div className="current-image-note">Ảnh hiện tại</div>
+                    <div className={styles["current-image-note"]}>
+                      Ảnh hiện tại
+                    </div>
                     <div
                       style={{
                         fontSize: "12px",
@@ -439,7 +441,7 @@ const SachEdit = () => {
                     ></div>
                   </div>
                 ) : (
-                  <div className="upload-placeholder">
+                  <div className={styles["upload-placeholder"]}>
                     <p>Chọn ảnh bìa mới</p>
                     <small>Hỗ trợ: JPG, PNG, GIF</small>
                     <small>(Để trống nếu không muốn thay đổi)</small>
@@ -451,15 +453,19 @@ const SachEdit = () => {
         </div>
 
         {/* Form actions */}
-        <div className="form-actions">
+        <div className={styles["form-actions"]}>
           <button
             type="button"
             onClick={() => navigate("/admin/sach")}
-            className="cancel-btn"
+            className={styles["cancel-btn"]}
           >
             ✖ Hủy
           </button>
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles["submit-btn"]}
+          >
             {loading ? "⏳ Đang cập nhật..." : "💾 Cập nhật sách"}
           </button>
         </div>

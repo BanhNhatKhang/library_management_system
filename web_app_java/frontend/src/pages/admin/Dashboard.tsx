@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import "../../css/admins/Dashboard.css";
+import styles from "../../css/admins/Dashboard.module.css";
 
 const Dashboard = () => {
   // Mock data
@@ -103,52 +103,52 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="dashboard">
+    <div className={styles["dashboard"]}>
       <h2>📊 Dashboard</h2>
 
       {/* Thống kê nhanh */}
-      <div className="stats-grid">
+      <div className={styles["stats-grid"]}>
         {/* Dòng 1 */}
-        <div className="stats-row">
-          <div className="stat-card">
+        <div className={styles["stats-row"]}>
+          <div className={styles["stat-card"]}>
             <i className="fas fa-book"></i>
             <h3>{stats.sach}</h3>
             <p>Sách</p>
           </div>
-          <div className="stat-card">
+          <div className={styles["stat-card"]}>
             <i className="fas fa-tags"></i>
             <h3>{stats.theloai}</h3>
             <p>Thể loại</p>
           </div>
-          <div className="stat-card">
+          <div className={styles["stat-card"]}>
             <i className="fas fa-building"></i>
             <h3>{stats.nxb}</h3>
             <p>NXB</p>
           </div>
-          <div className="stat-card">
+          <div className={styles["stat-card"]}>
             <i className="fas fa-users"></i>
             <h3>{stats.docgia}</h3>
             <p>Độc giả</p>
           </div>
         </div>
         {/* Dòng 2 */}
-        <div className="stats-row">
-          <div className="stat-card">
+        <div className={styles["stats-row"]}>
+          <div className={styles["stat-card"]}>
             <i className="fas fa-user-tie"></i>
             <h3>{stats.nhanvien}</h3>
             <p>Nhân viên</p>
           </div>
-          <div className="stat-card">
+          <div className={styles["stat-card"]}>
             <i className="fas fa-gift"></i>
             <h3>{stats.uudai}</h3>
             <p>Ưu đãi</p>
           </div>
-          <div className="stat-card">
+          <div className={styles["stat-card"]}>
             <i className="fas fa-shopping-cart"></i>
             <h3>{stats.donhang}</h3>
             <p>Đơn hàng</p>
           </div>
-          <div className="stat-card">
+          <div className={styles["stat-card"]}>
             <i className="fas fa-bell"></i>
             <h3>{stats.thongbao}</h3>
             <p>Thông báo</p>
@@ -157,8 +157,8 @@ const Dashboard = () => {
       </div>
 
       {/* Biểu đồ */}
-      <div className="charts-grid">
-        <div className="chart-card">
+      <div className={styles["charts-grid"]}>
+        <div className={styles["chart-card"]}>
           <h3>📚 Phân bố sách theo thể loại</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -184,7 +184,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-card">
+        <div className={styles["chart-card"]}>
           <h3>📅 Số lượt mượn theo tháng</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={borrowByMonth}>
@@ -199,7 +199,7 @@ const Dashboard = () => {
       </div>
 
       {/* Hoạt động gần đây */}
-      <div className="recent-activity">
+      <div className={styles["recent-activity"]}>
         <h3>🕒 Hoạt động gần đây</h3>
         <ul>
           <li>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/readers/DGEdit.css";
+import styles from "../../../css/admins/readers/DGEdit.module.css";
 
 interface DocGia {
   maDocGia: string;
@@ -66,21 +66,21 @@ const DGEdit: React.FC = () => {
   if (!form) return <div className="p-3">Không tìm thấy độc giả</div>;
 
   return (
-    <div className="dg-edit">
-      <Link to="/admin/docgia" className="back-link">
+    <div className={styles["dg-edit"]}>
+      <Link to="/admin/docgia" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
 
       <h2>✏️ Chỉnh sửa độc giả</h2>
 
-      <form onSubmit={submit} className="dg-edit-form">
-        <div className="form-container">
-          <div className="form-group">
+      <form onSubmit={submit} className={styles["dg-edit-form"]}>
+        <div className={styles["form-container"]}>
+          <div className={styles["form-group"]}>
             <label>Mã độc giả</label>
             <input type="text" value={form.maDocGia} readOnly />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Họ lót</label>
             <input
               type="text"
@@ -89,7 +89,7 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Tên</label>
             <input
               type="text"
@@ -98,7 +98,7 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Điện thoại</label>
             <input
               type="text"
@@ -107,7 +107,7 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Email</label>
             <input
               type="email"
@@ -116,7 +116,7 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Ngày sinh</label>
             <input
               type="date"
@@ -125,7 +125,10 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+          <div
+            className={styles["form-group"]}
+            style={{ gridColumn: "1 / -1" }}
+          >
             <label>Địa chỉ</label>
             <input
               type="text"
@@ -134,7 +137,7 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Đổi mật khẩu (để trống nếu không đổi)</label>
             <input
               type="password"
@@ -143,14 +146,14 @@ const DGEdit: React.FC = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label>Trạng thái tài khoản</label>
             <div className="d-flex align-items-center gap-2">
               <span
-                className={`status-badge ${
+                className={`${styles["status-badge"]} ${
                   form.trangThai === "HOATDONG"
-                    ? "status-active"
-                    : "status-locked"
+                    ? styles["status-active"]
+                    : styles["status-locked"]
                 }`}
               >
                 {form.trangThai === "HOATDONG" ? "Hoạt động" : "Tạm khóa"}
@@ -166,11 +169,15 @@ const DGEdit: React.FC = () => {
           </div>
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="submit-btn" disabled={loading}>
+        <div className={styles["form-actions"]}>
+          <button
+            type="submit"
+            className={styles["submit-btn"]}
+            disabled={loading}
+          >
             {loading ? "Đang lưu..." : "Lưu thay đổi"}
           </button>
-          <Link to="/admin/docgia" className="cancel-btn">
+          <Link to="/admin/docgia" className={styles["cancel-btn"]}>
             Hủy
           </Link>
         </div>

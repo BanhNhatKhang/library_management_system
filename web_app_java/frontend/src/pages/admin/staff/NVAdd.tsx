@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/staff/NVAdd.css";
+import styles from "../../../css/admins/staff/NVAdd.module.css";
 
 const NVAdd: React.FC = () => {
   const navigate = useNavigate();
@@ -34,12 +34,15 @@ const NVAdd: React.FC = () => {
   };
 
   return (
-    <div className="nv-add p-3">
+    <div className={`${styles["nv-add"]} p-3`}>
       <Link to="/admin/nhanvien" className="btn btn-secondary mb-3">
         ← Quay lại danh sách
       </Link>
       <h4>➕ Thêm nhân viên</h4>
-      <form onSubmit={submit} className="mt-3 bg-white p-3 rounded">
+      <form
+        onSubmit={submit}
+        className={`mt-3 ${styles["bg-white"]} p-3 rounded`}
+      >
         <div className="row">
           <div className="col-md-6 mb-2">
             <label>Họ lót</label>

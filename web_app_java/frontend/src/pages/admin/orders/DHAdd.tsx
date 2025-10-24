@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/orders/DHAdd.css";
+import styles from "../../../css/admins/orders/DHAdd.module.css";
 
 const DHAdd: React.FC = () => {
   const navigate = useNavigate();
@@ -55,13 +55,16 @@ const DHAdd: React.FC = () => {
   };
 
   return (
-    <div className="dh-add p-3">
+    <div className={`${styles["dh-add"]} p-3`}>
       <Link to="/admin/donhang" className="btn btn-secondary mb-3">
         ← Quay lại danh sách
       </Link>
       <h4>➕ Thêm đơn hàng</h4>
 
-      <form onSubmit={submit} className="mt-3 bg-white p-3 rounded">
+      <form
+        onSubmit={submit}
+        className={`mt-3 ${styles["bg-white"]} p-3 rounded`}
+      >
         <div className="row">
           <div className="col-md-6 mb-2">
             <label>Mã độc giả</label>

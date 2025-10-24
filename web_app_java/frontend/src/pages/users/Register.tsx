@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
-import "../../css/Login.css";
+import styles from "../../css/Login.module.css";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -72,10 +72,10 @@ const Register = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="register-card">
+    <div className={styles["login-container"]}>
+      <div className={styles["register-card"]}>
         {/* Logo */}
-        <div className="login-logo">
+        <div className={styles["login-logo"]}>
           <svg
             height="48"
             aria-hidden="true"
@@ -89,31 +89,31 @@ const Register = () => {
         </div>
 
         {/* Tiêu đề */}
-        <h1 className="login-title">Tạo tài khoản BookShare</h1>
+        <h1 className={styles["login-title"]}>Tạo tài khoản BookShare</h1>
 
         {/* Form */}
-        <form className="register-form" onSubmit={handleRegister}>
+        <form className={styles["register-form"]} onSubmit={handleRegister}>
           {/* Họ lót - Tên */}
-          <div className="form-row">
-            <div className="form-group">
+          <div className={styles["form-row"]}>
+            <div className={styles["form-group"]}>
               <label htmlFor="hoLot">Họ lót</label>
               <input
                 type="text"
                 id="hoLot"
                 name="hoLot"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.hoLot}
                 onChange={handleChange}
                 required
               />
             </div>
-            <div className="form-group">
+            <div className={styles["form-group"]}>
               <label htmlFor="ten">Tên</label>
               <input
                 type="text"
                 id="ten"
                 name="ten"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.ten}
                 onChange={handleChange}
                 required
@@ -122,13 +122,13 @@ const Register = () => {
           </div>
 
           {/* Giới tính - Ngày sinh */}
-          <div className="form-row">
-            <div className="form-group">
+          <div className={styles["form-row"]}>
+            <div className={styles["form-group"]}>
               <label htmlFor="gioiTinh">Giới tính</label>
               <select
                 id="gioiTinh"
                 name="gioiTinh"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.gioiTinh}
                 onChange={handleChange}
                 required
@@ -139,13 +139,13 @@ const Register = () => {
                 <option value="KHAC">Khác</option>
               </select>
             </div>
-            <div className="form-group">
+            <div className={styles["form-group"]}>
               <label htmlFor="ngaySinh">Ngày sinh</label>
               <input
                 type="date"
                 id="ngaySinh"
                 name="ngaySinh"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.ngaySinh}
                 onChange={handleChange}
                 required
@@ -154,26 +154,26 @@ const Register = () => {
           </div>
 
           {/* Email - Điện thoại */}
-          <div className="form-row">
-            <div className="form-group">
+          <div className={styles["form-row"]}>
+            <div className={styles["form-group"]}>
               <label htmlFor="email">Email</label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
-            <div className="form-group">
+            <div className={styles["form-group"]}>
               <label htmlFor="dienThoai">Điện thoại</label>
               <input
                 type="text"
                 id="dienThoai"
                 name="dienThoai"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.dienThoai}
                 onChange={handleChange}
                 required
@@ -182,13 +182,13 @@ const Register = () => {
           </div>
 
           {/* Địa chỉ */}
-          <div className="form-group">
+          <div className={styles["form-group"]}>
             <label htmlFor="diaChi">Địa chỉ</label>
             <input
               type="text"
               id="diaChi"
               name="diaChi"
-              className="form-control"
+              className={styles["form-control"]}
               value={formData.diaChi}
               onChange={handleChange}
               required
@@ -196,26 +196,26 @@ const Register = () => {
           </div>
 
           {/* Mật khẩu - Xác nhận mật khẩu */}
-          <div className="form-row">
-            <div className="form-group">
+          <div className={styles["form-row"]}>
+            <div className={styles["form-group"]}>
               <label htmlFor="matKhau">Mật khẩu</label>
               <input
                 type="password"
                 id="matKhau"
                 name="matKhau"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.matKhau}
                 onChange={handleChange}
                 required
               />
             </div>
-            <div className="form-group">
+            <div className={styles["form-group"]}>
               <label htmlFor="xacNhanMatKhau">Xác nhận mật khẩu</label>
               <input
                 type="password"
                 id="xacNhanMatKhau"
                 name="xacNhanMatKhau"
-                className="form-control"
+                className={styles["form-control"]}
                 value={formData.xacNhanMatKhau}
                 onChange={handleChange}
                 required
@@ -225,7 +225,7 @@ const Register = () => {
 
           {/* Messages */}
           {errors && (
-            <div className="error-message">
+            <div className={styles["error-message"]}>
               {errors.map((err, idx) => (
                 <div key={idx}>{err}</div>
               ))}
@@ -233,23 +233,27 @@ const Register = () => {
           )}
 
           {success.length > 0 && (
-            <div className="success-message">
+            <div className={styles["success-message"]}>
               {success.map((msg, idx) => (
                 <div key={idx}>{msg}</div>
               ))}
             </div>
           )}
 
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <button
+            type="submit"
+            className={styles["btn-primary"]}
+            disabled={loading}
+          >
             {loading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
           </button>
         </form>
 
         {/* Footer */}
-        <div className="login-footer">
+        <div className={styles["login-footer"]}>
           <p>
             Đã có tài khoản?{" "}
-            <a href="/login" className="register-link">
+            <a href="/login" className={styles["register-link"]}>
               Đăng nhập
             </a>
           </p>
@@ -257,7 +261,7 @@ const Register = () => {
       </div>
 
       {/* Footer links */}
-      <div className="page-footer">
+      <div className={styles["page-footer"]}>
         <a href="/terms">Điều khoản</a>
         <a href="/privacy">Quyền riêng tư</a>
         <a href="/contact">Liên hệ hỗ trợ</a>

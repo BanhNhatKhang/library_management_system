@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/publisher/NXBManager.css";
+import styles from "../../../css/admins/publisher/NXBManager.module.css";
 
 interface NhaXuatBan {
   maNhaXuatBan: string;
@@ -109,9 +109,12 @@ const NXBManager = () => {
   };
 
   return (
-    <div className="nxb-manager">
+    <div className={styles["nxb-manager"]}>
       <h2>🏢 Quản Lý Nhà Xuất Bản</h2>
-      <button className="add-btn" onClick={() => navigate("/admin/nxb/add")}>
+      <button
+        className={styles["add-btn"]}
+        onClick={() => navigate("/admin/nxb/add")}
+      >
         + Thêm nhà xuất bản
       </button>
 
@@ -119,7 +122,7 @@ const NXBManager = () => {
         <p>Đang tải...</p>
       ) : (
         <>
-          <table className="nxb-table">
+          <table className={styles["nxb-table"]}>
             <thead>
               <tr>
                 <th
@@ -174,14 +177,14 @@ const NXBManager = () => {
                     </Link>
                     <Link
                       to={`/admin/nxb/edit/${nxb.maNhaXuatBan}`}
-                      className="edit-btn"
+                      className={styles["edit-btn"]}
                       title="Sửa"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
                     <button
-                      className="delete-btn"
+                      className={styles["delete-btn"]}
                       title="Xóa"
                       onClick={() => handleDeleteClick(nxb)}
                     >
@@ -194,7 +197,7 @@ const NXBManager = () => {
           </table>
 
           {totalPages > 1 && (
-            <div className="pagination">
+            <div className={styles["pagination"]}>
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
@@ -217,17 +220,20 @@ const NXBManager = () => {
 
       {/* Modal xác nhận xóa */}
       {showDeleteModal && nxbToDelete && (
-        <div className="modal-overlay" onClick={handleCancelDelete}>
-          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className={styles["modal-overlay"]} onClick={handleCancelDelete}>
+          <div
+            className={styles["delete-modal"]}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles["modal-header"]}>
               <h3>⚠️ Xác nhận xóa nhà xuất bản</h3>
             </div>
 
-            <div className="modal-content">
+            <div className={styles["modal-content"]}>
               <p>Bạn có chắc chắn muốn xóa nhà xuất bản này không?</p>
 
-              <div className="nxb-info">
-                <div className="nxb-details">
+              <div className={styles["nxb-info"]}>
+                <div className={styles["nxb-details"]}>
                   <h4>{nxbToDelete.tenNhaXuatBan}</h4>
                   <p>
                     <strong>Mã NXB:</strong> {nxbToDelete.maNhaXuatBan}
@@ -239,16 +245,16 @@ const NXBManager = () => {
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className={styles["modal-actions"]}>
               <button
-                className="cancel-btn"
+                className={styles["cancel-btn"]}
                 onClick={handleCancelDelete}
                 disabled={deleting}
               >
                 Không
               </button>
               <button
-                className="confirm-btn"
+                className={styles["confirm-btn"]}
                 onClick={handleConfirmDelete}
                 disabled={deleting}
               >

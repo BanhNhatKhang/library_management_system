@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/staff/NVEdit.css";
+import styles from "../../../css/admins/staff/NVEdit.module.css";
 
 interface NhanVien {
   maNhanVien: string;
@@ -54,17 +54,17 @@ const NVEdit: React.FC = () => {
   if (!form) return <div>Không tìm thấy nhân viên</div>;
 
   return (
-    <div className="nv-edit">
-      <Link to="/admin/nhanvien" className="back-link">
+    <div className={styles["nv-edit"]}>
+      <Link to="/admin/nhanvien" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
       <h2>✏️ Chỉnh sửa nhân viên</h2>
-      <form onSubmit={handleSubmit} className="nv-edit-form">
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className={styles["nv-edit-form"]}>
+        <div className={styles["form-group"]}>
           <label>Mã nhân viên</label>
           <input type="text" value={form.maNhanVien} readOnly />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Họ lót</label>
           <input
             name="hoLot"
@@ -73,11 +73,11 @@ const NVEdit: React.FC = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Tên</label>
           <input name="ten" value={form.ten} onChange={handleChange} required />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Điện thoại</label>
           <input
             name="dienThoai"
@@ -86,7 +86,7 @@ const NVEdit: React.FC = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Email</label>
           <input
             name="email"
@@ -96,7 +96,7 @@ const NVEdit: React.FC = () => {
             required
           />
         </div>
-        <div className="form-group">
+        <div className={styles["form-group"]}>
           <label>Trạng thái</label>
           <input
             name="trangThai"
@@ -104,11 +104,15 @@ const NVEdit: React.FC = () => {
             onChange={handleChange}
           />
         </div>
-        <div className="form-actions">
-          <button type="submit" className="submit-btn" disabled={loading}>
+        <div className={styles["form-actions"]}>
+          <button
+            type="submit"
+            className={styles["submit-btn"]}
+            disabled={loading}
+          >
             {loading ? "Đang lưu..." : "Lưu thay đổi"}
           </button>
-          <Link to="/admin/nhanvien" className="cancel-btn">
+          <Link to="/admin/nhanvien" className={styles["cancel-btn"]}>
             Hủy
           </Link>
         </div>

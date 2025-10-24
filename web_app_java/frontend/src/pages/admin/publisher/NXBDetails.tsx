@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
-import "../../../css/admins/publisher/NXBDetails.css";
+import styles from "../../../css/admins/publisher/NXBDetails.module.css";
 
 interface NhaXuatBan {
   maNhaXuatBan: string;
@@ -55,19 +55,21 @@ const NXBDetails = () => {
 
   if (loading) {
     return (
-      <div className="nxb-details">
-        <div className="loading">⏳ Đang tải thông tin nhà xuất bản...</div>
+      <div className={styles["nxb-details"]}>
+        <div className={styles["loading"]}>
+          ⏳ Đang tải thông tin nhà xuất bản...
+        </div>
       </div>
     );
   }
 
   if (error || !nxb) {
     return (
-      <div className="nxb-details">
-        <Link to="/admin/nxb" className="back-link">
+      <div className={styles["nxb-details"]}>
+        <Link to="/admin/nxb" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div className="error">
+        <div className={styles["error"]}>
           {error || "❌ Không tìm thấy nhà xuất bản!"}
         </div>
       </div>
@@ -75,58 +77,62 @@ const NXBDetails = () => {
   }
 
   return (
-    <div className="nxb-details">
-      <Link to="/admin/nxb" className="back-link">
+    <div className={styles["nxb-details"]}>
+      <Link to="/admin/nxb" className={styles["back-link"]}>
         ← Quay lại danh sách
       </Link>
 
-      <h2 className="page-title">🏢 Chi tiết nhà xuất bản</h2>
+      <h2 className={styles["page-title"]}>🏢 Chi tiết nhà xuất bản</h2>
 
-      <div className="main-container">
+      <div className={styles["main-container"]}>
         {/* Cột trái - Thông tin nhà xuất bản */}
-        <div className="nxb-info-section">
-          <h3 className="nxb-info-title">Thông tin chi tiết</h3>
+        <div className={styles["nxb-info-section"]}>
+          <h3 className={styles["nxb-info-title"]}>Thông tin chi tiết</h3>
 
-          <div className="nxb-content">
-            <div className="nxb-info">
-              <div className="info-item">
-                <span className="info-label">Mã NXB:</span>
-                <span className="info-value">{nxb.maNhaXuatBan}</span>
+          <div className={styles["nxb-content"]}>
+            <div className={styles["nxb-info"]}>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Mã NXB:</span>
+                <span className={styles["info-value"]}>{nxb.maNhaXuatBan}</span>
               </div>
 
-              <div className="info-item">
-                <span className="info-label">Tên NXB:</span>
-                <span className="info-value">{nxb.tenNhaXuatBan}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Tên NXB:</span>
+                <span className={styles["info-value"]}>
+                  {nxb.tenNhaXuatBan}
+                </span>
               </div>
 
-              <div className="info-item">
-                <span className="info-label">Địa chỉ:</span>
-                <span className="info-value">{nxb.diaChi}</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Địa chỉ:</span>
+                <span className={styles["info-value"]}>{nxb.diaChi}</span>
               </div>
 
-              <div className="info-item">
-                <span className="info-label">Số lượng sách:</span>
-                <span className="info-value stats">{sachList.length} cuốn</span>
+              <div className={styles["info-item"]}>
+                <span className={styles["info-label"]}>Số lượng sách:</span>
+                <span className={`${styles["info-value"]} ${styles["stats"]}`}>
+                  {sachList.length} cuốn
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Cột phải - Sách của nhà xuất bản */}
-        <div className="sach-section">
-          <h3 className="sach-title">
+        <div className={styles["sach-section"]}>
+          <h3 className={styles["sach-title"]}>
             📚 Sách của nhà xuất bản ({sachList.length})
           </h3>
 
           {sachList.length === 0 ? (
-            <div className="no-data">
+            <div className={styles["no-data"]}>
               <p>📚 Hiện tại chưa có sách nào của nhà xuất bản này</p>
             </div>
           ) : (
-            <div className="sach-grid">
+            <div className={styles["sach-grid"]}>
               {sachList.map((sach) => (
-                <div key={sach.maSach} className="sach-card">
-                  <div className="sach-image">
+                <div key={sach.maSach} className={styles["sach-card"]}>
+                  <div className={styles["sach-image"]}>
                     <img
                       src={
                         sach.anhBia
@@ -146,16 +152,20 @@ const NXBDetails = () => {
                     />
                   </div>
 
-                  <div className="sach-info">
-                    <h4 className="sach-name">{sach.tenSach}</h4>
-                    <p className="sach-author">👤 {sach.tacGia}</p>
-                    <p className="sach-price">💰 {formatPrice(sach.donGia)}</p>
-                    <p className="sach-quantity">📦 Còn lại: {sach.soLuong}</p>
+                  <div className={styles["sach-info"]}>
+                    <h4 className={styles["sach-name"]}>{sach.tenSach}</h4>
+                    <p className={styles["sach-author"]}>👤 {sach.tacGia}</p>
+                    <p className={styles["sach-price"]}>
+                      💰 {formatPrice(sach.donGia)}
+                    </p>
+                    <p className={styles["sach-quantity"]}>
+                      📦 Còn lại: {sach.soLuong}
+                    </p>
 
-                    <div className="sach-actions">
+                    <div className={styles["sach-actions"]}>
                       <Link
                         to={`/admin/sach/${sach.maSach}`}
-                        className="view-btn"
+                        className={styles["view-btn"]}
                       >
                         👁️ Xem chi tiết
                       </Link>

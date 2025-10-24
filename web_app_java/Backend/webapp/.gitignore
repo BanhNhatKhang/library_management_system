@@ -37,3 +37,6 @@ build/
 ### Docker ###
 compose.yaml
 db_data/
+
+uploads/
+!uploads/.gitkeep

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../../css/users/AppHeader.css";
+import styles from "../../css/users/AppHeader.module.css";
 import axios from "axios";
 
 interface SachDTO {
@@ -114,7 +114,9 @@ const Header = () => {
   };
 
   const LoggedInUserDropdown = () => (
-    <div className="user-dropdown logged-in-dropdown">
+    <div
+      className={`${styles["user-dropdown"]} ${styles["logged-in-dropdown"]}`}
+    >
       {/* <div className="user-info-header">
         <div className="user-avatar-placeholder">
           <i className="fas fa-crown"></i>
@@ -123,11 +125,11 @@ const Header = () => {
           <div className="user-name">{userName}</div>{" "}
         </div>
       </div> */}
-      <Link to="/don-hang" className="dropdown-item">
+      <Link to="/don-hang" className={styles["dropdown-item"]}>
         <i className="fas fa-receipt me-2"></i>
         Đơn hàng của tôi
       </Link>
-      <Link to="/" onClick={handleLogout} className="dropdown-item">
+      <Link to="/" onClick={handleLogout} className={styles["dropdown-item"]}>
         <i className="fas fa-sign-out-alt me-2"></i>
         Thoát tài khoản
       </Link>
@@ -135,12 +137,12 @@ const Header = () => {
   );
 
   const LoggedOutUserDropdown = () => (
-    <div className="user-dropdown">
-      <Link to="/login" className="dropdown-item">
+    <div className={styles["user-dropdown"]}>
+      <Link to="/login" className={styles["dropdown-item"]}>
         <i className="fas fa-sign-in-alt me-2"></i>
         Đăng nhập
       </Link>
-      <Link to="/register" className="dropdown-item">
+      <Link to="/register" className={styles["dropdown-item"]}>
         <i className="fas fa-user-plus me-2"></i>
         Đăng ký
       </Link>
@@ -152,21 +154,21 @@ const Header = () => {
     : [];
 
   return (
-    <header className="app-header">
+    <header className={styles["app-header"]}>
       <div className="container-fluid px-4">
         <div className="row justify-content-center">
           <div className="col-10">
-            <div className="header-content">
+            <div className={styles["header-content"]}>
               {/* Danh mục bên trái */}
               <div
-                className="category-menu"
+                className={styles["category-menu"]}
                 onMouseEnter={() => setIsDropdownOpen(true)}
                 onMouseLeave={() => {
                   setIsDropdownOpen(false);
                   setActiveCategoryId(null);
                 }}
               >
-                <button className="category-toggle">
+                <button className={styles["category-toggle"]}>
                   <i className="fas fa-bars me-2"></i>
                   <span>Danh mục</span>
                 </button>
@@ -174,16 +176,16 @@ const Header = () => {
                 {/* Dropdown menu */}
                 {isDropdownOpen && (
                   <div
-                    className="category-dropdown"
+                    className={styles["category-dropdown"]}
                     onMouseEnter={() => setIsDropdownOpen(true)}
                     onMouseLeave={() => {
                       setIsDropdownOpen(false);
                       setActiveCategoryId(null);
                     }}
                   >
-                    <div className="dropdown-content">
+                    <div className={styles["dropdown-content"]}>
                       {/* Phần danh mục chính bên trái */}
-                      <div className="main-categories">
+                      <div className={styles["main-categories"]}>
                         <ul>
                           {mainCategories.map((category) => (
                             <li
@@ -205,21 +207,23 @@ const Header = () => {
                       </div>
 
                       {/* Phần subcategories bên phải */}
-                      <div className="subcategories-panel">
+                      <div className={styles["subcategories-panel"]}>
                         {activeCategoryId ? (
-                          <div className="subcategories-4-column-grid">
+                          <div
+                            className={styles["subcategories-4-column-grid"]}
+                          >
                             {currentCategoriesWithBooks.map((category) => (
                               <div
                                 key={category.maTheLoai}
-                                className="category-column"
+                                className={styles["category-column"]}
                               >
                                 {/* Tên Thể Loại (Heading) */}
-                                <h5 className="category-title">
+                                <h5 className={styles["category-title"]}>
                                   {category.tenTheLoai}
                                 </h5>
 
                                 {/* Danh sách 4 cuốn sách đầu tiên */}
-                                <ul className="book-list">
+                                <ul className={styles["book-list"]}>
                                   {category.sachList.slice(0, 4).map((book) => (
                                     <li key={book.maSach}>
                                       <Link to={`/sach/${book.maSach}`}>
@@ -232,7 +236,7 @@ const Header = () => {
                                 {/* Nút Xem tất cả */}
                                 <Link
                                   to={`/the-loai/${category.maTheLoai}`}
-                                  className="view-all-link"
+                                  className={styles["view-all-link"]}
                                 >
                                   Xem tất cả
                                 </Link>
@@ -240,7 +244,7 @@ const Header = () => {
                             ))}
                           </div>
                         ) : (
-                          <div className="placeholder-content">
+                          <div className={styles["placeholder-content"]}>
                             <i className="fas fa-book-reader"></i>
                             <p>Chọn danh mục để xem chi tiết</p>
                           </div>
@@ -252,7 +256,7 @@ const Header = () => {
               </div>
 
               {/* Logo ở giữa */}
-              <div className="logo-container">
+              <div className={styles["logo-container"]}>
                 <a href="/">
                   <i className="fas fa-book-open me-2"></i>
                   BookShare
@@ -260,61 +264,63 @@ const Header = () => {
               </div>
 
               {/* Các icon bên phải */}
-              <div className="header-icons">
-                <div className="search-wrapper">
+              <div className={styles["header-icons"]}>
+                <div className={styles["search-wrapper"]}>
                   <input
                     type="text"
-                    className="search-input"
+                    className={styles["search-input"]}
                     placeholder="Tìm kiếm sách, tác giả, thể loại..."
                   />
-                  <button className="search-btn">
+                  <button className={styles["search-btn"]}>
                     <i className="fas fa-search"></i>
                   </button>
                 </div>
-                <div className="icons-group">
+                <div className={styles["icons-group"]}>
                   {/* Notification icon với dropdown */}
                   <div
-                    className="notification-icon-container"
+                    className={styles["notification-icon-container"]}
                     onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                   >
-                    <button className="notification-btn">
+                    <button className={styles["notification-btn"]}>
                       <i className="fas fa-bell"></i>
                       {unreadCount > 0 && (
-                        <span className="notification-badge">
+                        <span className={styles["notification-badge"]}>
                           {unreadCount}
                         </span>
                       )}
                     </button>
-                    <span className="icon-label">Thông Báo</span>
+                    <span className={styles["icon-label"]}>Thông Báo</span>
 
                     {/* Notification dropdown */}
                     {isNotificationsOpen && (
-                      <div className="notification-dropdown">
-                        <div className="notification-header">
+                      <div className={styles["notification-dropdown"]}>
+                        <div className={styles["notification-header"]}>
                           <h3>Thông báo</h3>
                         </div>
-                        <div className="notification-list">
+                        <div className={styles["notification-list"]}>
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`notification-item ${
-                                notification.isRead ? "read" : "unread"
+                              className={`${styles["notification-item"]} ${
+                                notification.isRead
+                                  ? styles["read"]
+                                  : styles["unread"]
                               }`}
                             >
-                              <div className="notification-content">
+                              <div className={styles["notification-content"]}>
                                 <h4>{notification.title}</h4>
                                 <p>{notification.message}</p>
-                                <span className="notification-time">
+                                <span className={styles["notification-time"]}>
                                   {notification.time}
                                 </span>
                               </div>
                               {!notification.isRead && (
-                                <div className="unread-dot"></div>
+                                <div className={styles["unread-dot"]}></div>
                               )}
                             </div>
                           ))}
                         </div>
-                        <div className="notification-footer">
+                        <div className={styles["notification-footer"]}>
                           <a href="#">Xem tất cả</a>
                         </div>
                       </div>
@@ -323,17 +329,17 @@ const Header = () => {
 
                   <button>
                     <i className="fas fa-shopping-cart"></i>
-                    <span className="icon-label">Giỏ Hàng</span>
+                    <span className={styles["icon-label"]}>Giỏ Hàng</span>
                   </button>
 
                   <div
-                    className="user-icon-container"
+                    className={styles["user-icon-container"]}
                     onMouseEnter={() => setIsUserDropdownOpen(true)}
                     onMouseLeave={() => setIsUserDropdownOpen(false)}
                   >
                     <button>
                       <i className="fas fa-user"></i>
-                      <span className="icon-label">
+                      <span className={styles["icon-label"]}>
                         {isLoggedIn ? userName : "Tài Khoản"}
                       </span>
                     </button>
