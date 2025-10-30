@@ -24,7 +24,17 @@ public class TheLoaiService {
         return Optional.ofNullable(theLoaiRepository.findByMaTheLoai(maTheLoai)).map(this::toDTO);
     }
 
+    // keep existing save for compatibility, delegate to new method with null prefix
     public TheLoaiDTO saveTheLoai(TheLoaiDTO theLoaiDTO) {
+        return saveTheLoai(theLoaiDTO, null);
+    }
+
+    // new save method: if maTheLoai missing, generate based on provided prefix (TL | FB)
+    public TheLoaiDTO saveTheLoai(TheLoaiDTO theLoaiDTO, String prefix) {
+        if (theLoaiDTO.getMaTheLoai() == null || theLoaiDTO.getMaTheLoai().trim().isEmpty()) {
+            String p = (prefix == null || prefix.trim().isEmpty()) ? "TL" : prefix.trim().toUpperCase();
+            theLoaiDTO.setMaTheLoai(generateNextMaTheLoai(p));
+        }
         TheLoai theLoai = toEntity(theLoaiDTO);
         return toDTO(theLoaiRepository.save(theLoai));
     }
@@ -43,6 +53,32 @@ public class TheLoaiService {
             throw new RuntimeException("Thể loại không tồn tại");
         }
         theLoaiRepository.deleteById(maTheLoai);
+    }
+
+    // generate next code like TL006 or FB005 by scanning existing codes
+    public String generateNextMaTheLoai(String prefix) {
+        if (prefix == null || prefix.trim().isEmpty()) {
+            prefix = "TL";
+        }
+        prefix = prefix.trim().toUpperCase();
+
+        List<TheLoai> all = theLoaiRepository.findAll();
+        int max = 0;
+        for (TheLoai t : all) {
+            String ma = t.getMaTheLoai();
+            if (ma == null) continue;
+            String up = ma.toUpperCase();
+            if (!up.startsWith(prefix)) continue;
+            String digits = up.replaceAll("\\D+", "");
+            if (digits.isEmpty()) continue;
+            try {
+                int n = Integer.parseInt(digits);
+                if (n > max) max = n;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        int next = max + 1;
+        return prefix + String.format("%03d", next);
     }
 
     public TheLoaiDTO toDTO(TheLoai theLoai) {

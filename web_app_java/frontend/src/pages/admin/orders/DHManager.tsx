@@ -11,11 +11,21 @@ interface DonHang {
   trangThai: string;
 }
 
+type DHSortKey = "maDonHang" | "maDocGia" | "ngayDat";
+type SortOrder = "asc" | "desc";
+
+const sortIcon = (order: SortOrder | null) =>
+  order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
+
 const DHManager: React.FC = () => {
   const navigate = useNavigate();
   const [list, setList] = useState<DonHang[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+
+  // sort
+  const [sortKey, setSortKey] = useState<DHSortKey>("maDonHang");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   useEffect(() => {
     axios
@@ -37,11 +47,36 @@ const DHManager: React.FC = () => {
     }
   };
 
+  const handleSort = (key: DHSortKey) => {
+    if (sortKey === key) {
+      setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   const filtered = list.filter((d) =>
     `${d.maDonHang} ${d.maDocGia} ${d.trangThai}`
       .toLowerCase()
       .includes(q.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let cmp = 0;
+    if (sortKey === "ngayDat") {
+      const da = a.ngayDat ? new Date(a.ngayDat).getTime() : 0;
+      const db = b.ngayDat ? new Date(b.ngayDat).getTime() : 0;
+      cmp = da - db;
+    } else if (sortKey === "maDonHang") {
+      cmp = a.maDonHang.localeCompare(b.maDonHang, "vi", {
+        sensitivity: "base",
+      });
+    } else if (sortKey === "maDocGia") {
+      cmp = a.maDocGia.localeCompare(b.maDocGia, "vi", { sensitivity: "base" });
+    }
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
 
   return (
     <div className={styles["dh-manager"]}>
@@ -70,16 +105,34 @@ const DHManager: React.FC = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Mã đơn</th>
-              <th>Mã độc giả</th>
-              <th>Ngày đặt</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maDonHang")}
+              >
+                Mã đơn{" "}
+                {sortKey === "maDonHang" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maDocGia")}
+              >
+                Mã độc giả{" "}
+                {sortKey === "maDocGia" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("ngayDat")}
+              >
+                Ngày đặt{" "}
+                {sortKey === "ngayDat" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
               <th>Tổng tiền</th>
               <th>Trạng thái</th>
               <th className="text-end">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((d) => (
+            {sorted.map((d) => (
               <tr key={d.maDonHang}>
                 <td>{d.maDonHang}</td>
                 <td>{d.maDocGia}</td>
@@ -110,7 +163,7 @@ const DHManager: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center">
                   Không tìm thấy kết quả

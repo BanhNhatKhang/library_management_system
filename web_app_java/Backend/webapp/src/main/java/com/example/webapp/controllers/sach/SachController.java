@@ -83,9 +83,14 @@ public class SachController {
         }
     }
 
+    @GetMapping("/next-ma")
+    public ResponseEntity<String> getNextMaSach() {
+        String next = sachService.generateNextMaSach();
+        return ResponseEntity.ok(next);
+    }
+
     @PostMapping
     public ResponseEntity<SachDTO> createSach(
-            @RequestParam("maSach") String maSach,
             @RequestParam("tenSach") String tenSach,
             @RequestParam("soQuyen") int soQuyen,
             @RequestParam("donGia") String donGia,
@@ -98,11 +103,16 @@ public class SachController {
             @RequestParam("anhBia") MultipartFile anhBia) {
         
         try {
+
+            if (sachService.existsByTenSach(tenSach)) {
+                return ResponseEntity.badRequest().header("X-Error", "Tên sách đã tồn tại").build();
+            }
+
             ObjectMapper mapper = new ObjectMapper();
             String[] theLoais = mapper.readValue(theLoaisJson, String[].class);
             
             SachDTO sachDTO = sachService.createSach(
-                maSach, tenSach, soQuyen, donGia, soLuong, 
+                null, tenSach, soQuyen, donGia, soLuong, 
                 namXuatBan, tacGia, moTa, nhaXuatBan, 
                 theLoais, anhBia
             );

@@ -44,6 +44,14 @@ const SachAdd = () => {
       .catch((error) => {
         console.error("Lỗi khi tải dữ liệu:", error);
       });
+    axios
+      .get("/api/sach/next-ma")
+      .then((res) => {
+        setFormData((prev) => ({ ...prev, maSach: res.data }));
+      })
+      .catch(() => {
+        setFormData((prev) => ({ ...prev, maSach: "Tự động" }));
+      });
   }, []);
 
   const handleInputChange = (
@@ -137,10 +145,8 @@ const SachAdd = () => {
                   id="maSach"
                   name="maSach"
                   value={formData.maSach}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={30}
-                  placeholder="Nhập mã sách"
+                  readOnly
+                  placeholder="Tự động"
                 />
               </div>
 

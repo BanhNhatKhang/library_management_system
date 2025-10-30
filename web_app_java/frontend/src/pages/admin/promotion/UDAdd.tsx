@@ -6,7 +6,6 @@ import styles from "../../../css/admins/promotion/UDAdd.module.css";
 const UDAdd: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    maUuDai: "",
     tenUuDai: "",
     moTa: "",
     phanTramGiam: "0",
@@ -30,7 +29,7 @@ const UDAdd: React.FC = () => {
     setLoading(true);
     try {
       const requestBody = {
-        maUuDai: form.maUuDai,
+        // không gửi maUuDai — service sẽ tự sinh nếu thiếu
         tenUuDai: form.tenUuDai,
         moTa: form.moTa,
         phanTramGiam: Number(form.phanTramGiam),
@@ -61,16 +60,8 @@ const UDAdd: React.FC = () => {
         className={`mt-3 ${styles["bg-white"]} p-3 rounded`}
       >
         <div className="row">
-          <div className="col-md-6 mb-2">
-            <label>Mã ưu đãi</label>
-            <input
-              name="maUuDai"
-              className="form-control"
-              value={form.maUuDai}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          {/* mã ưu đãi không hiện ở frontend */}
+
           <div className="col-md-6 mb-2">
             <label>Tên ưu đãi</label>
             <input

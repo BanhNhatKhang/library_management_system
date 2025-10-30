@@ -18,10 +18,22 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
 
     private static String secret;
+    private static long expirationMillis = 3600_000L; 
+    private static long allowedClockSkewSeconds = 0L;
 
     @Value("${jwt.secret}")
     public void setSecret(String secretValue) {
         JwtUtil.secret = secretValue;
+    }
+
+    @Value("${jwt.expiration-ms:3600000}")
+    public void setExpirationMillis(long expMs) {
+        JwtUtil.expirationMillis = expMs;
+    }
+
+    @Value("${jwt.allowed-clock-skew-seconds:0}")
+    public void setAllowedClockSkewSeconds(long skewSeconds) {
+        JwtUtil.allowedClockSkewSeconds = skewSeconds;
     }
 
     private static Key getKey() {
@@ -35,7 +47,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -70,6 +82,7 @@ public class JwtUtil {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getKey())
+                    .setAllowedClockSkewSeconds(allowedClockSkewSeconds)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();

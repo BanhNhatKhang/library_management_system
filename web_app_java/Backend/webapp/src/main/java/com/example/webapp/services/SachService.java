@@ -3,23 +3,31 @@ package com.example.webapp.services;
 import com.example.webapp.models.*;
 import com.example.webapp.dto.SachDTO;
 import com.example.webapp.repository.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+
+import java.time.LocalDate;
+
+import java.math.BigDecimal;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Objects;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Optional;
+
+
 
 @Service
 public class SachService {
@@ -78,19 +86,41 @@ public class SachService {
             .collect(Collectors.toList());
     }
 
-    public SachDTO createSach(String maSach, String tenSach, int soQuyen, String donGia,
+    public String generateNextMaSach() {
+        List<Sach> all = sachRepository.findAll();
+        int maxNum = all.stream()
+                .map(Sach::getMaSach)
+                .filter(Objects::nonNull)
+                .mapToInt(s -> {
+                    String digits = s.replaceAll("[^0-9]", "");
+                    return digits.isEmpty() ? 0 : Integer.parseInt(digits);
+                })
+                .max()
+                .orElse(0);
+        int next = maxNum + 1;
+        return String.format("S%03d", next);
+    }
+
+    public boolean existsByTenSach(String tenSach) {
+        if (tenSach == null || tenSach.trim().isEmpty()) return false;
+        String normalized = tenSach.trim().toLowerCase();
+        return sachRepository.findAll().stream()
+                .anyMatch(s -> s.getTenSach() != null && s.getTenSach().trim().toLowerCase().equals(normalized));
+    }
+
+    public SachDTO createSach(String maSachIgnored, String tenSach, int soQuyen, String donGia,
                              int soLuong, String namXuatBan, String tacGia, String moTa,
                              String nhaXuatBan, String[] theLoaiIds, MultipartFile anhBia) {
         
         try {
             // Kiểm tra mã sách đã tồn tại
-            if (sachRepository.existsById(maSach)) {
+            if (sachRepository.existsByTenSach(tenSach)) {
                 throw new RuntimeException("Mã sách đã tồn tại");
             }
 
             // Tạo đối tượng Sach
             Sach sach = new Sach();
-            sach.setMaSach(maSach);
+            sach.setMaSach(generateNextMaSach());
             sach.setTenSach(tenSach);
             sach.setSoQuyen(soQuyen);
             sach.setDonGia(new BigDecimal(donGia));

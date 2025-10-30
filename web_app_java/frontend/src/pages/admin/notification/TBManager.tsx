@@ -14,17 +14,26 @@ interface ThongBao {
   trangThaiDaDoc: boolean;
 }
 
+// sort types
+type TBSortKey = "id" | "maDocGia" | "maSach" | "thoiGianGui";
+type SortOrder = "asc" | "desc";
+const sortIcon = (order: SortOrder | null) =>
+  order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
+
 const TBManager: React.FC = () => {
   const navigate = useNavigate();
   const [list, setList] = useState<ThongBao[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
 
+  // default sort theo thời gian gửi giảm dần
+  const [sortKey, setSortKey] = useState<TBSortKey>("thoiGianGui");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
   useEffect(() => {
     axios
       .get("/api/thongbao")
       .then((res) => {
-        // Sắp xếp theo thời gian gửi giảm dần
         const sortedList = (res.data || []).sort(
           (a: ThongBao, b: ThongBao) =>
             new Date(b.thoiGianGui).getTime() -
@@ -57,11 +66,43 @@ const TBManager: React.FC = () => {
       minute: "2-digit",
     });
 
+  const handleSort = (key: TBSortKey) => {
+    if (sortKey === key) setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   const filtered = list.filter((d) =>
     `${d.maDocGia} ${d.maSach} ${d.noiDung} ${d.loaiThongBao}`
       .toLowerCase()
       .includes(q.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let cmp = 0;
+    switch (sortKey) {
+      case "id":
+        cmp = (a.id || 0) - (b.id || 0);
+        break;
+      case "maDocGia":
+        cmp = (a.maDocGia || "").localeCompare(b.maDocGia || "", "vi", {
+          sensitivity: "base",
+        });
+        break;
+      case "maSach":
+        cmp = (a.maSach || "").localeCompare(b.maSach || "", "vi", {
+          sensitivity: "base",
+        });
+        break;
+      case "thoiGianGui":
+        cmp =
+          new Date(a.thoiGianGui).getTime() - new Date(b.thoiGianGui).getTime();
+        break;
+    }
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
 
   return (
     <div className={styles["tb-manager"]}>
@@ -90,18 +131,43 @@ const TBManager: React.FC = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Độc giả</th>
-              <th>Mã sách</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("id")}
+              >
+                ID {sortKey === "id" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maDocGia")}
+              >
+                Độc giả{" "}
+                {sortKey === "maDocGia" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maSach")}
+              >
+                Mã sách{" "}
+                {sortKey === "maSach" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
               <th>Loại TB</th>
               <th>Nội dung (tóm tắt)</th>
-              <th>Thời gian gửi</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("thoiGianGui")}
+              >
+                Thời gian gửi{" "}
+                {sortKey === "thoiGianGui"
+                  ? sortIcon(sortOrder)
+                  : sortIcon(null)}
+              </th>
               <th>Đã đọc</th>
               <th className="text-end">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((d) => (
+            {sorted.map((d) => (
               <tr key={d.id}>
                 <td>{d.id}</td>
                 <td>{d.maDocGia}</td>
@@ -142,7 +208,7 @@ const TBManager: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={8} className="text-center">
                   Không tìm thấy kết quả

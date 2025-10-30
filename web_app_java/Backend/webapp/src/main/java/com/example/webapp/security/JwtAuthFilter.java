@@ -1,6 +1,7 @@
 package com.example.webapp.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference; 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -70,7 +71,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             if (parts.length >= 2) {
                                 String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
                                 ObjectMapper om = new ObjectMapper();
-                                Map<String, Object> claims = om.readValue(payloadJson, Map.class);
+                                // Map<String, Object> claims = om.readValue(payloadJson, Map.class);
+                                Map<String, Object> claims = om.readValue(payloadJson, new TypeReference<Map<String, Object>>() {});
                                 if (username == null) {
                                     Object sub = claims.get("sub");
                                     if (sub != null) username = sub.toString();

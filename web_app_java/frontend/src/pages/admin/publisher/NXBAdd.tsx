@@ -7,8 +7,8 @@ const NXBAdd = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  // frontend chỉ lưu tên và địa chỉ, backend sẽ sinh mã
   const [formData, setFormData] = useState({
-    maNhaXuatBan: "",
     tenNhaXuatBan: "",
     diaChi: "",
   });
@@ -28,7 +28,11 @@ const NXBAdd = () => {
 
     setLoading(true);
     try {
-      await axios.post("/api/nhaxuatban", formData);
+      // gửi chỉ tên và địa chỉ; backend sẽ tạo maNhaXuatBan
+      await axios.post("/api/nhaxuatban", {
+        tenNhaXuatBan: formData.tenNhaXuatBan,
+        diaChi: formData.diaChi,
+      });
 
       alert("Thêm nhà xuất bản thành công!");
       navigate("/admin/nxb");
@@ -55,20 +59,6 @@ const NXBAdd = () => {
           {/* Form chính */}
           <div className={styles["form-main"]}>
             <div className={styles["form-row"]}>
-              <div className={styles["form-group"]}>
-                <label htmlFor="maNhaXuatBan">Mã nhà xuất bản</label>
-                <input
-                  type="text"
-                  id="maNhaXuatBan"
-                  name="maNhaXuatBan"
-                  value={formData.maNhaXuatBan}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={30}
-                  placeholder="Nhập mã nhà xuất bản"
-                />
-              </div>
-
               <div className={styles["form-group"]}>
                 <label htmlFor="tenNhaXuatBan">Tên nhà xuất bản</label>
                 <input

@@ -22,6 +22,11 @@ const TheLoaiManager = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Thêm state cho trường tìm kiếm
+  const [query, setQuery] = useState("");
+  // Thêm state cho bộ lọc mã thể loại (ALL | FB | TL)
+  const [prefixFilter, setPrefixFilter] = useState<"ALL" | "FB" | "TL">("ALL");
+
   // States cho modal xác nhận xóa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [theLoaiToDelete, setTheLoaiToDelete] = useState<TheLoai | null>(null);
@@ -73,8 +78,25 @@ const TheLoaiManager = () => {
     setTheLoaiToDelete(null);
   };
 
-  // Hàm sắp xếp
-  const sortedList = [...theLoaiList].sort((a, b) => {
+  // Lọc theo query và bộ lọc prefix trước khi sắp xếp
+  const filteredList = theLoaiList.filter((tl) => {
+    const q = query.trim().toLowerCase();
+    // prefix filter: ALL | FB | TL
+    const prefixOk =
+      prefixFilter === "ALL" ||
+      (tl.maTheLoai || "").toUpperCase().startsWith(prefixFilter);
+
+    if (!q) return prefixOk;
+
+    const matchQuery =
+      tl.maTheLoai?.toLowerCase().includes(q) ||
+      tl.tenTheLoai?.toLowerCase().includes(q);
+
+    return prefixOk && matchQuery;
+  });
+
+  // Hàm sắp xếp (dùng filteredList)
+  const sortedList = [...filteredList].sort((a, b) => {
     const aValue = a[sortKey];
     const bValue = b[sortKey];
 
@@ -88,8 +110,8 @@ const TheLoaiManager = () => {
   });
 
   // Phân trang
-  const rowsPerPage = 10;
-  const totalPages = Math.ceil(sortedList.length / rowsPerPage);
+  const rowsPerPage = 8;
+  const totalPages = Math.max(1, Math.ceil(sortedList.length / rowsPerPage));
   const paginatedList = sortedList.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
@@ -108,12 +130,64 @@ const TheLoaiManager = () => {
   return (
     <div className={styles["theloai-manager"]}>
       <h2>🏷️ Quản Lý Thể Loại</h2>
-      <button
-        className={styles["add-btn"]}
-        onClick={() => navigate("/admin/theloai/add")}
+
+      {/* Hàng chứa nút Thêm (trái) và trường tìm kiếm + bộ lọc (phải) */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 12,
+        }}
       >
-        + Thêm thể loại
-      </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            className={styles["add-btn"]}
+            onClick={() => navigate("/admin/theloai/add")}
+          >
+            + Thêm thể loại
+          </button>
+        </div>
+
+        {/* container cho bộ lọc prefix và input tìm kiếm */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <select
+            value={prefixFilter}
+            onChange={(e) =>
+              setPrefixFilter(e.target.value as "ALL" | "FB" | "TL")
+            }
+            style={{
+              padding: "8px 10px",
+              borderRadius: 6,
+              border: "1px solid #ddd",
+              background: "#fff",
+              cursor: "pointer",
+            }}
+            title="Lọc mã thể loại"
+          >
+            <option value="ALL">Tất cả</option>
+            <option value="FB">FB</option>
+            <option value="TL">TL</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Tìm mã / tên thể loại"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 6,
+              border: "1px solid #ddd",
+              minWidth: 260,
+            }}
+          />
+        </div>
+      </div>
 
       {loading ? (
         <p>Đang tải...</p>
@@ -156,20 +230,21 @@ const TheLoaiManager = () => {
                     <Link
                       to={`/admin/theloai/${theLoai.maTheLoai}`}
                       title="Xem chi tiết"
+                      className="btn btn-sm btn-outline-info me-2"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-eye"></i>
                     </Link>
                     <Link
                       to={`/admin/theloai/edit/${theLoai.maTheLoai}`}
-                      className={styles["edit-btn"]}
+                      className="btn btn-sm btn-outline-secondary me-2"
                       title="Sửa"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
                     <button
-                      className={styles["delete-btn"]}
+                      className="btn btn-sm btn-outline-danger"
                       title="Xóa"
                       onClick={() => handleDeleteClick(theLoai)}
                     >

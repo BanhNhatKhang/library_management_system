@@ -7,8 +7,9 @@ const TheLoaiAdd = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const [prefix, setPrefix] = useState<"TL" | "FB">("TL");
+
   const [formData, setFormData] = useState({
-    maTheLoai: "",
     tenTheLoai: "",
   });
 
@@ -22,12 +23,19 @@ const TheLoaiAdd = () => {
     }));
   };
 
+  const handlePrefixChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPrefix(e.target.value as "TL" | "FB");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoading(true);
     try {
-      await axios.post("/api/theloai", formData);
+      // send tenTheLoai in body and prefix as query param; backend will generate maTheLoai
+      await axios.post(`/api/theloai?prefix=${prefix}`, {
+        tenTheLoai: formData.tenTheLoai,
+      });
 
       alert("Thêm thể loại thành công!");
       navigate("/admin/theloai");
@@ -55,17 +63,17 @@ const TheLoaiAdd = () => {
           <div className={styles["form-main"]}>
             <div className={styles["form-row"]}>
               <div className={styles["form-group"]}>
-                <label htmlFor="maTheLoai">Mã thể loại</label>
-                <input
-                  type="text"
-                  id="maTheLoai"
-                  name="maTheLoai"
-                  value={formData.maTheLoai}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={30}
-                  placeholder="Nhập mã thể loại"
-                />
+                <label htmlFor="loai">Loại</label>
+                <select
+                  id="loai"
+                  name="loai"
+                  value={prefix}
+                  onChange={handlePrefixChange}
+                  style={{ padding: 10, borderRadius: 8 }}
+                >
+                  <option value="TL">Trong nước (TL)</option>
+                  <option value="FB">Ngoài nước (FB)</option>
+                </select>
               </div>
 
               <div className={styles["form-group"]}>

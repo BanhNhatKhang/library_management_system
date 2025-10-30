@@ -10,11 +10,21 @@ interface MuonRequest {
   trangThaiMuon: string;
 }
 
+// thêm type cho sort key và hàm hiển thị icon
+type MuonSortKey = "maDocGia" | "maSach" | "ngayMuon";
+type SortOrder = "asc" | "desc";
+const sortIcon = (order: SortOrder | null) =>
+  order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
+
 const MuonManager: React.FC = () => {
   const navigate = useNavigate();
   const [MuonRequests, setMuonRequests] = useState<MuonRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // sort states
+  const [sortKey, setSortKey] = useState<MuonSortKey>("ngayMuon");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
   useEffect(() => {
     const fetchMuonRequests = async () => {
@@ -91,11 +101,36 @@ const MuonManager: React.FC = () => {
     }
   };
 
+  // xử lý đổi chiều / key sắp xếp
+  const handleSort = (key: MuonSortKey) => {
+    if (sortKey === key) {
+      setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   const filteredRequests = MuonRequests.filter((r) =>
     `${r.maDocGia} ${r.maSach} ${r.trangThaiMuon}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
+
+  // sắp xếp dựa trên sortKey và sortOrder
+  const sortedRequests = [...filteredRequests].sort((a, b) => {
+    let cmp = 0;
+    if (sortKey === "ngayMuon") {
+      const da = a.ngayMuon ? new Date(a.ngayMuon).getTime() : 0;
+      const db = b.ngayMuon ? new Date(b.ngayMuon).getTime() : 0;
+      cmp = da - db;
+    } else if (sortKey === "maDocGia") {
+      cmp = a.maDocGia.localeCompare(b.maDocGia, "vi", { sensitivity: "base" });
+    } else if (sortKey === "maSach") {
+      cmp = a.maSach.localeCompare(b.maSach, "vi", { sensitivity: "base" });
+    }
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
 
   return (
     <div className={styles["muon-manager"]}>
@@ -124,15 +159,33 @@ const MuonManager: React.FC = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Mã độc giả</th>
-              <th>Mã sách</th>
-              <th>Ngày mượn</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maDocGia")}
+              >
+                Mã độc giả{" "}
+                {sortKey === "maDocGia" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maSach")}
+              >
+                Mã sách{" "}
+                {sortKey === "maSach" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("ngayMuon")}
+              >
+                Ngày mượn{" "}
+                {sortKey === "ngayMuon" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
               <th>Trạng thái</th>
               <th className="text-end">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filteredRequests.map((r, i) => (
+            {sortedRequests.map((r, i) => (
               <tr key={i}>
                 <td>{r.maDocGia}</td>
                 <td>{r.maSach}</td>
@@ -200,7 +253,7 @@ const MuonManager: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {filteredRequests.length === 0 && (
+            {sortedRequests.length === 0 && (
               <tr>
                 <td colSpan={5} className="text-center">
                   Không tìm thấy kết quả

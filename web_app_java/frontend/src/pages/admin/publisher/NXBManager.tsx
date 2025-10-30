@@ -23,6 +23,9 @@ const NXBManager = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Thêm state cho trường tìm kiếm (mã NXB, tên NXB)
+  const [query, setQuery] = useState("");
+
   // States cho modal xác nhận xóa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [nxbToDelete, setNxbToDelete] = useState<NhaXuatBan | null>(null);
@@ -76,8 +79,18 @@ const NXBManager = () => {
     setNxbToDelete(null);
   };
 
-  // Hàm sắp xếp
-  const sortedList = [...nxbList].sort((a, b) => {
+  // Lọc theo query (mã NXB hoặc tên NXB) trước khi sắp xếp
+  const filteredList = nxbList.filter((nxb) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      nxb.maNhaXuatBan?.toLowerCase().includes(q) ||
+      nxb.tenNhaXuatBan?.toLowerCase().includes(q)
+    );
+  });
+
+  // Hàm sắp xếp (dùng filteredList)
+  const sortedList = [...filteredList].sort((a, b) => {
     const aValue = a[sortKey];
     const bValue = b[sortKey];
 
@@ -91,8 +104,8 @@ const NXBManager = () => {
   });
 
   // Phân trang
-  const rowsPerPage = 10;
-  const totalPages = Math.ceil(sortedList.length / rowsPerPage);
+  const rowsPerPage = 8;
+  const totalPages = Math.max(1, Math.ceil(sortedList.length / rowsPerPage));
   const paginatedList = sortedList.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
@@ -111,12 +124,41 @@ const NXBManager = () => {
   return (
     <div className={styles["nxb-manager"]}>
       <h2>🏢 Quản Lý Nhà Xuất Bản</h2>
-      <button
-        className={styles["add-btn"]}
-        onClick={() => navigate("/admin/nxb/add")}
+
+      {/* Header: nút Thêm (trái) và input tìm kiếm (phải) */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+        }}
       >
-        + Thêm nhà xuất bản
-      </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            className={styles["add-btn"]}
+            onClick={() => navigate("/admin/nxb/add")}
+          >
+            + Thêm nhà xuất bản
+          </button>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Tìm mã / tên NXB"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          style={{
+            padding: "8px 12px",
+            borderRadius: 6,
+            border: "1px solid #ddd",
+            minWidth: 260,
+          }}
+        />
+      </div>
 
       {loading ? (
         <p>Đang tải...</p>
@@ -158,7 +200,7 @@ const NXBManager = () => {
                       : sortIcon(null)}
                   </span>
                 </th>
-                <th>Thao tác</th>
+                <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -171,20 +213,21 @@ const NXBManager = () => {
                     <Link
                       to={`/admin/nxb/${nxb.maNhaXuatBan}`}
                       title="Xem chi tiết"
+                      className="btn btn-sm btn-outline-info me-2"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-eye"></i>
                     </Link>
                     <Link
                       to={`/admin/nxb/edit/${nxb.maNhaXuatBan}`}
-                      className={styles["edit-btn"]}
+                      className="btn btn-sm btn-outline-secondary me-2"
                       title="Sửa"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
                     <button
-                      className={styles["delete-btn"]}
+                      className="btn btn-sm btn-outline-danger"
                       title="Xóa"
                       onClick={() => handleDeleteClick(nxb)}
                     >

@@ -21,7 +21,7 @@
 
 /* Nút thêm mới */
 .ud-manager .add-btn {
-  background: #27ae60; /* Màu xanh lá cho Add (thay vì xanh dương) */
+  background: #2563eb; /* Màu xanh lá cho Add (thay vì xanh dương) */
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
@@ -32,7 +32,7 @@
 }
 
 .ud-manager .add-btn:hover {
-  background: #1e8449;
+  background: #1e40af;
 }
 
 /* Ô tìm kiếm */
@@ -52,8 +52,8 @@
 }
 
 .ud-manager .search-box input:focus {
-  border-color: #27ae60; /* Màu xanh lá focus */
-  box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.25);
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 /* Bảng */
@@ -73,7 +73,7 @@
 }
 
 .ud-manager th {
-  background: #f0f7f2; /* Nền đầu bảng nhạt hơn */
+  background: #f3f4f6;
   font-weight: 600;
 }
 

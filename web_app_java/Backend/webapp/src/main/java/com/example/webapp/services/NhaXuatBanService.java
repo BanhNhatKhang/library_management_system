@@ -24,6 +24,9 @@ public class NhaXuatBanService {
     }
 
     public NhaXuatBan saveNhaXuatBan(NhaXuatBan nhaXuatBan) {
+        if (nhaXuatBan.getMaNhaXuatBan() == null || nhaXuatBan.getMaNhaXuatBan().trim().isEmpty()) {
+            nhaXuatBan.setMaNhaXuatBan(generateNextMaNXB());
+        }
         return nhaXuatBanRepository.save(nhaXuatBan);
     }
 
@@ -37,6 +40,26 @@ public class NhaXuatBanService {
 
     public void deleteNhaXuatBan(String maNhaXuatBan) {
         nhaXuatBanRepository.deleteById(maNhaXuatBan);
+    }
+
+    public String generateNextMaNXB() {
+        List<NhaXuatBan> all = nhaXuatBanRepository.findAll();
+        int max = 0;
+        for (NhaXuatBan n : all) {
+            String ma = n.getMaNhaXuatBan();
+            if (ma == null) continue;
+            String up = ma.toUpperCase();
+            // chỉ xét các mã bắt đầu bằng NXB
+            if (!up.startsWith("NXB")) continue;
+            String digits = up.replaceAll("\\D+", "");
+            if (digits.isEmpty()) continue;
+            try {
+                int val = Integer.parseInt(digits);
+                if (val > max) max = val;
+            } catch (NumberFormatException ignored) {}
+        }
+        int next = max + 1;
+        return "NXB" + String.format("%03d", next);
     }
 
     public NhaXuatBanDTO toDTO(NhaXuatBan nhaXuatBan) {

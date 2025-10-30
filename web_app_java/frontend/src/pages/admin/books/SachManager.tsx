@@ -10,6 +10,7 @@ interface Sach {
   anhBia: string;
   soLuong: number;
   theLoais: string[];
+  nhaXuatBan?: string;
 }
 
 type SortKey = keyof Sach | "theLoais";
@@ -25,6 +26,9 @@ const SachManager = () => {
   const [sortKey, setSortKey] = useState<SortKey>("maSach");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Trường tìm kiếm
+  const [query, setQuery] = useState("");
 
   // States cho modal xác nhận xóa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -77,8 +81,20 @@ const SachManager = () => {
     setSachToDelete(null);
   };
 
+  // Lọc theo query trước khi sắp xếp
+  const filteredList = sachList.filter((s) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      s.maSach?.toLowerCase().includes(q) ||
+      s.tenSach?.toLowerCase().includes(q) ||
+      s.tacGia?.toLowerCase().includes(q) ||
+      (s.nhaXuatBan || "").toLowerCase().includes(q)
+    );
+  });
+
   // Hàm sắp xếp
-  const sortedList = [...sachList].sort((a, b) => {
+  const sortedList = [...filteredList].sort((a, b) => {
     let aValue: string | number = a[sortKey as keyof Sach] as string | number;
     let bValue: string | number = b[sortKey as keyof Sach] as string | number;
 
@@ -125,13 +141,42 @@ const SachManager = () => {
 
   return (
     <div className={styles["sach-manager"]}>
+      {/* Header với button và search trên cùng 1 hàng */}
       <h2>📚 Quản Lý Sách</h2>
-      <button
-        className={styles["add-btn"]}
-        onClick={() => navigate("/admin/sach/add")}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+        }}
       >
-        + Thêm sách
-      </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            title="Thêm sách"
+            className={styles["add-btn"]}
+            onClick={() => navigate("/admin/sach/add")}
+          >
+            <i className="fa-solid fa-file-circle-plus"></i>
+          </button>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Tìm mã / tên / tác giả / NXB"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setCurrentPage(1); // về trang 1 khi tìm
+          }}
+          style={{
+            padding: "8px 12px",
+            borderRadius: 6,
+            border: "1px solid #ddd",
+            minWidth: 260,
+          }}
+        />
+      </div>
 
       {loading ? (
         <p>Đang tải...</p>
@@ -226,20 +271,21 @@ const SachManager = () => {
                     <Link
                       to={`/admin/sach/${sach.maSach}`}
                       title="Xem chi tiết"
+                      className="btn btn-sm btn-outline-info me-2"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-eye"></i>
                     </Link>
                     <Link
                       to={`/admin/sach/edit/${sach.maSach}`}
-                      className={styles["edit-btn"]}
+                      className="btn btn-sm btn-outline-secondary me-2"
                       title="Sửa"
                       style={{ marginRight: 8 }}
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
                     <button
-                      className={styles["delete-btn"]}
+                      className="btn btn-sm btn-outline-danger"
                       title="Xóa"
                       onClick={() => handleDeleteClick(sach)}
                     >

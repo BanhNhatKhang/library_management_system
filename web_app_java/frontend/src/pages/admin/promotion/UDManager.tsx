@@ -11,11 +11,26 @@ interface UuDai {
   ngayKetThuc: string;
 }
 
+type UDSortKey =
+  | "maUuDai"
+  | "tenUuDai"
+  | "phanTramGiam"
+  | "ngayBatDau"
+  | "ngayKetThuc";
+type SortOrder = "asc" | "desc";
+
+const sortIcon = (order: SortOrder | null) =>
+  order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
+
 const UDManager: React.FC = () => {
   const navigate = useNavigate();
   const [list, setList] = useState<UuDai[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+
+  // sort state
+  const [sortKey, setSortKey] = useState<UDSortKey>("maUuDai");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   useEffect(() => {
     axios
@@ -37,9 +52,45 @@ const UDManager: React.FC = () => {
     }
   };
 
+  const handleSort = (key: UDSortKey) => {
+    if (sortKey === key) setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   const filtered = list.filter((d) =>
     `${d.maUuDai} ${d.tenUuDai}`.toLowerCase().includes(q.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let cmp = 0;
+    switch (sortKey) {
+      case "maUuDai":
+        cmp = a.maUuDai.localeCompare(b.maUuDai, "vi", { sensitivity: "base" });
+        break;
+      case "tenUuDai":
+        cmp = a.tenUuDai.localeCompare(b.tenUuDai, "vi", {
+          sensitivity: "base",
+        });
+        break;
+      case "phanTramGiam":
+        cmp = a.phanTramGiam - b.phanTramGiam;
+        break;
+      case "ngayBatDau":
+        cmp =
+          (new Date(a.ngayBatDau).getTime() || 0) -
+          (new Date(b.ngayBatDau).getTime() || 0);
+        break;
+      case "ngayKetThuc":
+        cmp =
+          (new Date(a.ngayKetThuc).getTime() || 0) -
+          (new Date(b.ngayKetThuc).getTime() || 0);
+        break;
+    }
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("vi-VN");
 
@@ -70,16 +121,52 @@ const UDManager: React.FC = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Mã ưu đãi</th>
-              <th>Tên ưu đãi</th>
-              <th>Giảm (%)</th>
-              <th>Ngày bắt đầu</th>
-              <th>Ngày kết thúc</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maUuDai")}
+              >
+                Mã ưu đãi{" "}
+                {sortKey === "maUuDai" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("tenUuDai")}
+              >
+                Tên ưu đãi{" "}
+                {sortKey === "tenUuDai" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("phanTramGiam")}
+              >
+                Giảm (%){" "}
+                {sortKey === "phanTramGiam"
+                  ? sortIcon(sortOrder)
+                  : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("ngayBatDau")}
+              >
+                Ngày bắt đầu{" "}
+                {sortKey === "ngayBatDau"
+                  ? sortIcon(sortOrder)
+                  : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("ngayKetThuc")}
+              >
+                Ngày kết thúc{" "}
+                {sortKey === "ngayKetThuc"
+                  ? sortIcon(sortOrder)
+                  : sortIcon(null)}
+              </th>
               <th className="text-end">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((d) => (
+            {sorted.map((d) => (
               <tr key={d.maUuDai}>
                 <td>{d.maUuDai}</td>
                 <td>{d.tenUuDai}</td>
@@ -108,7 +195,7 @@ const UDManager: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center">
                   Không tìm thấy kết quả

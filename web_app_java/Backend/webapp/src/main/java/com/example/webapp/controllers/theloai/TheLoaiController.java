@@ -24,9 +24,11 @@ public class TheLoaiController {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại với mã: " + maTheLoai));
     }
 
+    // Accept optional prefix query param (TL | FB). If provided, service will generate maTheLoai.
     @PostMapping
-    public TheLoaiDTO createTheLoai(@RequestBody TheLoaiDTO theLoaiDTO) {
-        return theLoaiService.saveTheLoai(theLoaiDTO);
+    public TheLoaiDTO createTheLoai(@RequestBody TheLoaiDTO theLoaiDTO,
+                                    @RequestParam(value = "prefix", required = false) String prefix) {
+        return theLoaiService.saveTheLoai(theLoaiDTO, prefix);
     }
 
     @PutMapping("/{maTheLoai}")

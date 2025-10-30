@@ -11,11 +11,21 @@ interface NhanVien {
   trangThai?: string;
 }
 
+type NVSortKey = "maNhanVien" | "hoTen" | "dienThoai" | "email";
+type SortOrder = "asc" | "desc";
+
+const sortIcon = (order: SortOrder | null) =>
+  order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
+
 const NVManager: React.FC = () => {
   const navigate = useNavigate();
   const [list, setList] = useState<NhanVien[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+
+  // sort
+  const [sortKey, setSortKey] = useState<NVSortKey>("maNhanVien");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   useEffect(() => {
     axios
@@ -39,11 +49,47 @@ const NVManager: React.FC = () => {
     }
   };
 
+  const handleSort = (key: NVSortKey) => {
+    if (sortKey === key) {
+      setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   const filtered = list.filter((nv) =>
     `${nv.hoTen} ${nv.dienThoai} ${nv.email}`
       .toLowerCase()
       .includes(q.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal = "";
+    let bVal = "";
+
+    switch (sortKey) {
+      case "maNhanVien":
+        aVal = a.maNhanVien || "";
+        bVal = b.maNhanVien || "";
+        break;
+      case "hoTen":
+        aVal = a.hoTen || "";
+        bVal = b.hoTen || "";
+        break;
+      case "dienThoai":
+        aVal = a.dienThoai || "";
+        bVal = b.dienThoai || "";
+        break;
+      case "email":
+        aVal = a.email || "";
+        bVal = b.email || "";
+        break;
+    }
+
+    const cmp = aVal.localeCompare(bVal, "vi", { sensitivity: "base" });
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
 
   return (
     <div className={styles["nv-manager"]}>
@@ -72,16 +118,42 @@ const NVManager: React.FC = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Mã</th>
-              <th>Họ tên</th>
-              <th>Điện thoại</th>
-              <th>Email</th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("maNhanVien")}
+              >
+                Mã{" "}
+                {sortKey === "maNhanVien"
+                  ? sortIcon(sortOrder)
+                  : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("hoTen")}
+              >
+                Họ tên{" "}
+                {sortKey === "hoTen" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("dienThoai")}
+              >
+                Điện thoại{" "}
+                {sortKey === "dienThoai" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
+              <th
+                style={{ cursor: "pointer" }}
+                onClick={() => handleSort("email")}
+              >
+                Email{" "}
+                {sortKey === "email" ? sortIcon(sortOrder) : sortIcon(null)}
+              </th>
               <th>Trạng thái</th>
               <th className="text-end">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((nv) => (
+            {sorted.map((nv) => (
               <tr key={nv.maNhanVien}>
                 <td>{nv.maNhanVien}</td>
                 <td>{nv.hoTen}</td>
@@ -112,7 +184,7 @@ const NVManager: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={6} className={styles["text-center"]}>
                   Không tìm thấy kết quả

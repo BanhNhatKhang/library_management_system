@@ -57,6 +57,10 @@ public class UuDaiService {
     }
 
     public UuDaiDTO saveUuDai(UuDaiDTO uuDaiDTO) {
+        // nếu client không cung cấp mã ưu đãi, tự sinh mã ở service
+        if (uuDaiDTO.getMaUuDai() == null || uuDaiDTO.getMaUuDai().trim().isEmpty()) {
+            uuDaiDTO.setMaUuDai(generateNextMaUD());
+        }
         UuDai uuDai = toEntity(uuDaiDTO);
         return toDTO(uuDaiRepository.save(uuDai));
     }
@@ -75,6 +79,27 @@ public class UuDaiService {
             throw new RuntimeException("Ưu đãi không tồn tại");
         }
         uuDaiRepository.deleteById(maUuDai);
+    }
+
+        // sinh mã ưu đãi tiếp theo dạng UD001, UD002, ...
+    public String generateNextMaUD() {
+        List<UuDai> all = uuDaiRepository.findAll();
+        int max = 0;
+        for (UuDai u : all) {
+            String ma = u.getMaUuDai();
+            if (ma == null) continue;
+            String up = ma.toUpperCase();
+            if (!up.startsWith("UD")) continue;
+            String digits = up.replaceAll("\\D+", "");
+            if (digits.isEmpty()) continue;
+            try {
+                int n = Integer.parseInt(digits);
+                if (n > max) max = n;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        int next = max + 1;
+        return "UD" + String.format("%03d", next);
     }
 
     public UuDaiDTO toDTO(UuDai uuDai) {
