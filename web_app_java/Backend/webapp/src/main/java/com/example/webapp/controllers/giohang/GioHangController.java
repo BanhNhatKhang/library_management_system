@@ -1,6 +1,7 @@
 package com.example.webapp.controllers.giohang;
 
 import com.example.webapp.dto.GioHangDTO;
+import com.example.webapp.dto.GioHangResponseDTO;
 import com.example.webapp.models.GioHangId;
 import com.example.webapp.services.GioHangService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class GioHangController {
 
     
     @GetMapping("/{maDocGia}")
-    public List<GioHangDTO> getGioHangByDocGia(@PathVariable String maDocGia) {
+    public List<GioHangResponseDTO> getGioHangByDocGia(@PathVariable String maDocGia) {
         return gioHangService.getGioHangsByMaDocGia(maDocGia);
     }
 
@@ -29,7 +30,7 @@ public class GioHangController {
     
     @PutMapping
     public GioHangDTO updateGioHang(@RequestBody GioHangDTO gioHangDTO) {
-        return gioHangService.updateGioHang(gioHangDTO);
+        return gioHangService.addOrUpdateGioHang(gioHangDTO); 
     }
 
     

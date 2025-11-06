@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/users/AppHeader";
+import Footer from "./components/users/AppFooter";
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
 import Register from "./pages/users/Register";
@@ -51,6 +52,12 @@ import TBManager from "./pages/admin/notification/TBManager";
 import TBAdd from "./pages/admin/notification/TBAdd";
 import TBDetails from "./pages/admin/notification/TBDetails";
 import TBEdit from "./pages/admin/notification/TBEdit";
+
+// chi tiết sách
+import BookDetails from "./pages/users/BookDetails";
+
+// giỏ hàng
+import Cart from "./pages/users/Cart";
 
 function App() {
   const { role } = useAuth();
@@ -134,8 +141,13 @@ function App() {
           <>
             <Header />
             <Routes>
+              {/* Trang chủ */}
               <Route path="/" element={<HomePage />} />
+              {/* Chi tiết sách */}
+              <Route path="/sach/:maSach" element={<BookDetails />} />
+              <Route path="/giohang" element={<Cart />} />
             </Routes>
+            <Footer />
           </>
         }
       />

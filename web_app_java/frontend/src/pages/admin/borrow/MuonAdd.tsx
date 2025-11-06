@@ -40,7 +40,7 @@ const MuonAdd: React.FC = () => {
 
       await axios.post("/api/theodoimuonsach", requestBody);
       alert("Thêm phiếu mượn thành công");
-      navigate("/admin/muon");
+      navigate("/admin/muontra");
     } catch (err) {
       console.error(err);
       alert("Có lỗi khi thêm phiếu mượn");
@@ -115,8 +115,8 @@ const MuonAdd: React.FC = () => {
               onChange={handleChange}
               required
             >
-              <option value="DANG_MUON">Đang mượn</option>
-              <option value="DA_TRA">Đã trả</option>
+              <option value="DANGMUON">Đang mượn</option>
+              <option value="DATRA">Đã trả</option>
             </select>
           </div>
 

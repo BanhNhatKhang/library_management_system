@@ -1,7 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../css/users/AppHeader.module.css";
-import axios from "axios";
+import axios from "../../../axiosConfig";
+import { useAuth } from "../../context/AuthContext";
+
+const getSubjectFromToken = () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return null;
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+    const payload = JSON.parse(jsonPayload);
+    if (payload.role === "DOCGIA" || payload.role === "ROLE_DOCGIA") {
+      return payload.sub || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 interface SachDTO {
   maSach: string;
@@ -42,6 +67,7 @@ const mainCategories: HeaderCategory[] = [
 ];
 
 const Header = () => {
+  useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<
     "domestic" | "foreign" | null
@@ -54,6 +80,45 @@ const Header = () => {
   const [categoriesWithBooks, setCategoriesWithBooks] = useState<HomeDTO[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  const [cartCount, setCartCount] = useState<number>(0);
+
+  // Thay vì dùng `role` để kiểm tra DOCGIA (kiểu role không có 'ROLE_DOCGIA'),
+  // dùng getSubjectFromToken() — hàm đã validate role trong payload.
+  const isDocGia = !!getSubjectFromToken();
+
+  const fetchCartCount = useCallback(async () => {
+    const maDocGia = getSubjectFromToken();
+    if (!maDocGia) {
+      setCartCount(0);
+      return;
+    }
+    try {
+      const res = await axios.get(`/api/giohang/${maDocGia}`);
+      setCartCount(Array.isArray(res.data) ? res.data.length : 0);
+    } catch (err) {
+      console.error("Error fetching cart count:", err);
+      setCartCount(0);
+    }
+  }, []); // không cần [role]
+
+  useEffect(() => {
+    fetchCartCount();
+
+    // Lắng nghe thay đổi localStorage (khác tab) và sự kiện tùy chỉnh 'cartUpdated'
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "authToken") fetchCartCount();
+    };
+    const onCartUpdated = () => fetchCartCount();
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("cartUpdated", onCartUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("cartUpdated", onCartUpdated as EventListener);
+    };
+  }, [fetchCartCount]);
+
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
     const storedToken = localStorage.getItem("authToken");
@@ -62,7 +127,7 @@ const Header = () => {
 
     if (isUserLoggedIn) {
       setIsLoggedIn(true);
-      setUserName(storedUserName || "Khang Bành Nhật");
+      setUserName(storedUserName || "Tài Khoản");
     } else {
       setIsLoggedIn(false);
       setUserName("Tài Khoản");
@@ -87,7 +152,7 @@ const Header = () => {
     // Xóa tất cả các khóa liên quan đến người dùng trong Local Storage
     localStorage.removeItem("userName"); // Key giả định
     localStorage.removeItem("role"); // Key thực tế bạn đang dùng
-    // Nếu bạn có lưu token, hãy xóa nó: localStorage.removeItem("token");
+    localStorage.removeItem("authToken"); // xoa token
 
     setIsLoggedIn(false); // Cập nhật state
     setUserName("Tài Khoản");
@@ -327,10 +392,21 @@ const Header = () => {
                     )}
                   </div>
 
-                  <button>
-                    <i className="fas fa-shopping-cart"></i>
-                    <span className={styles["icon-label"]}>Giỏ Hàng</span>
-                  </button>
+                  <Link to={"/giohang"}>
+                    <div className={styles["cart-icon-container"]}>
+                      <button>
+                        <i className="fas fa-shopping-cart"></i>
+                        <span className={styles["icon-label"]}>Giỏ Hàng</span>
+                      </button>
+
+                      {/* Hiển thị badge chỉ khi user là ĐỘC GIẢ (từ token) */}
+                      {isDocGia && cartCount > 0 && (
+                        <span className={styles["cart-badge"]}>
+                          {cartCount}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
 
                   <div
                     className={styles["user-icon-container"]}

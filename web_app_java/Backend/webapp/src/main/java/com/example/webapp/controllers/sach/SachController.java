@@ -55,6 +55,11 @@ public class SachController {
         return sachService.getSachByNhaXuatBan(tenNhaXuatBan);
     }
 
+    @GetMapping("/goi-y/{maSach}") 
+    public List<SachDTO> getSachGoiY(@PathVariable String maSach) {
+        return sachService.getSachGoiY(maSach);
+    }
+
     @GetMapping("/theloai/{maTheLoai}")
     public List<SachDTO> getSachByMaTheLoai(@PathVariable String maTheLoai) {
         return sachService.getSachByMaTheLoai(maTheLoai);

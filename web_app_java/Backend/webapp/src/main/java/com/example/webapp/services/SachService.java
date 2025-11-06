@@ -78,6 +78,10 @@ public class SachService {
         return sachRepository.findByNhaXuatBan_TenNhaXuatBan(tenNhaXuatBan).stream().map(this::toDTO).toList();
     }
 
+    public List<SachDTO> getSachGoiY(String maSach) {
+        return getAllSach();
+    }
+
     public List<SachDTO> getSachUuDai() {
         return sachRepository.findAll().stream()
             .filter(sach -> sach.getGiamGia() != null && sach.getGiamGia() > 0)

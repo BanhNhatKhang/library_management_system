@@ -11,6 +11,8 @@ import com.example.webapp.repository.TheoDoiMuonSachRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,30 +56,72 @@ public class TheoDoiMuonSachService {
     }
 
     public TheoDoiMuonSachDTO save(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
-        TheoDoiMuonSach theoDoiMuonSach = toEntity(theoDoiMuonSachDTO);
-        DocGia docGia = docGiaRepository.findById(theoDoiMuonSachDTO.getMaDocGia())
-            .orElseThrow(() -> new RuntimeException("Độc giả không tồn tại"));
+        // 1. Xử lý Mã Độc Giả (MaDocGia / Email)
+        String docGiaIdentifier = theoDoiMuonSachDTO.getMaDocGia();
+        DocGia docGia;
+
+        if (docGiaIdentifier != null && docGiaIdentifier.startsWith("DG")) {
+            // Trường hợp là Mã DocGia: Tìm theo ID
+            docGia = docGiaRepository.findById(docGiaIdentifier)
+                .orElseThrow(() -> new RuntimeException("Độc giả không tồn tại (ID: " + docGiaIdentifier + ")"));
+        } else {
+            // Trường hợp là Email (Subject): Tìm theo Email
+            // PHẢI ĐẢM BẢO docGiaRepository CÓ PHƯƠNG THỨC findByEmail(String email)
+            docGia = docGiaRepository.findByEmail(docGiaIdentifier); 
+            if (docGia == null) {
+                throw new RuntimeException("Độc giả không tồn tại (Email: " + docGiaIdentifier + ")");
+            }
+        }
+
+        // Lấy Mã Độc Giả thực tế để tạo ID
+        String maDocGiaThucTe = docGia.getMaDocGia();
         
+        // 2. Kiểm tra sách
         Sach sach = sachRepository.findById(theoDoiMuonSachDTO.getMaSach())
             .orElseThrow(() -> new RuntimeException("Sách không tồn tại"));
 
-        NhanVien nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
-            .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
+        // 3. Xử lý Nhân viên (luôn là null khi độc giả tạo phiếu)
+        NhanVien nhanVien = null; 
+        if (theoDoiMuonSachDTO.getMaNhanVien() != null && !theoDoiMuonSachDTO.getMaNhanVien().isEmpty()) {
+             nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
+                 .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
+        }
 
+        // 4. Tính Ngày Trả (Ngay Muon + 14 ngày)
+        LocalDate ngayMuon = theoDoiMuonSachDTO.getNgayMuon();
+        if (ngayMuon == null) {
+             throw new RuntimeException("Ngày mượn không được để trống!");
+        }
+        // Tính ngày trả dự kiến
+        LocalDate ngayTraDuKien = ngayMuon.plus(14, ChronoUnit.DAYS); // Thêm 14 ngày
+        
+        // 5. Tạo ID và kiểm tra trùng lặp (dùng NgayMuon từ DTO, MaDocGia thực tế)
+        TheoDoiMuonSachId id = new TheoDoiMuonSachId(
+            maDocGiaThucTe, 
+            theoDoiMuonSachDTO.getMaSach(), 
+            ngayMuon // Sử dụng Ngay Muon đã kiểm tra
+        );
+        
+        if (theoDoiMuonSachRepository.findById(id).isPresent()) {
+             throw new RuntimeException("Yêu cầu mượn cho sách này của độc giả vào ngày này đã tồn tại!");
+        }
+
+        // 6. Tạo và lưu Entity
+        TheoDoiMuonSach theoDoiMuonSach = new TheoDoiMuonSach();
+        theoDoiMuonSach.setId(id);
         theoDoiMuonSach.setDocGia(docGia);
         theoDoiMuonSach.setSach(sach);
-        theoDoiMuonSach.setNhanVien(nhanVien);
-
-        TheoDoiMuonSachId id = new TheoDoiMuonSachId(
-            theoDoiMuonSachDTO.getMaDocGia(), 
-            theoDoiMuonSachDTO.getMaSach(), 
-            theoDoiMuonSachDTO.getNgayMuon()
-        );
-
-        theoDoiMuonSach.setId(id);
-
-        theoDoiMuonSach.setNgayTra(theoDoiMuonSachDTO.getNgayTra());
-        theoDoiMuonSach.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(theoDoiMuonSachDTO.getTrangThaiMuon()));
+        theoDoiMuonSach.setNhanVien(nhanVien); // null
+        
+        // Gán Ngày Trả đã tính toán
+        theoDoiMuonSach.setNgayTra(ngayTraDuKien); 
+        
+        // Gán trạng thái 
+        String trangThaiString = theoDoiMuonSachDTO.getTrangThaiMuon();
+        if (trangThaiString == null) {
+            trangThaiString = "CHODUYET"; // Đảm bảo trạng thái mặc định
+        }
+        theoDoiMuonSach.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(trangThaiString));
 
         TheoDoiMuonSach saved = theoDoiMuonSachRepository.save(theoDoiMuonSach);
         return toDTO(saved);
@@ -141,6 +185,7 @@ public class TheoDoiMuonSachService {
         return theoDoiMuonSachDTO;
     }
 
+    @SuppressWarnings("unused") // tắt cảnh báo 
     private TheoDoiMuonSach toEntity(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
         TheoDoiMuonSach theoDoiMuonSach = new TheoDoiMuonSach();
         TheoDoiMuonSachId id = new TheoDoiMuonSachId(theoDoiMuonSachDTO.getMaDocGia(), theoDoiMuonSachDTO.getMaSach(), theoDoiMuonSachDTO.getNgayMuon());

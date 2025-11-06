@@ -125,19 +125,41 @@ const Register = () => {
           <div className={styles["form-row"]}>
             <div className={styles["form-group"]}>
               <label htmlFor="gioiTinh">Giới tính</label>
-              <select
-                id="gioiTinh"
-                name="gioiTinh"
-                className={styles["form-control"]}
-                value={formData.gioiTinh}
-                onChange={handleChange}
-                required
-              >
-                <option value="">-- Chọn giới tính --</option>
-                <option value="NAM">Nam</option>
-                <option value="NU">Nữ</option>
-                <option value="KHAC">Khác</option>
-              </select>
+              <div className={styles["radio-group-horizontal"]}>
+                <label className={styles["radio-label"]}>
+                  <input
+                    type="radio"
+                    name="gioiTinh"
+                    value="NAM"
+                    checked={formData.gioiTinh === "NAM"}
+                    onChange={handleChange}
+                    required
+                  />
+                  Nam
+                </label>
+                <label className={styles["radio-label"]}>
+                  <input
+                    type="radio"
+                    name="gioiTinh"
+                    value="NU"
+                    checked={formData.gioiTinh === "NU"}
+                    onChange={handleChange}
+                    required
+                  />
+                  Nữ
+                </label>
+                <label className={styles["radio-label"]}>
+                  <input
+                    type="radio"
+                    name="gioiTinh"
+                    value="KHAC"
+                    checked={formData.gioiTinh === "KHAC"}
+                    onChange={handleChange}
+                    required
+                  />
+                  Khác
+                </label>
+              </div>
             </div>
             <div className={styles["form-group"]}>
               <label htmlFor="ngaySinh">Ngày sinh</label>

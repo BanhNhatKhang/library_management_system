@@ -1,0 +1,311 @@
+.card-section {
+  background-color: #ffffff; /* Màu nền trắng cho card */
+  border-radius: 8px; /* Bo góc nhẹ */
+  padding: 20px; /* Padding bên trong */
+  margin-bottom: 20px; /* Khoảng cách với phần dưới */
+  border: 1px solid #e0e0e0; /* Đường viền nhẹ (tùy chọn) */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Bóng nhẹ (tùy chọn) */
+}
+
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: "Roboto", sans-serif;
+  color: #333;
+  background-color: #f7f7f7; /* Thay đổi màu nền body (nếu cần) */
+}
+
+.layout {
+  display: flex;
+  gap: 40px;
+  /* Xóa margin-bottom cũ */
+  /* margin-bottom: 40px; */
+  /* Áp dụng kiểu dáng card */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Ảnh */
+.imageBox {
+  flex: 0 0 360px;
+}
+
+.mainImage {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 520px !important;
+  object-fit: contain !important;
+  border-radius: 12px !important;
+  border: 2px solid #ecf0f1 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  display: block;
+}
+
+/* Thông tin */
+.infoBox {
+  flex: 1;
+  padding-bottom: 0; /* Xóa padding-bottom cũ */
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.meta {
+  color: #666;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.stars {
+  color: #ffc107;
+  margin-right: 8px;
+}
+
+.score {
+  margin-right: 8px;
+}
+
+.divider {
+  margin: 0 8px;
+  color: #aaa;
+}
+
+.priceBox {
+  background: #fcebeb;
+  border-radius: 6px;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.discounted {
+  color: #c92127;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.original {
+  text-decoration: line-through;
+  color: #777;
+  font-size: 18px;
+}
+
+.badge {
+  background: #c92127;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Số lượng */
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.quantity input {
+  width: 60px;
+  padding: 5px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Nút hành động */
+.actionButtons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.addCart,
+.borrow {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.addCart {
+  background-color: #fff;
+  color: #c92127;
+  border: 2px solid #c92127;
+}
+
+.addCart:hover {
+  background-color: #ffe5e5;
+}
+
+.borrow {
+  background-color: #c92127;
+  color: #fff;
+  border: none;
+}
+
+.borrow:hover {
+  background-color: #a8181d;
+}
+
+/* Chính sách */
+.shipping ul {
+  list-style: none;
+  padding-left: 0;
+  line-height: 1.6;
+}
+
+.shipping li {
+  color: #444;
+}
+
+/* Thông tin chi tiết */
+.details {
+  /* Áp dụng kiểu dáng card */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.details h2,
+.description h2,
+.rating h2 {
+  font-size: 22px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 15px;
+}
+
+.details table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.details th,
+.details td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.details th {
+  width: 160px;
+  color: #666;
+  font-weight: 400;
+}
+
+/* Mô tả */
+.description {
+  /* Áp dụng kiểu dáng card */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.description p {
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Đánh giá */
+.rating {
+  /* Áp dụng kiểu dáng card */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px; /* Giữ margin-bottom cuối cùng */
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ratingBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.ratingScore {
+  font-size: 24px;
+  font-weight: 600;
+  color: #c92127;
+}
+
+.ratingStars {
+  color: #ffc107;
+}
+
+.mainImage:hover {
+  transform: none !important;
+  transition: none !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* GỢI Ý */
+.recommendationSection {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recommendationTitle {
+  font-size: 22px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 15px;
+}
+
+.recommendationGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .imageBox {
+    width: 80%;
+  }
+
+  .infoBox {
+    width: 100%;
+  }
+  .recommendationGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .recommendationGrid {
+    grid-template-columns: 1fr;
+  }
+}

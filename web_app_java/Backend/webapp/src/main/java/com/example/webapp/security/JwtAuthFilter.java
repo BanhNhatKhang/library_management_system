@@ -125,6 +125,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private boolean isPublicPath(String path) {
         return path.startsWith("/api/xacthuc/") ||
                path.startsWith("/api/home") ||
-               path.startsWith("/api/sach/image");
+               path.startsWith("/api/sach/image") ||
+               path.matches("/api/sach/id/.*") ||
+               path.matches("/api/sach/ten/.*") ||
+               path.matches("/api/sach/tacgia/.*");
     }
 }

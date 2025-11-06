@@ -1,0 +1,212 @@
+/* AppFooter.module.css */
+
+.footer {
+  background-color: #f8f8f8;
+  background-image: url(/bg-footer.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-top: 50px;
+  padding: 40px 0 20px 0;
+  border-top: 1px solid #e0eeef;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.viewAllButton {
+  display: inline-block;
+  padding: 8px 20px;
+  border: 1px solid #043747;
+  color: #043747;
+  text-decoration: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.viewAllButton:hover {
+  background-color: #c92127;
+  color: #fff;
+}
+
+.mainContent {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.infoColumn {
+  flex: 0 0 300px;
+}
+
+.logo {
+  height: 50px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.fahasaInfo {
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.certifiedBadge {
+  height: 50px;
+  margin-bottom: 20px;
+}
+
+.socialIcons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.socialIcon {
+  width: 30px;
+  height: 30px;
+  background-color: #777;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.appStores {
+  display: flex;
+  gap: 10px;
+}
+
+.appStore img {
+  height: 35px;
+  border-radius: 4px;
+}
+
+.linkColumn {
+  flex: 1;
+}
+
+.linkColumn h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.linkColumn ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.linkColumn li {
+  margin-bottom: 8px;
+}
+
+.linkColumn a {
+  font-size: 14px;
+  color: #555;
+  text-decoration: none;
+}
+
+.linkColumn a:hover {
+  color: #043747;
+}
+
+/* Cột liên hệ */
+.contactColumn {
+  flex: 0 0 250px; /* Cố định chiều rộng cho cột liên hệ/hỗ trợ */
+}
+
+.contactColumn p {
+  font-size: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contactColumn i {
+  color: #043747;
+}
+
+.shippingLogos {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.shippingLogos img {
+  height: 30px;
+  object-fit: contain;
+}
+
+.paymentLogos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.paymentLogos img {
+  height: 30px;
+  object-fit: contain;
+}
+
+/* Footer cuối cùng */
+.copyright {
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-wrap: wrap;
+  }
+  .infoColumn {
+    flex: 1 1 100%;
+    margin-bottom: 20px;
+  }
+  .linkColumn,
+  .contactColumn {
+    flex: 1 1 45%;
+  }
+  .header {
+    text-align: left;
+  }
+}
+
+@media (max-width: 600px) {
+  .mainContent {
+    flex-direction: column;
+  }
+  .linkColumn,
+  .contactColumn {
+    flex: 1 1 100%;
+    margin-bottom: 20px;
+  }
+  .shippingLogos,
+  .paymentLogos {
+    justify-content: center;
+  }
+}

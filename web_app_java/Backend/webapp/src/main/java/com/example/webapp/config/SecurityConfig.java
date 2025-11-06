@@ -9,6 +9,7 @@ import com.example.webapp.security.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 // import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -62,8 +63,20 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/xacthuc/**", 
                     "/api/home/**",
-                    "/api/sach/image/**"         
+                    "/api/sach/image/**",
+                    "/api/sach/id/**",
+                    "/api/sach/goi-y/**"         
                 ).permitAll()
+
+                .requestMatchers(HttpMethod.POST, "/api/theodoimuonsach")
+                .hasAnyAuthority("DOCGIA", "ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                
+                .requestMatchers(HttpMethod.GET, "/api/theodoimuonsach/{maDocGia}").hasRole("DOCGIA")
+
+                .requestMatchers(
+                    "/api/docgia/thongtin/**", 
+                    "/api/giohang/**"
+                ).hasRole("DOCGIA")
                 
                 .requestMatchers(
                     "/api/admin/**",
@@ -78,11 +91,6 @@ public class SecurityConfig {
                     "/api/chitietdonhang/**", 
                     "/api/theodoimuonsach/**" 
                 ).hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY") 
-
-                .requestMatchers(
-                    "/api/docgia/thongtin/**", 
-                    "/api/theodoimuonsach/**"
-                ).hasRole("DOCGIA")
 
                 .requestMatchers(
                     "/api/user/me" 
