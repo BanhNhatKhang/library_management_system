@@ -1,12 +1,15 @@
 package com.example.webapp.services;
 
 import com.example.webapp.models.*;
+import com.example.webapp.models.TheoDoiMuonSach.TrangThaiMuon;
 import com.example.webapp.dto.SachDTO;
 import com.example.webapp.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.*;
 
 import java.io.IOException;
 
@@ -38,6 +41,8 @@ public class SachService {
     private NhaXuatBanRepository nhaXuatBanRepository;
     @Autowired
     private TheLoaiRepository theLoaiRepository;
+    @Autowired
+    private TheoDoiMuonSachRepository theoDoiMuonSachRepository;
 
     private static final String UPLOAD_DIR = "uploads";
 
@@ -221,23 +226,49 @@ public class SachService {
         }
     }
 
-    public boolean deleteSach(String id) {
-        try {
-            Optional<Sach> optionalSach = sachRepository.findById(id);
-            if (optionalSach.isPresent()) {
-                Sach sach = optionalSach.get();
-                
-                // Xóa ảnh
-                deleteImage(sach.getAnhBia());
-                
-                // Xóa sách
-                sachRepository.deleteById(id);
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi xóa sách: " + e.getMessage());
+
+    @Transactional 
+    public boolean deleteSach(String maSach) {
+        //  Tải Entity Sach
+        Optional<Sach> sachOpt = sachRepository.findById(maSach);
+        
+        if (sachOpt.isEmpty()) {
+            return false; 
         }
+
+        boolean hasActiveLoan = theoDoiMuonSachRepository.existsBySach_MaSachAndTrangThaiMuonIn(
+            maSach,
+            List.of(TrangThaiMuon.DANGMUON, TrangThaiMuon.DADUYET, TrangThaiMuon.CHODUYET)
+        );
+        if (hasActiveLoan) {
+            throw new IllegalStateException("Sách đang được mượn, Vui lòng thu hồi sách sau đó thực hiện thao tác xóa");
+        }
+        
+        Sach sach = sachOpt.get();
+        
+        // 2. Loại bỏ tham chiếu hai chiều (Many-to-Many)
+        for (TheLoai theLoai : sach.getTheLoais()) {
+            theLoai.getSachs().remove(sach);
+        }
+        sach.getTheLoais().clear(); 
+
+        // 3. Thực hiện xóa trong DB trước
+        try {
+            sachRepository.delete(sach); // nếu ném lỗi FK thì sẽ rơi vào catch, file chưa bị xóa
+        } catch (DataIntegrityViolationException ex) {
+            // Không xóa file — để controller trả lỗi rõ ràng
+            throw ex;
+        }
+
+        // 4. Nếu tới đây thì DB đã xóa thành công -> xóa file ảnh
+        try {
+            deleteImage(sach.getAnhBia());
+        } catch (Exception e) {
+            // Ghi log nhưng không rollback DB vì DB đã xóa; nếu muốn cân nhắc rollback, cần xử lý khác
+            e.printStackTrace();
+        }
+        
+        return true;
     }
 
     private String saveImage(MultipartFile file, String theLoaiId) throws IOException {
@@ -278,6 +309,7 @@ public class SachService {
 
         return folderName + "/" + filename;
     }
+
     private void deleteImage(String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
             try {

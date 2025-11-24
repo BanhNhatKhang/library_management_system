@@ -135,4 +135,10 @@ public class Sach {
     public Set<UuDai> getUuDais() { return uuDais; }
     public void setUuDais(Set<UuDai> uuDais) { this.uuDais = uuDais; }
 
+    // phương thức hỗ trợ quản lý quan hệ
+    public void removeTheLoai(TheLoai theLoai) {
+        this.theLoais.remove(theLoai);
+        theLoai.getSachs().remove(this); // Cập nhật cả bên TheLoai
+    }
+
 }

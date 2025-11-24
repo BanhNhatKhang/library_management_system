@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -160,9 +161,17 @@ public class SachController {
     }
 
     @DeleteMapping("/{maSach}")
-    public ResponseEntity<Void> deleteSach(@PathVariable String id) {
-        boolean deleted = sachService.deleteSach(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<String> deleteSach(@PathVariable String maSach) {
+        try {
+            boolean deleted = sachService.deleteSach(maSach);
+            return deleted ? ResponseEntity.ok("Deleted") : ResponseEntity.notFound().build();
+        } catch (IllegalStateException ex) {
+            // Sách đang được mượn
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Không thể xóa sách do ràng buộc dữ liệu: " + ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi xóa sách");
+        }
     }
-
 }

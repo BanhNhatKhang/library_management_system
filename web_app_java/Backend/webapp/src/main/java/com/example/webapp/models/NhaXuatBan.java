@@ -18,6 +18,11 @@ public class NhaXuatBan {
     @Column(name = "DIACHI", columnDefinition = "TEXT")
     private String diaChi;
 
+    public enum TrangThaiNXB { MOKHOA, DAKHOA }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TRANGTHAI", length = 10, nullable = false)
+    private TrangThaiNXB trangThai = TrangThaiNXB.MOKHOA;
+
     public NhaXuatBan() {}
 
     public NhaXuatBan(String maNhaXuatBan, String tenNhaXuatBan, String diaChi) {
@@ -36,6 +41,9 @@ public class NhaXuatBan {
 
     public String getDiaChi() { return diaChi; }
     public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
+
+    public TrangThaiNXB getTrangThai() { return trangThai; }
+    public void setTrangThai(TrangThaiNXB trangThai) { this.trangThai = trangThai; }
 
 }
 

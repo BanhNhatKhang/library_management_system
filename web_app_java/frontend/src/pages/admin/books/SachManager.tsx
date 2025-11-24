@@ -56,20 +56,22 @@ const SachManager = () => {
     try {
       await axios.delete(`/api/sach/${sachToDelete.maSach}`);
 
-      // Cập nhật danh sách sau khi xóa
       setSachList((prev) =>
         prev.filter((sach) => sach.maSach !== sachToDelete.maSach)
       );
-
-      // Hiển thị thông báo thành công
       alert(`Sách "${sachToDelete.tenSach}" đã được xóa thành công!`);
-
-      // Đóng modal
       setShowDeleteModal(false);
       setSachToDelete(null);
-    } catch (error) {
-      console.error("Lỗi khi xóa sách:", error);
-      alert("Có lỗi xảy ra khi xóa sách!");
+    } catch (error: unknown) {
+      let msg = "Có lỗi xảy ra khi xóa sách!";
+      if (axios.isAxiosError(error) && error.response) {
+        msg = error.response.data as string;
+      } else if (error instanceof Error) {
+        msg = error.message;
+      } else {
+        msg = String(error);
+      }
+      alert(msg);
     } finally {
       setDeleting(false);
     }

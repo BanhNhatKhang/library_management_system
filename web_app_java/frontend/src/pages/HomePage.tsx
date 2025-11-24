@@ -23,20 +23,22 @@ function HomePage() {
 
   const MAX_DISPLAY_BOOKS = 35;
 
-  // Logic lọc và nhóm 9 thể loại dựa trên dữ liệu động
+  // Logic lọc và nhóm 9 thể loại
   const homeCategoriesDisplay = useMemo(() => {
-    const domestic = allTheLoai
-      .filter((cat) => cat.maTheLoai.startsWith("TL"))
-      .slice(0, 3);
-    const foreign = allTheLoai
-      .filter((cat) => cat.maTheLoai.startsWith("FB"))
-      .slice(0, 3);
-    const schoolBooks = allTheLoai
-      .filter((cat) => cat.maTheLoai.startsWith("SK"))
-      .slice(0, 3);
-
-    return [...domestic, ...foreign, ...schoolBooks];
+    return allTheLoai.slice(0, 9);
   }, [allTheLoai]);
+
+  const categoryImages: Record<string, string> = {
+    TL001: "/category-icons/banner6.jpg",
+    TL002: "/category-icons/banner1.webp",
+    TL003: "/category-icons/banner1.webp",
+    FB001: "/category-icons/banner7.webp",
+    FB002: "/category-icons/banner3.webp",
+    FB003: "/category-icons/banner2.webp",
+    TL004: "/category-icons/banner6.jpg",
+    TL005: "/category-icons/banner6.jpg",
+    TL006: "/category-icons/banner2.webp",
+  };
 
   useEffect(() => {
     axios
@@ -53,7 +55,10 @@ function HomePage() {
 
     axios
       .get("/api/home/theloai")
-      .then((res) => setAllTheLoai(res.data))
+      .then((res) => {
+        console.log("API /theloai response:", res.data);
+        setAllTheLoai(res.data);
+      })
       .catch((error) => console.error("Error fetching all categories:", error));
   }, []);
 
@@ -122,16 +127,31 @@ function HomePage() {
       <div className={styles["category-display-section"]}>
         <h2 className={styles["section-title"]}>Danh mục sản phẩm</h2>
         <div className={styles["home-categories-grid"]}>
-          {homeCategoriesDisplay.map((cat) => (
-            <Link
-              key={cat.maTheLoai}
-              to={`/the-loai/${cat.maTheLoai}`}
-              className={styles["home-category-item"]}
-            >
-              <i className="fas fa-book-open"></i>
-              <span className={styles["category-name"]}>{cat.tenTheLoai}</span>
-            </Link>
-          ))}
+          {homeCategoriesDisplay.map((cat) => {
+            const imgSrc = categoryImages[cat.maTheLoai];
+            return (
+              <div key={cat.maTheLoai} className={styles["home-category-item"]}>
+                <Link
+                  to={`/the-loai/${cat.maTheLoai}`}
+                  className={styles["home-category-link"]}
+                >
+                  <img
+                    src={imgSrc}
+                    alt={cat.tenTheLoai}
+                    className={styles["category-image"]}
+                  />
+                </Link>
+                <Link
+                  to={`/the-loai/${cat.maTheLoai}`}
+                  className={styles["category-name-link"]}
+                >
+                  <span className={styles["category-name"]}>
+                    {cat.tenTheLoai}
+                  </span>
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </div>
 

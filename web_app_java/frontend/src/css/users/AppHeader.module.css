@@ -55,7 +55,7 @@
 
 .main-categories {
   width: 25%;
-  background-color: #fefce8;
+  background-color: #c1dddc;
   border-right: 1px solid #e5e7eb;
 }
 
@@ -70,7 +70,7 @@
   cursor: pointer;
   transition: all 0.2s;
   border-bottom: 1px solid #e5e7eb;
-  color: #78350f;
+  color: #043747;
   display: flex;
   align-items: center;
 }
@@ -101,7 +101,7 @@
 .category-title {
   font-size: 1rem;
   font-weight: bold;
-  color: #78350f;
+  color: #043747;
   margin-bottom: 10px;
   padding-bottom: 5px;
   white-space: nowrap;
@@ -110,13 +110,13 @@
 }
 
 .subcategory-item a:hover {
-  color: #b45309;
+  color: #c1dddc;
 }
 
 .category-title {
   font-size: 1rem;
   font-weight: bold;
-  color: #78350f;
+  color: #043747;
   margin-bottom: 10px;
   padding-bottom: 5px;
   white-space: nowrap;
@@ -135,7 +135,7 @@
 }
 
 .book-list li a {
-  color: #374151;
+  color: #043747;
   text-decoration: none;
   font-size: 0.9rem;
   display: block;
@@ -145,12 +145,13 @@
 }
 
 .book-list li a:hover {
-  color: #b45309;
+  color: #043747;
+  font-weight: 500;
 }
 
 .view-all-link {
   display: inline-block;
-  color: #b45309;
+  color: #043747;
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 500;

@@ -2,6 +2,8 @@ package com.example.webapp.controllers.nxb;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+
 import com.example.webapp.dto.*;
 import com.example.webapp.models.NhaXuatBan;
 import com.example.webapp.services.NhaXuatBanService;
@@ -16,8 +18,8 @@ public class NhaXuatBanController {
     private NhaXuatBanService nhaXuatBanService;
 
     @GetMapping
-    public List<NhaXuatBanDTO> getAllNhaXuatBan() {
-        return nhaXuatBanService.getAllNhaXuatBan();
+    public List<NhaXuatBanDTO> getAllNhaXuatBan(@RequestParam(value = "onlyActive", required = false) Boolean onlyActive) {
+        return nhaXuatBanService.getAllNhaXuatBan(onlyActive);
     }
 
     @GetMapping("/{maNhaXuatBan}")
@@ -36,9 +38,21 @@ public class NhaXuatBanController {
         return nhaXuatBanService.updateNhaXuatBan(maNhaXuatBan, nhaXuatBan);
     }
 
+        @PatchMapping("/{maNhaXuatBan}/lock")
+    public ResponseEntity<String> lockNhaXuatBan(@PathVariable String maNhaXuatBan) {
+        nhaXuatBanService.lockNhaXuatBan(maNhaXuatBan);
+        return ResponseEntity.ok("Đã khóa NXB " + maNhaXuatBan);
+    }
+
+    @PatchMapping("/{maNhaXuatBan}/unlock")
+    public ResponseEntity<String> unlockNhaXuatBan(@PathVariable String maNhaXuatBan) {
+        nhaXuatBanService.unlockNhaXuatBan(maNhaXuatBan);
+        return ResponseEntity.ok("Đã mở khóa NXB " + maNhaXuatBan);
+    }
+
     @DeleteMapping("/{maNhaXuatBan}")
-    public String deleteNhaXuatBan(@PathVariable String maNhaXuatBan) {
-        nhaXuatBanService.deleteNhaXuatBan(maNhaXuatBan);
-        return "Nhà xuất bản với mã " + maNhaXuatBan + " đã được xóa thành công";
+    public String deleteOrLockNhaXuatBan(@PathVariable String maNhaXuatBan) {
+        nhaXuatBanService.lockNhaXuatBan(maNhaXuatBan);
+        return "Nhà xuất bản với mã " + maNhaXuatBan + " đã được khóa";
     }
 }

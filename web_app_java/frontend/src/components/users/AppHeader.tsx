@@ -82,8 +82,6 @@ const Header = () => {
 
   const [cartCount, setCartCount] = useState<number>(0);
 
-  // Thay vì dùng `role` để kiểm tra DOCGIA (kiểu role không có 'ROLE_DOCGIA'),
-  // dùng getSubjectFromToken() — hàm đã validate role trong payload.
   const isDocGia = !!getSubjectFromToken();
 
   const fetchCartCount = useCallback(async () => {
@@ -99,7 +97,7 @@ const Header = () => {
       console.error("Error fetching cart count:", err);
       setCartCount(0);
     }
-  }, []); // không cần [role]
+  }, []);
 
   useEffect(() => {
     fetchCartCount();
@@ -157,8 +155,6 @@ const Header = () => {
     setIsLoggedIn(false); // Cập nhật state
     setUserName("Tài Khoản");
     setIsUserDropdownOpen(false);
-    // Có thể thêm lệnh chuyển hướng người dùng đến trang chủ hoặc đăng nhập
-    // navigate('/');
   };
 
   const getSubcategoriesWithBooks = (

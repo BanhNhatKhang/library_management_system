@@ -15,8 +15,15 @@ public class NhaXuatBanService {
     @Autowired
     private NhaXuatBanRepository nhaXuatBanRepository;
 
-    public List<NhaXuatBanDTO> getAllNhaXuatBan() {
-        return nhaXuatBanRepository.findAll().stream().map(this::toDTO).toList();
+    public List<NhaXuatBanDTO> getAllNhaXuatBan(Boolean onlyActive) {
+        return nhaXuatBanRepository.findAll().stream()
+                .filter(nxb -> {
+                    if (onlyActive == null) return true;
+                    if (onlyActive) return nxb.getTrangThai() == NhaXuatBan.TrangThaiNXB.MOKHOA;
+                    return true;
+                })
+                .map(this::toDTO)
+                .toList();
     }
 
     public Optional<NhaXuatBanDTO> getNhaXuatBanById(String maNhaXuatBan) {
@@ -36,6 +43,24 @@ public class NhaXuatBanService {
         }
         nhaXuatBan.setMaNhaXuatBan(maNhaXuatBan);
         return nhaXuatBanRepository.save(nhaXuatBan);
+    }
+
+    // khóa
+    public void lockNhaXuatBan(String maNhaXuatBan) {
+        Optional<NhaXuatBan> opt = nhaXuatBanRepository.findById(maNhaXuatBan);
+        if (opt.isEmpty()) throw new RuntimeException("Không tìm thấy nhà xuất bản: " + maNhaXuatBan);
+        NhaXuatBan nxb = opt.get();
+        nxb.setTrangThai(NhaXuatBan.TrangThaiNXB.DAKHOA);
+        nhaXuatBanRepository.save(nxb);
+    }
+
+    // mở khóa
+    public void unlockNhaXuatBan(String maNhaXuatBan) {
+        Optional<NhaXuatBan> opt = nhaXuatBanRepository.findById(maNhaXuatBan);
+        if (opt.isEmpty()) throw new RuntimeException("Không tìm thấy nhà xuất bản: " + maNhaXuatBan);
+        NhaXuatBan nxb = opt.get();
+        nxb.setTrangThai(NhaXuatBan.TrangThaiNXB.MOKHOA);
+        nhaXuatBanRepository.save(nxb);
     }
 
     public void deleteNhaXuatBan(String maNhaXuatBan) {
@@ -67,6 +92,11 @@ public class NhaXuatBanService {
         nhaXuatBanDTO.setMaNhaXuatBan(nhaXuatBan.getMaNhaXuatBan());
         nhaXuatBanDTO.setTenNhaXuatBan(nhaXuatBan.getTenNhaXuatBan());
         nhaXuatBanDTO.setDiaChi(nhaXuatBan.getDiaChi());
+        if (nhaXuatBan.getTrangThai() != null) {
+            nhaXuatBanDTO.setTrangThai(
+                NhaXuatBanDTO.TrangThaiNXB.valueOf(nhaXuatBan.getTrangThai().name())
+            );
+        }
         return nhaXuatBanDTO;
     }
 

@@ -7,6 +7,7 @@ interface NhaXuatBan {
   maNhaXuatBan: string;
   tenNhaXuatBan: string;
   diaChi: string;
+  trangThai?: "MOKHOA" | "DAKHOA";
 }
 
 type SortKey = keyof NhaXuatBan;
@@ -26,10 +27,10 @@ const NXBManager = () => {
   // Thêm state cho trường tìm kiếm (mã NXB, tên NXB)
   const [query, setQuery] = useState("");
 
-  // States cho modal xác nhận xóa
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [nxbToDelete, setNxbToDelete] = useState<NhaXuatBan | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  // States cho modal xác nhận khóa/mở khóa
+  const [showToggleModal, setShowToggleModal] = useState(false);
+  const [nxbToToggle, setNxbToToggle] = useState<NhaXuatBan | null>(null);
+  const [toggling, setToggling] = useState(false);
 
   useEffect(() => {
     axios
@@ -38,45 +39,62 @@ const NXBManager = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Hàm mở modal xác nhận xóa
-  const handleDeleteClick = (nxb: NhaXuatBan) => {
-    setNxbToDelete(nxb);
-    setShowDeleteModal(true);
+  // Mở modal xác nhận khóa/mở khóa
+  const handleToggleClick = (nxb: NhaXuatBan) => {
+    setNxbToToggle(nxb);
+    setShowToggleModal(true);
   };
 
-  // Hàm xóa nhà xuất bản
-  const handleConfirmDelete = async () => {
-    if (!nxbToDelete) return;
+  // Thực hiện khóa hoặc mở khóa
+  const handleConfirmToggle = async () => {
+    if (!nxbToToggle) return;
 
-    setDeleting(true);
+    setToggling(true);
     try {
-      await axios.delete(`/api/nhaxuatban/${nxbToDelete.maNhaXuatBan}`);
+      const isCurrentlyOpen = nxbToToggle.trangThai === "MOKHOA";
 
-      // Cập nhật danh sách sau khi xóa
-      setNxbList((prev) =>
-        prev.filter((nxb) => nxb.maNhaXuatBan !== nxbToDelete.maNhaXuatBan)
-      );
+      if (isCurrentlyOpen) {
+        // gọi PATCH lock
+        await axios.patch(`/api/nhaxuatban/${nxbToToggle.maNhaXuatBan}/lock`);
 
-      // Hiển thị thông báo thành công
-      alert(
-        `Nhà xuất bản "${nxbToDelete.tenNhaXuatBan}" đã được xóa thành công!`
-      );
+        setNxbList((prev) =>
+          prev.map((n) =>
+            n.maNhaXuatBan === nxbToToggle.maNhaXuatBan
+              ? { ...n, trangThai: "DAKHOA" }
+              : n
+          )
+        );
 
-      // Đóng modal
-      setShowDeleteModal(false);
-      setNxbToDelete(null);
+        alert(`Nhà xuất bản "${nxbToToggle.tenNhaXuatBan}" đã được khóa.`);
+      } else {
+        // gọi PATCH unlock
+        await axios.patch(`/api/nhaxuatban/${nxbToToggle.maNhaXuatBan}/unlock`);
+
+        setNxbList((prev) =>
+          prev.map((n) =>
+            n.maNhaXuatBan === nxbToToggle.maNhaXuatBan
+              ? { ...n, trangThai: "MOKHOA" }
+              : n
+          )
+        );
+
+        alert(`Nhà xuất bản "${nxbToToggle.tenNhaXuatBan}" đã được mở khóa.`);
+      }
+
+      setShowToggleModal(false);
+      setNxbToToggle(null);
     } catch (error) {
-      console.error("Lỗi khi xóa nhà xuất bản:", error);
-      alert("Có lỗi xảy ra khi xóa nhà xuất bản!");
+      console.error("Lỗi khi thay đổi trạng thái nhà xuất bản:", error);
+      alert("Có lỗi xảy ra khi thay đổi trạng thái nhà xuất bản!");
     } finally {
-      setDeleting(false);
+      setToggling(false);
     }
   };
 
-  // Hàm hủy xóa
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setNxbToDelete(null);
+  // Hủy modal
+  const handleCancelToggle = () => {
+    setShowToggleModal(false);
+    setNxbToToggle(null);
   };
 
   // Lọc theo query (mã NXB hoặc tên NXB) trước khi sắp xếp
@@ -90,17 +108,20 @@ const NXBManager = () => {
   });
 
   // Hàm sắp xếp (dùng filteredList)
+  const getFieldString = (obj: NhaXuatBan, key: SortKey): string => {
+    const val = obj[key];
+    if (typeof val === "string") return val;
+    return val == null ? "" : String(val);
+  };
+
+  // Hàm sắp xếp (dùng filteredList)
   const sortedList = [...filteredList].sort((a, b) => {
-    const aValue = a[sortKey];
-    const bValue = b[sortKey];
+    const aValue = getFieldString(a, sortKey);
+    const bValue = getFieldString(b, sortKey);
 
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortOrder === "asc"
-        ? aValue.localeCompare(bValue, "vi", { sensitivity: "base" })
-        : bValue.localeCompare(aValue, "vi", { sensitivity: "base" });
-    }
-
-    return 0;
+    return sortOrder === "asc"
+      ? aValue.localeCompare(bValue, "vi", { sensitivity: "base" })
+      : bValue.localeCompare(aValue, "vi", { sensitivity: "base" });
   });
 
   // Phân trang
@@ -125,7 +146,6 @@ const NXBManager = () => {
     <div className={styles["nxb-manager"]}>
       <h2>🏢 Quản Lý Nhà Xuất Bản</h2>
 
-      {/* Header: nút Thêm (trái) và input tìm kiếm (phải) */}
       <div
         style={{
           display: "flex",
@@ -226,12 +246,24 @@ const NXBManager = () => {
                     >
                       <i className="fas fa-edit"></i>
                     </Link>
+
+                    {/* Thay icon thùng rác bằng lock/unlock theo trạng thái */}
                     <button
                       className="btn btn-sm btn-outline-danger"
-                      title="Xóa"
-                      onClick={() => handleDeleteClick(nxb)}
+                      title={
+                        nxb.trangThai === "DAKHOA"
+                          ? "Mở khóa"
+                          : "Khóa nhà xuất bản"
+                      }
+                      onClick={() => handleToggleClick(nxb)}
                     >
-                      <i className="fas fa-trash-alt"></i>
+                      <i
+                        className={
+                          nxb.trangThai === "MOKHOA"
+                            ? "fas fa-unlock" // theo yêu cầu: unlock nếu MOKHOA
+                            : "fas fa-lock" // lock nếu DAKHOA
+                        }
+                      ></i>
                     </button>
                   </td>
                 </tr>
@@ -261,28 +293,40 @@ const NXBManager = () => {
         </>
       )}
 
-      {/* Modal xác nhận xóa */}
-      {showDeleteModal && nxbToDelete && (
-        <div className={styles["modal-overlay"]} onClick={handleCancelDelete}>
+      {/* Modal xác nhận khóa/mở khóa */}
+      {showToggleModal && nxbToToggle && (
+        <div className={styles["modal-overlay"]} onClick={handleCancelToggle}>
           <div
             className={styles["delete-modal"]}
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles["modal-header"]}>
-              <h3>⚠️ Xác nhận xóa nhà xuất bản</h3>
+              <h3>
+                {nxbToToggle.trangThai === "MOKHOA"
+                  ? "⚠️ Xác nhận khóa nhà xuất bản"
+                  : "🔓 Xác nhận mở khóa nhà xuất bản"}
+              </h3>
             </div>
 
             <div className={styles["modal-content"]}>
-              <p>Bạn có chắc chắn muốn xóa nhà xuất bản này không?</p>
+              <p>
+                {nxbToToggle.trangThai === "MOKHOA"
+                  ? "Bạn có chắc chắn muốn khóa nhà xuất bản này không?"
+                  : "Bạn có chắc chắn muốn mở khóa nhà xuất bản này không?"}
+              </p>
 
               <div className={styles["nxb-info"]}>
                 <div className={styles["nxb-details"]}>
-                  <h4>{nxbToDelete.tenNhaXuatBan}</h4>
+                  <h4>{nxbToToggle.tenNhaXuatBan}</h4>
                   <p>
-                    <strong>Mã NXB:</strong> {nxbToDelete.maNhaXuatBan}
+                    <strong>Mã NXB:</strong> {nxbToToggle.maNhaXuatBan}
                   </p>
                   <p>
-                    <strong>Địa chỉ:</strong> {nxbToDelete.diaChi}
+                    <strong>Địa chỉ:</strong> {nxbToToggle.diaChi}
+                  </p>
+                  <p>
+                    <strong>Trạng thái hiện tại:</strong>{" "}
+                    {nxbToToggle.trangThai === "MOKHOA" ? "Mở" : "Đã khóa"}
                   </p>
                 </div>
               </div>
@@ -291,17 +335,23 @@ const NXBManager = () => {
             <div className={styles["modal-actions"]}>
               <button
                 className={styles["cancel-btn"]}
-                onClick={handleCancelDelete}
-                disabled={deleting}
+                onClick={handleCancelToggle}
+                disabled={toggling}
               >
-                Không
+                Hủy
               </button>
               <button
                 className={styles["confirm-btn"]}
-                onClick={handleConfirmDelete}
-                disabled={deleting}
+                onClick={handleConfirmToggle}
+                disabled={toggling}
               >
-                {deleting ? "Đang xóa..." : "Có"}
+                {toggling
+                  ? nxbToToggle.trangThai === "MOKHOA"
+                    ? "Đang khóa..."
+                    : "Đang mở khóa..."
+                  : nxbToToggle.trangThai === "MOKHOA"
+                  ? "Khóa"
+                  : "Mở khóa"}
               </button>
             </div>
           </div>
