@@ -8,7 +8,7 @@ interface DonHang {
   maDocGia: string;
   ngayDat: string;
   tongTien: number;
-  trangThai: string;
+  trangThai: "DANGXULY" | "DAGIAO" | "DAHUY" | "GIAOTHATBAI"; // SỬA: match với enum backend
 }
 
 type DHSortKey = "maDonHang" | "maDocGia" | "ngayDat";
@@ -16,6 +16,37 @@ type SortOrder = "asc" | "desc";
 
 const sortIcon = (order: SortOrder | null) =>
   order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
+
+// Thêm helper functions để hiển thị trạng thái
+const getStatusText = (status: string) => {
+  switch (status) {
+    case "DANGXULY":
+      return "Đang xử lý";
+    case "DAGIAO":
+      return "Đã giao";
+    case "DAHUY":
+      return "Đã hủy";
+    case "GIAOTHATBAI":
+      return "Giao thất bại";
+    default:
+      return status || "—";
+  }
+};
+
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case "DANGXULY":
+      return "badge bg-warning text-dark";
+    case "DAGIAO":
+      return "badge bg-success";
+    case "DAHUY":
+      return "badge bg-danger";
+    case "GIAOTHATBAI":
+      return "badge bg-warning";
+    default:
+      return "badge bg-secondary";
+  }
+};
 
 const DHManager: React.FC = () => {
   const navigate = useNavigate();
@@ -30,8 +61,18 @@ const DHManager: React.FC = () => {
   useEffect(() => {
     axios
       .get("/api/donhang")
-      .then((res) => setList(res.data || []))
-      .catch(console.error)
+      .then((res) => {
+        console.log("Donhang response:", res.data); // Debug log
+        setList(res.data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching orders:", error);
+        if (error.response?.status === 403) {
+          alert(
+            "Bạn không có quyền truy cập. Vui lòng đăng nhập với tài khoản admin."
+          );
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -57,7 +98,7 @@ const DHManager: React.FC = () => {
   };
 
   const filtered = list.filter((d) =>
-    `${d.maDonHang} ${d.maDocGia} ${d.trangThai}`
+    `${d.maDonHang} ${d.maDocGia} ${getStatusText(d.trangThai)}`
       .toLowerCase()
       .includes(q.toLowerCase())
   );
@@ -138,7 +179,11 @@ const DHManager: React.FC = () => {
                 <td>{d.maDocGia}</td>
                 <td>{new Date(d.ngayDat).toLocaleDateString("vi-VN")}</td>
                 <td>{d.tongTien.toLocaleString("vi-VN")}₫</td>
-                <td>{d.trangThai || "—"}</td>
+                <td>
+                  <span className={getStatusClass(d.trangThai)}>
+                    {getStatusText(d.trangThai)}
+                  </span>
+                </td>
                 <td className="text-end">
                   <Link
                     to={`/admin/donhang/${d.maDonHang}`}

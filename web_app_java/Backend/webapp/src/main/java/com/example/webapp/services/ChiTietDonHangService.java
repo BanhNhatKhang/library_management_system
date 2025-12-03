@@ -4,10 +4,10 @@ import com.example.webapp.models.ChiTietDonHang;
 import com.example.webapp.models.ChiTietDonHangId;
 import com.example.webapp.dto.ChiTietDonHangDTO;
 import com.example.webapp.repository.ChiTietDonHangRepository;
-import com.example.webapp.repository.DonHangRepository;
-import com.example.webapp.repository.SachRepository;
-import com.example.webapp.models.DonHang;
-import com.example.webapp.models.Sach;
+// import com.example.webapp.repository.DonHangRepository;
+// import com.example.webapp.repository.SachRepository;
+// import com.example.webapp.models.DonHang;
+// import com.example.webapp.models.Sach;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,113 +23,85 @@ public class ChiTietDonHangService {
     @Autowired
     private ChiTietDonHangRepository chiTietDonHangRepository;
 
-    @Autowired
-    private DonHangRepository donHangRepository;
+    // @Autowired
+    // private DonHangRepository donHangRepository;
 
-    @Autowired
-    private SachRepository sachRepository;
+    // @Autowired
+    // private SachRepository sachRepository;
 
-    public List<ChiTietDonHangDTO> getAllChiTietDonHang() {
-        return chiTietDonHangRepository.findAll().stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-
-
-    public Optional<ChiTietDonHangDTO> getChiTietDonHangById(ChiTietDonHangId id) {
-        return chiTietDonHangRepository.findById(id).map(this::toDTO);
-    }
-
-
+    // Method để lấy chi tiết đơn hàng theo mã đơn hàng
     public List<ChiTietDonHangDTO> getChiTietByMaDonHang(String maDonHang) {
-        return chiTietDonHangRepository.findByDonHang_MaDonHang(maDonHang).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang_MaDonHang(maDonHang);
+        
+        return chiTietList.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public List<ChiTietDonHangDTO> getChiTietByMaSach(String maSach) {
-        return chiTietDonHangRepository.findBySach_MaSach(maSach).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    // Method chuyển đổi ChiTietDonHang entity sang DTO
+    private ChiTietDonHangDTO convertToDTO(ChiTietDonHang chiTiet) {
+        ChiTietDonHangDTO dto = new ChiTietDonHangDTO();
+        
+        dto.setMaDonHang(chiTiet.getDonHang().getMaDonHang());
+        dto.setMaSach(chiTiet.getSach().getMaSach());
+        dto.setTenSach(chiTiet.getSach().getTenSach());
+        dto.setTacGia(chiTiet.getSach().getTacGia());
+        dto.setAnhBia(chiTiet.getSach().getAnhBia());
+        dto.setSoLuong(chiTiet.getSoLuong());
+        dto.setDonGia(chiTiet.getDonGia());
+        
+        // thanhTien sẽ được tự động tính trong setter của DTO
+        
+        return dto;
     }
 
-    public ChiTietDonHangDTO getTongTienByMaDonHang(String maDonHang) {
-        BigDecimal tongTien = chiTietDonHangRepository.calculateTotalByDonHang(maDonHang);
-        return new ChiTietDonHangDTO(maDonHang, tongTien != null ? tongTien : BigDecimal.ZERO);
+    // Method lấy tất cả chi tiết đơn hàng (nếu cần)
+    public List<ChiTietDonHangDTO> getAllChiTietDonHang() {
+        List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findAll();
+        return chiTietList.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public List<ChiTietDonHangDTO> getTopSachBanChay() {
-        List<Object[]> results = chiTietDonHangRepository.findTopSachBanChay();
-        return results.stream()
-                .map(row -> new ChiTietDonHangDTO((String) row[0], ((Number) row[1]).longValue()))
-                .collect(Collectors.toList());
-    }
-
-    public ChiTietDonHangDTO saveChiTietDonHang(ChiTietDonHangDTO chiTietDonHangDTO) {
-        DonHang donHang = donHangRepository.findById(chiTietDonHangDTO.getMaDonHang())
-                .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
-
-        Sach sach = sachRepository.findById(chiTietDonHangDTO.getMaSach())
-                .orElseThrow(() -> new RuntimeException("Sách không tồn tại"));
-
-        ChiTietDonHang chiTietDonHang = new ChiTietDonHang();
-        chiTietDonHang.setId(new ChiTietDonHangId(chiTietDonHangDTO.getMaDonHang(), chiTietDonHangDTO.getMaSach()));
-        chiTietDonHang.setDonHang(donHang);
-        chiTietDonHang.setSach(sach);
-        chiTietDonHang.setSoLuong(chiTietDonHangDTO.getSoLuong());
-        chiTietDonHang.setDonGia(chiTietDonHangDTO.getDonGia());
-
-        chiTietDonHangRepository.save(chiTietDonHang);
-
-        if (chiTietDonHang.getSoLuong() != null && chiTietDonHang.getDonGia() != null) {
-            BigDecimal tongTien = chiTietDonHang.getDonGia()
-                    .multiply(BigDecimal.valueOf(chiTietDonHang.getSoLuong()));
-            chiTietDonHangDTO.setTongTien(tongTien);
-            chiTietDonHangDTO.setTongSoLuong((long) chiTietDonHang.getSoLuong());
+    // Method lấy chi tiết đơn hàng theo ID
+    public ChiTietDonHangDTO getChiTietById(ChiTietDonHangId id) {
+        Optional<ChiTietDonHang> chiTiet = chiTietDonHangRepository.findById(id);
+        
+        if (chiTiet.isPresent()) {
+            return convertToDTO(chiTiet.get());
+        } else {
+            throw new RuntimeException("Không tìm thấy chi tiết đơn hàng với ID: " + id);
         }
-
-        return chiTietDonHangDTO;
     }
 
-
-    public ChiTietDonHang updateChiTietDonHang(ChiTietDonHangId id, ChiTietDonHang chiTietDonHang) {
-        ChiTietDonHang existing = chiTietDonHangRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chi tiết đơn hàng không tồn tại"));
-
-        existing.setSoLuong(chiTietDonHang.getSoLuong());
-        existing.setDonGia(chiTietDonHang.getDonGia());
-        return chiTietDonHangRepository.save(existing);
+    // Method tính tổng tiền của đơn hàng
+    public BigDecimal getTongTienByMaDonHang(String maDonHang) {
+        List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang_MaDonHang(maDonHang);
+        
+        return chiTietList.stream()
+                .map(chiTiet -> chiTiet.getDonGia().multiply(BigDecimal.valueOf(chiTiet.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    // Method đếm tổng số lượng sản phẩm trong đơn hàng
+    public long getTongSoLuongByMaDonHang(String maDonHang) {
+        List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang_MaDonHang(maDonHang);
+        
+        return chiTietList.stream()
+                .mapToLong(ChiTietDonHang::getSoLuong)
+                .sum();
+    }
+
+    // Method thêm chi tiết đơn hàng
+    public ChiTietDonHangDTO addChiTietDonHang(ChiTietDonHang chiTiet) {
+        ChiTietDonHang saved = chiTietDonHangRepository.save(chiTiet);
+        return convertToDTO(saved);
+    }
+
+    // Method cập nhật chi tiết đơn hàng
+    public ChiTietDonHangDTO updateChiTietDonHang(ChiTietDonHang chiTiet) {
+        ChiTietDonHang updated = chiTietDonHangRepository.save(chiTiet);
+        return convertToDTO(updated);
+    }
+
+    // Method xóa chi tiết đơn hàng
     public void deleteChiTietDonHang(ChiTietDonHangId id) {
         chiTietDonHangRepository.deleteById(id);
-    }
-
-    public ChiTietDonHangDTO toDTO(ChiTietDonHang chiTietDonHang) {
-        ChiTietDonHangDTO chiTietDonHangDTO = new ChiTietDonHangDTO();
-        chiTietDonHangDTO.setMaDonHang(chiTietDonHang.getDonHang().getMaDonHang());
-        chiTietDonHangDTO.setMaSach(chiTietDonHang.getSach().getMaSach());
-        chiTietDonHangDTO.setSoLuong(chiTietDonHang.getSoLuong());
-        chiTietDonHangDTO.setDonGia(chiTietDonHang.getDonGia());
-        return chiTietDonHangDTO;
-    }
-
-    public ChiTietDonHang toEntity(ChiTietDonHangDTO chiTietDonHangDTO) {
-        ChiTietDonHang chiTietDonHang = new ChiTietDonHang();
-        ChiTietDonHangId id = new ChiTietDonHangId(chiTietDonHangDTO.getMaDonHang(), chiTietDonHangDTO.getMaSach());
-        chiTietDonHang.setId(id);
-        chiTietDonHang.setSoLuong(chiTietDonHangDTO.getSoLuong());
-        chiTietDonHang.setDonGia(chiTietDonHangDTO.getDonGia());
-
-        
-        DonHang donHang = donHangRepository.findById(chiTietDonHangDTO.getMaDonHang())
-            .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
-        chiTietDonHang.setDonHang(donHang);
-
-        Sach sach = sachRepository.findById(chiTietDonHangDTO.getMaSach())
-            .orElseThrow(() -> new RuntimeException("Sách không tồn tại"));
-        chiTietDonHang.setSach(sach);
-
-        return chiTietDonHang;
     }
 }

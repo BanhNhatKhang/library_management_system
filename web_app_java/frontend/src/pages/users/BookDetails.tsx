@@ -158,10 +158,20 @@ export default function BookDetails() {
   const handleAddToCart = async () => {
     if (!book || !maSach) return;
 
-    // 1. Kiểm tra vai trò
+    // 1. Kiểm tra vai trò và token
     if (role !== "DOCGIA") {
       setMessage({
         text: "Chức năng chỉ dành cho Độc Giả. Vui lòng đăng nhập.",
+        type: "error",
+      });
+      return;
+    }
+
+    const token =
+      localStorage.getItem("authToken") || localStorage.getItem("token");
+    if (!token) {
+      setMessage({
+        text: "Vui lòng đăng nhập để thêm vào giỏ hàng.",
         type: "error",
       });
       return;
@@ -184,18 +194,50 @@ export default function BookDetails() {
     };
 
     try {
-      // Gọi PUT để tạo mới hoặc cập nhật số lượng
-      await axios.put("/api/giohang", payload);
+      console.log("Adding to cart:", payload); // Debug log
+
+      const response = await axios.post("/api/giohang/add", payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Đảm bảo có token
+        },
+      });
+
+      console.log("Add to cart success:", response.data);
+
       setMessage({
         text: "Đã thêm sản phẩm vào giỏ hàng thành công!",
         type: "success",
       });
+
+      // Thông báo header cập nhật giỏ hàng
+      window.dispatchEvent(new Event("cartUpdated"));
     } catch (error) {
       console.error("Error adding to cart:", error);
-      setMessage({
-        text: "Lỗi: Không thể thêm sản phẩm vào giỏ hàng. Có thể sản phẩm đã hết hàng.",
-        type: "error",
-      });
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          setMessage({
+            text: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+            type: "error",
+          });
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        } else {
+          const errorMessage =
+            error.response?.data || "Không thể thêm sản phẩm vào giỏ hàng";
+          setMessage({
+            text: `Lỗi: ${errorMessage}`,
+            type: "error",
+          });
+        }
+      } else {
+        setMessage({
+          text: "Lỗi: Không thể thêm sản phẩm vào giỏ hàng.",
+          type: "error",
+        });
+      }
     }
   };
 

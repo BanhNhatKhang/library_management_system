@@ -425,8 +425,32 @@
   text-align: center;
   margin-top: 4px;
 }
+
+/* --- BỔ SUNG CHO LOGGED-IN USER DROPDOWN --- */
 .user-dropdown.logged-in-dropdown {
-  width: 200px;
+  width: 200px; /* Đặt lại chiều rộng phù hợp */
+  padding: 10px 0; /* Giữ padding tổng thể */
+}
+
+/* Tên người dùng đầy đủ (Mục đầu tiên, không click được) */
+.user-dropdown.logged-in-dropdown > .dropdown-item:first-child {
+  font-weight: bold;
+  color: #374151; /* Màu chữ đen */
+  border-bottom: 1px solid #e5e7eb; /* Đường kẻ phân cách */
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  cursor: default; /* Không cho phép click */
+  background-color: white !important; /* Đảm bảo không đổi màu khi hover */
+}
+/* Đảm bảo icon vương miện nổi bật */
+.user-dropdown.logged-in-dropdown > .dropdown-item:first-child i {
+  color: #f59e0b; /* Màu vàng cho vương miện */
+}
+
+/* Các mục menu con bên dưới */
+.user-dropdown.logged-in-dropdown .dropdown-item {
+  border-bottom: none; /* Xóa border bottom cho các mục con nếu đã có border chung */
+  padding: 8px 16px; /* Giảm nhẹ padding */
 }
 
 .icons-group a {

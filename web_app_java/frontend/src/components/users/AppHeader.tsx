@@ -82,6 +82,8 @@ const Header = () => {
 
   const [cartCount, setCartCount] = useState<number>(0);
 
+  const [fullName, setFullName] = useState("");
+
   const isDocGia = !!getSubjectFromToken();
 
   const fetchCartCount = useCallback(async () => {
@@ -121,14 +123,18 @@ const Header = () => {
     const storedUserName = localStorage.getItem("userName");
     const storedToken = localStorage.getItem("authToken");
 
+    const storedFullName = localStorage.getItem("fullName") || storedUserName;
+
     const isUserLoggedIn = !!storedToken;
 
     if (isUserLoggedIn) {
       setIsLoggedIn(true);
       setUserName(storedUserName || "Tài Khoản");
+      setFullName(storedFullName || storedUserName || "Khách hàng");
     } else {
       setIsLoggedIn(false);
       setUserName("Tài Khoản");
+      setFullName("");
     }
 
     axios
@@ -177,15 +183,22 @@ const Header = () => {
   const LoggedInUserDropdown = () => (
     <div
       className={`${styles["user-dropdown"]} ${styles["logged-in-dropdown"]}`}
+      style={{ width: "200px" }}
     >
-      {/* <div className="user-info-header">
-        <div className="user-avatar-placeholder">
-          <i className="fas fa-crown"></i>
-        </div>
-        <div className="user-text-info">
-          <div className="user-name">{userName}</div>{" "}
-        </div>
-      </div> */}
+      {/* Tên người dùng đầy đủ */}
+      <Link
+        to="/profile"
+        className={styles["dropdown-item"]}
+        style={{
+          borderBottom: "1px solid #e5e7eb",
+          marginBottom: "8px",
+          paddingBottom: "8px",
+          fontWeight: "bold",
+        }}
+      >
+        <i className="fas fa-user-gear me-2"></i>
+        {fullName}
+      </Link>
       <Link to="/don-hang" className={styles["dropdown-item"]}>
         <i className="fas fa-receipt me-2"></i>
         Đơn hàng của tôi

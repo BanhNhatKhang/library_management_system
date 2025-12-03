@@ -1,13 +1,15 @@
 package com.example.webapp.services;
 
 import com.example.webapp.models.DocGia;
-import com.example.webapp.dto.DocGiaDTO;
 import com.example.webapp.repository.DocGiaRepository;
 import com.example.webapp.dto.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,16 +22,110 @@ public class DocGiaService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private DonHangService donHangService;
+
     public List<DocGiaDTO> getAllDocGia() {
         return docGiaRepository.findAll().stream().map(this::toDTO).toList();
+    }
+
+    
+    public List<DonHangDTO> getDonHangByEmail(String email) {
+        DocGia docGia = docGiaRepository.findByEmail(email);
+        if (docGia == null) {
+            throw new RuntimeException("Không tìm thấy độc giả");
+        }
+        
+        return donHangService.getDonHangByMaDocGia(docGia.getMaDocGia());
+    }
+
+    public Page<DonHangDTO> getDonHangByEmailPaginated(String email, Pageable pageable) {
+        DocGia docGia = docGiaRepository.findByEmail(email);
+        if (docGia == null) {
+            throw new RuntimeException("Không tìm thấy độc giả");
+        }
+        
+        return donHangService.getDonHangByMaDocGiaPaginated(docGia.getMaDocGia(), pageable);
     }
 
     public Optional<DocGiaDTO> getDocGiaById(String maDocGia) {
         return docGiaRepository.findById(maDocGia).map(this::toDTO);
     }
 
+    public DocGiaDTO getDocGiaByPrincipal(Principal principal) {
+        String username = principal.getName(); 
+        
+        // Tìm kiếm theo email hoặc điện thoại
+        DocGia docGia = docGiaRepository.findByEmail(username);
+        if (docGia == null) {
+            docGia = docGiaRepository.findByDienThoai(username);
+        }
+        
+        if (docGia == null) {
+            throw new RuntimeException("Không tìm thấy thông tin độc giả");
+        }
+        
+        return toDTO(docGia);
+    }
+
+    public DocGiaDTO updateDocGiaByPrincipal(Principal principal, DocGiaDTO docGiaDTO) {
+        String username = principal.getName();
+        
+        // Tìm DocGia hiện tại
+        DocGia existingDocGia = docGiaRepository.findByEmail(username);
+        if (existingDocGia == null) {
+            existingDocGia = docGiaRepository.findByDienThoai(username);
+        }
+        
+        if (existingDocGia == null) {
+            throw new RuntimeException("Không tìm thấy thông tin độc giả");
+        }
+        
+        // Cập nhật thông tin
+        existingDocGia.setHoLot(docGiaDTO.getHoLot());
+        existingDocGia.setTen(docGiaDTO.getTen());
+        existingDocGia.setEmail(docGiaDTO.getEmail());
+        existingDocGia.setDienThoai(docGiaDTO.getDienThoai());
+        existingDocGia.setDiaChi(docGiaDTO.getDiaChi());
+        existingDocGia.setGioiTinh(docGiaDTO.getGioiTinh());
+        existingDocGia.setNgaySinh(docGiaDTO.getNgaySinh());
+        
+        DocGia savedDocGia = docGiaRepository.save(existingDocGia);
+        return toDTO(savedDocGia);
+    }
+
     public DocGia saveDocGia(DocGia docGia) {
         return docGiaRepository.save(docGia);
+    }
+
+        public String changePassword(Principal principal, DoiMatKhauRequestDTO request) {
+        String username = principal.getName();
+        
+        // Tìm DocGia hiện tại
+        DocGia existingDocGia = docGiaRepository.findByEmail(username);
+        if (existingDocGia == null) {
+            existingDocGia = docGiaRepository.findByDienThoai(username);
+        }
+        
+        if (existingDocGia == null) {
+            throw new RuntimeException("Không tìm thấy thông tin độc giả");
+        }
+        
+        // Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(request.getMatKhauHienTai(), existingDocGia.getMatKhau())) {
+            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+        }
+        
+        // Kiểm tra mật khẩu mới và nhập lại
+        if (!request.getMatKhauMoi().equals(request.getNhapLaiMatKhauMoi())) {
+            throw new RuntimeException("Mật khẩu mới và nhập lại mật khẩu không khớp");
+        }
+        
+        // Cập nhật mật khẩu mới
+        existingDocGia.setMatKhau(passwordEncoder.encode(request.getMatKhauMoi()));
+        docGiaRepository.save(existingDocGia);
+        
+        return "Đổi mật khẩu thành công";
     }
 
     public DocGia updateDocGia(String maDocGia, DocGia docGia) {

@@ -100,9 +100,10 @@ const DHEdit: React.FC = () => {
             onChange={handleChange}
           >
             <option value="">-- Chọn trạng thái --</option>
-            <option value="Đang xử lý">Đang xử lý</option>
-            <option value="Hoàn tất">Hoàn tất</option>
-            <option value="Đã hủy">Đã hủy</option>
+            <option value="DANGXULY">Đang xử lý</option>
+            <option value="DAGIAO">Hoàn tất</option>
+            <option value="DAHUY">Đã hủy</option>
+            <option value="GIAOTHATBAI">Giao thất bại</option>
           </select>
         </div>
 

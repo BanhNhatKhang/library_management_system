@@ -66,6 +66,7 @@ const Cart: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // LẤY maDocGia ĐỘNG TỪ TOKEN
   const maDocGia = getSubjectFromToken();
@@ -124,19 +125,39 @@ const Cart: React.FC = () => {
     newQuantity: number
   ) => {
     if (!maDocGia) return;
+
     const dto = { maDocGia: maDocGia, maSach: maSach, soLuong: newQuantity };
+
     try {
-      await axios.put("/api/giohang", dto);
+      console.log("Updating quantity:", dto); // Debug log
+
+      const response = await axios.put("/api/giohang", dto);
+
+      // Cập nhật state chỉ khi server trả về thành công
       setCartItems((prevItems) =>
         prevItems.map((item) =>
           item.id === maSach ? { ...item, quantity: newQuantity } : item
         )
       );
+
       // Thông báo header cập nhật
       window.dispatchEvent(new Event("cartUpdated"));
+
+      console.log("Quantity updated successfully:", response.data);
     } catch (error) {
       console.error("Error updating quantity:", error);
-      alert("Cập nhật số lượng thất bại. Vui lòng thử lại.");
+
+      if (axios.isAxiosError(error)) {
+        const errorMessage =
+          error.response?.data || "Cập nhật số lượng thất bại";
+        console.log("Server error:", errorMessage);
+        alert(`Lỗi: ${errorMessage}`);
+      } else {
+        alert("Cập nhật số lượng thất bại. Vui lòng thử lại.");
+      }
+
+      // Refresh lại giỏ hàng để đồng bộ với server
+      fetchCartItems();
     }
   };
 
@@ -144,36 +165,171 @@ const Cart: React.FC = () => {
     if (!maDocGia) return;
     const dto = { maDocGia: maDocGia, maSach: maSach };
     try {
-      await axios.delete("/api/giohang", { data: dto });
-      setCartItems((prevItems) =>
-        prevItems.filter((item) => item.id !== maSach)
-      );
-      setSelectedItems((prevSelected) =>
-        prevSelected.filter((itemId) => itemId !== maSach)
-      );
-      // Thông báo header cập nhật
-      window.dispatchEvent(new Event("cartUpdated"));
+      const response = await axios.delete("/api/giohang", { data: dto });
+
+      // Kiểm tra phản hồi từ server
+      if (response.data && response.data.includes("thành công")) {
+        // Xóa thành công - cập nhật state
+        setCartItems((prevItems) =>
+          prevItems.filter((item) => item.id !== maSach)
+        );
+        setSelectedItems((prevSelected) =>
+          prevSelected.filter((itemId) => itemId !== maSach)
+        );
+
+        // Thông báo header cập nhật
+        window.dispatchEvent(new Event("cartUpdated"));
+
+        // Hiển thị thông báo thành công
+        alert("Xóa sản phẩm thành công!");
+
+        // Điều chỉnh trang hiện tại nếu cần
+        const newTotalItems = cartItems.length - 1;
+        const newTotalPages = Math.ceil(newTotalItems / ITEMS_PER_PAGE);
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setCurrentPage(newTotalPages);
+        }
+      } else {
+        throw new Error("Phản hồi không mong đợi từ server");
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
-      alert("Xóa sản phẩm thất bại. Vui lòng thử lại.");
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data || "Xóa sản phẩm thất bại";
+        alert(`Lỗi: ${errorMessage}`);
+      } else {
+        alert("Xóa sản phẩm thất bại. Vui lòng thử lại.");
+      }
     }
   };
 
-  // Xử lý thay đổi số lượng (Gọi hàm API)
-  const handleQuantityChange = (id: string, delta: number) => {
-    const item = cartItems.find((i) => i.id === id);
+  const handleQuantityChange = (id: string, change: number) => {
+    const item = cartItems.find((item) => item.id === id);
     if (!item) return;
 
-    const newQuantity = Math.max(1, item.quantity + delta);
+    const newQuantity = item.quantity + change;
+
+    // Kiểm tra số lượng hợp lệ
+    if (newQuantity < 1) {
+      // Nếu số lượng < 1, hỏi có muốn xóa sản phẩm không
+      if (
+        window.confirm(`Bạn có muốn xóa "${item.name}" khỏi giỏ hàng không?`)
+      ) {
+        handleDeleteItem(id);
+      }
+      return;
+    }
+
+    // Giới hạn số lượng tối đa
+    if (newQuantity > 99) {
+      alert("Số lượng tối đa là 99");
+      return;
+    }
+
+    // Cập nhật số lượng trên server
     updateQuantityOnServer(id, newQuantity);
   };
 
-  // Xử lý xóa sản phẩm (Thêm nút xóa và gọi hàm API)
+  // Hàm xử lý nhập số lượng trực tiếp
+  const handleQuantityInput = (id: string, value: string) => {
+    const newQuantity = parseInt(value, 10);
+
+    // Kiểm tra số hợp lệ
+    if (isNaN(newQuantity) || newQuantity < 1) {
+      return;
+    }
+
+    // Giới hạn số lượng tối đa
+    if (newQuantity > 99) {
+      alert("Số lượng tối đa là 99");
+      return;
+    }
+
+    // Cập nhật số lượng trên server
+    updateQuantityOnServer(id, newQuantity);
+  };
+
+  // Xử lý xóa sản phẩm với thông báo xác nhận rõ ràng hơn
   const handleDeleteItem = (id: string) => {
+    const item = cartItems.find((item) => item.id === id);
+    const itemName = item ? item.name : "sản phẩm này";
+
     if (
-      window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?")
+      window.confirm(
+        `Bạn có chắc chắn muốn xóa "${itemName}" khỏi giỏ hàng không?\n\nHành động này không thể hoàn tác.`
+      )
     ) {
       deleteItemOnServer(id);
+    }
+  };
+
+  // Hàm xử lý thanh toán (giữ nguyên như đã viết trước đó)
+  const handleCheckout = async () => {
+    if (selectedItems.length === 0) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      return;
+    }
+
+    const selectedItemDetails = cartItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+    const itemNames = selectedItemDetails.map((item) => item.name).join(", ");
+
+    if (
+      !window.confirm(
+        `Bạn có chắc chắn muốn thanh toán ${
+          selectedItems.length
+        } sản phẩm?\n\nSản phẩm: ${itemNames}\n\nTổng tiền: ${formatCurrency(
+          totalDiscounted
+        )}`
+      )
+    ) {
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      const requestData = {
+        maDocGia: maDocGia,
+        maSachList: selectedItems,
+        tongTien: totalDiscounted,
+      };
+
+      console.log("Processing payment:", requestData);
+
+      const response = await axios.post("/api/donhang/thanhtoan", requestData);
+
+      console.log("Payment successful:", response.data);
+
+      // Hiển thị thông báo thành công
+      alert(
+        `Thanh toán thành công!\n\n` +
+          `Mã đơn hàng: ${response.data.maDonHang}\n` +
+          `Tổng tiền: ${formatCurrency(totalDiscounted)}\n` +
+          `Ngày đặt: ${response.data.ngayDat}\n\n` +
+          `Cảm ơn bạn đã mua hàng!`
+      );
+
+      // Refresh giỏ hàng để cập nhật danh sách
+      await fetchCartItems();
+
+      // Reset selected items
+      setSelectedItems([]);
+
+      // Thông báo header cập nhật
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (error) {
+      console.error("Payment error:", error);
+
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data || "Thanh toán thất bại";
+        alert(`Lỗi thanh toán: ${errorMessage}`);
+      } else {
+        alert("Thanh toán thất bại. Vui lòng thử lại!");
+      }
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -227,6 +383,7 @@ const Cart: React.FC = () => {
         <h2 className={styles["cart-title"]}>
           GIỎ HÀNG ({cartItems.length} sản phẩm)
         </h2>
+        {/* Xóa nút "Xóa đã chọn" */}
       </div>
 
       <div className={styles["cart-container"]}>
@@ -299,10 +456,40 @@ const Cart: React.FC = () => {
 
                   <div className={styles["item-actions"]}>
                     <div className={styles["quantity-control"]}>
-                      <button onClick={() => handleQuantityChange(item.id, -1)}>
+                      <button
+                        onClick={() => handleQuantityChange(item.id, -1)}
+                        disabled={item.quantity <= 1}
+                        title={
+                          item.quantity <= 1
+                            ? "Nhấn để xóa sản phẩm"
+                            : "Giảm số lượng"
+                        }
+                      >
                         -
                       </button>
-                      <input type="text" value={item.quantity} readOnly />
+                      <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          handleQuantityInput(item.id, e.target.value)
+                        }
+                        onBlur={(e) => {
+                          // Đảm bảo giá trị hợp lệ khi mất focus
+                          const value = parseInt(e.target.value, 10);
+                          if (isNaN(value) || value < 1) {
+                            handleQuantityInput(item.id, "1");
+                          }
+                        }}
+                        style={{
+                          width: "60px",
+                          textAlign: "center",
+                          border: "1px solid #ddd",
+                          borderRadius: "4px",
+                          padding: "4px",
+                        }}
+                      />
                       <button onClick={() => handleQuantityChange(item.id, 1)}>
                         +
                       </button>
@@ -322,6 +509,7 @@ const Cart: React.FC = () => {
                         width: "5%",
                         cursor: "pointer",
                       }}
+                      title="Xóa sản phẩm"
                     >
                       <i className="fas fa-trash"></i>
                     </button>
@@ -441,12 +629,23 @@ const Cart: React.FC = () => {
 
           <button
             className={styles["checkout-btn"]}
-            disabled={selectedItems.length === 0}
+            disabled={selectedItems.length === 0 || isProcessingPayment}
+            onClick={handleCheckout}
           >
-            THANH TOÁN
+            {isProcessingPayment ? (
+              <>
+                <i className="fas fa-spinner fa-spin me-2"></i>
+                ĐANG XỬ LÝ...
+              </>
+            ) : (
+              "THANH TOÁN"
+            )}
           </button>
+
           <p className={styles["checkout-note"]}>
-            (Giảm giá trên web chỉ áp dụng cho bạn bè)
+            {isProcessingPayment
+              ? "Vui lòng không tắt trang trong quá trình xử lý..."
+              : "(Giảm giá trên web chỉ áp dụng cho bạn bè)"}
           </p>
         </div>
       </div>

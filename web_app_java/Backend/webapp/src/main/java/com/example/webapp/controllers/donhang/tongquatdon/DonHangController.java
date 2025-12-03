@@ -5,7 +5,9 @@ import com.example.webapp.services.DonHangService;
 import com.example.webapp.dto.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.example.webapp.dto.ThanhToanRequestDTO;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -40,6 +42,11 @@ public class DonHangController {
     public DonHang createDonHang(@RequestBody DonHangRequestDTO request) {
         DonHang donHang = donHangService.toEntity(request.getDonHang());
         return donHangService.saveDonHang(donHang, request.getMaDocGia(), request.getMaUuDaiList());
+    }
+
+    @PostMapping("/thanhtoan")
+    public DonHangDTO thanhToan(Principal principal, @RequestBody ThanhToanRequestDTO request) {
+        return donHangService.thanhToan(principal, request);
     }
 
     @PutMapping("/{maDonHang}")

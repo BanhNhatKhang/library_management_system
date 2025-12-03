@@ -46,4 +46,13 @@ public class ChiTietDonHangId implements Serializable {
     public int hashCode() {
         return Objects.hash(maDonHang, maSach);
     }
+
+    @Override
+    public String toString() {
+        return "ChiTietDonHangId{" +
+                "maDonHang='" + maDonHang + '\'' +
+                ", maSach='" + maSach + '\'' +
+                '}';
+    }
+
 }

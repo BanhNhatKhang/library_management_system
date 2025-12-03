@@ -1,0 +1,1388 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import styles from "../../css/users/profile/Profile.module.css";
+import axios from "../../../axiosConfig";
+
+interface UserProfile {
+  hoLot: string;
+  ten: string;
+  dienThoai: string;
+  email: string;
+  gioiTinh: "NAM" | "NU" | null; // Thay đổi từ boolean thành enum string
+  ngaySinh: string; // YYYY-MM-DD
+  diaChi: string;
+}
+
+interface Achievement {
+  soDonHang: number;
+  daThanhToan: number;
+}
+
+interface ChangePasswordData {
+  matKhauHienTai: string;
+  matKhauMoi: string;
+  nhapLaiMatKhauMoi: string;
+}
+
+// Định nghĩa cấu trúc menu
+const menuItems = [
+  {
+    key: "thongTinTaiKhoan",
+    label: "Thông tin tài khoản",
+    icon: "fas fa-user",
+    isTitle: true,
+    isIndented: false,
+  },
+  // ĐÃ THÊM ICON: fas fa-address-card
+  {
+    key: "hoSoCaNhan",
+    label: "Hồ sơ cá nhân",
+    icon: "fas fa-address-card",
+    isTitle: false,
+    isIndented: false,
+  },
+  // Đổi mật khẩu sẽ hiển thị thụt vào
+  {
+    key: "doiMatKhau",
+    label: "Đổi mật khẩu",
+    icon: "fas fa-lock",
+    isTitle: false,
+    isIndented: true,
+  },
+
+  // Các mục cấp cao khác
+  {
+    key: "donHangCuaToi",
+    label: "Đơn hàng của tôi",
+    icon: "fas fa-receipt",
+    isTitle: false,
+    isIndented: false,
+  },
+  {
+    key: "thongBao",
+    label: "Thông báo",
+    icon: "fas fa-bell",
+    isTitle: false,
+    isIndented: false,
+  },
+  {
+    key: "sachDaMuon",
+    label: "Sách đã mượn",
+    icon: "fas fa-book",
+    isTitle: false,
+    isIndented: false,
+  },
+];
+
+// Thêm interface mới cho đơn hàng
+interface DonHang {
+  maDonHang: string;
+  ngayDat: string;
+  tongTien: number;
+  trangThaiDonHang: "DANGXULY" | "DAGIAO" | "DAHUY" | "GIAOTHATBAI";
+}
+
+// Cập nhật interface để match với ChiTietDonHangDTO
+interface ChiTietDonHang {
+  maDonHang: string;
+  maSach: string;
+  tenSach: string;
+  tacGia?: string;
+  anhBia?: string;
+  soLuong: number;
+  donGia: number;
+  thanhTien?: number;
+}
+
+// Thêm interface cho pagination
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+}
+
+function Profile() {
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [editableData, setEditableData] = useState<UserProfile | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [changePasswordData, setChangePasswordData] =
+    useState<ChangePasswordData>({
+      matKhauHienTai: "",
+      matKhauMoi: "",
+      nhapLaiMatKhauMoi: "",
+    });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Xóa isEditing state vì không cần nữa
+  // const [isEditing, setIsEditing] = useState(false);
+
+  // Cập nhật interface Achievement để match với dữ liệu thật
+  const [achievement, setAchievement] = useState<Achievement>({
+    soDonHang: 0,
+    daThanhToan: 0,
+  });
+
+  // Đặt default active là "hoSoCaNhan"
+  const [activeMenu, setActiveMenu] = useState("hoSoCaNhan");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Thêm states mới cho đơn hàng
+  const [donHangList, setDonHangList] = useState<DonHang[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [chiTietDonHang, setChiTietDonHang] = useState<ChiTietDonHang[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [isLoadingOrderDetails, setIsLoadingOrderDetails] = useState(false);
+
+  // Thêm states mới cho pagination
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    pageSize: 5, // Hiển thị 5 đơn hàng mỗi trang
+  });
+
+  const today = new Date().getFullYear();
+
+  // Dữ liệu giả định cứng
+  const memberIconClass = "fas fa-user";
+  const currentMemberName = "Khách hàng";
+
+  // Thêm helper functions để hiển thị thống kê - ĐẶT SAU CÁC STATES
+  const getCompletedOrdersCount = () => {
+    // Đếm số đơn hàng đã giao thành công
+    return donHangList.filter((order) => order.trangThaiDonHang === "DAGIAO")
+      .length;
+  };
+
+  const getOrderStatusStats = () => {
+    const stats = {
+      DANGXULY: 0,
+      DAGIAO: 0, // Thay HOANTHANH -> DAGIAO
+      DAHUY: 0, // Thay HUYBO -> DAHUY
+      GIAOTHATBAI: 0, // Thêm mới
+    };
+
+    donHangList.forEach((order) => {
+      if (order.trangThaiDonHang in stats) {
+        stats[order.trangThaiDonHang as keyof typeof stats]++;
+      }
+    });
+
+    return stats;
+  };
+
+  // Hàm tính toán thống kê từ danh sách đơn hàng - SỬA ĐỂ DÙNG useCallback
+  const calculateAchievements = React.useCallback((orders: DonHang[]) => {
+    const totalOrders = orders.length;
+
+    // Đã thanh toán = chỉ những đơn ĐÃ GIAO thành công
+    const totalPaid = orders
+      .filter((order) => order.trangThaiDonHang === "DAGIAO")
+      .reduce((sum, order) => sum + order.tongTien, 0);
+
+    setAchievement({
+      soDonHang: totalOrders,
+      daThanhToan: totalPaid,
+    });
+  }, []);
+
+  // Hàm lấy tất cả đơn hàng để tính thống kê - SỬA ĐỂ DÙNG useCallback
+  const fetchAllOrdersForStats = React.useCallback(async () => {
+    try {
+      const response = await axios.get(`/api/docgia/donhang/me/all`);
+      const allOrders = response.data;
+      calculateAchievements(allOrders);
+      console.log("Thống kê đơn hàng:", {
+        totalOrders: allOrders.length,
+        completedOrders: allOrders.filter(
+          (order: DonHang) => order.trangThaiDonHang === "DAGIAO"
+        ).length,
+        totalPaid: allOrders
+          .filter((order: DonHang) => order.trangThaiDonHang === "DAGIAO")
+          .reduce((sum: number, order: DonHang) => sum + order.tongTien, 0),
+      });
+    } catch (error) {
+      console.error("Error fetching all orders for statistics:", error);
+      // Nếu lỗi, giữ achievement mặc định
+    }
+  }, [calculateAchievements]);
+
+  // Cập nhật hàm lấy danh sách đơn hàng với phân trang - SỬA ĐỂ DÙNG useCallback
+  const fetchDonHangList = React.useCallback(
+    async (page = 0) => {
+      setIsLoadingOrders(true);
+      try {
+        const response = await axios.get(`/api/docgia/donhang/me`, {
+          params: {
+            page: page,
+            size: pagination.pageSize,
+            sort: "ngayDat,desc",
+          },
+        });
+
+        if (response.data.content) {
+          setDonHangList(response.data.content);
+          setPagination({
+            currentPage: response.data.number,
+            totalPages: response.data.totalPages,
+            totalElements: response.data.totalElements,
+            pageSize: response.data.size,
+          });
+        } else {
+          setDonHangList(response.data);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: 0,
+            totalPages: 1,
+            totalElements: response.data.length,
+          }));
+        }
+
+        console.log("Đơn hàng trang", page + 1, ":", response.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 404) {
+            setDonHangList([]);
+            setPagination((prev) => ({
+              ...prev,
+              currentPage: 0,
+              totalPages: 0,
+              totalElements: 0,
+            }));
+          } else {
+            alert("Có lỗi xảy ra khi tải danh sách đơn hàng!");
+          }
+        }
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    },
+    [pagination.pageSize]
+  );
+
+  // Load thống kê khi component mount - SỬA useEffect
+  useEffect(() => {
+    setIsLoading(true);
+
+    // Load thông tin profile và thống kê đồng thời
+    Promise.all([
+      axios.get("/api/docgia/thongtin/me"),
+      fetchAllOrdersForStats(),
+    ])
+      .then(([profileRes]) => {
+        const data = profileRes.data;
+        console.log("Received profile data:", data);
+
+        setProfileData(data);
+        setEditableData(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        // Vẫn load thống kê nếu profile bị lỗi
+        fetchAllOrdersForStats();
+      })
+      .finally(() => setIsLoading(false));
+  }, [fetchAllOrdersForStats]); // THÊM dependency
+
+  // Load đơn hàng khi activeMenu thay đổi thành "donHangCuaToi" - SỬA useEffect
+  useEffect(() => {
+    if (activeMenu === "donHangCuaToi") {
+      fetchDonHangList(0); // Load trang đầu tiên
+    }
+  }, [activeMenu, fetchDonHangList]); // THÊM dependency
+
+  // Hàm xử lý thay đổi input
+  const handleInputChange = (
+    field: keyof UserProfile,
+    value: string | "NAM" | "NU" | null
+  ) => {
+    if (editableData) {
+      setEditableData({
+        ...editableData,
+        [field]: value,
+      });
+    }
+  };
+
+  // Hàm xử lý lưu thay đổi
+  const handleSaveChanges = async () => {
+    if (!editableData) return;
+
+    setIsSaving(true);
+    try {
+      const token =
+        localStorage.getItem("token") || localStorage.getItem("authToken");
+      console.log("Token:", token);
+
+      // Không cần chuyển đổi vì đã cùng format enum
+      console.log("Data being sent:", editableData);
+
+      const response = await axios.put("/api/docgia/thongtin/me", editableData);
+      setProfileData(response.data);
+      setEditableData(response.data);
+      alert("Cập nhật thông tin thành công!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("Response status:", error.response?.status);
+        console.log("Response data:", error.response?.data);
+
+        if (error.response?.status === 403) {
+          alert("Không có quyền truy cập. Vui lòng đăng nhập lại!");
+        } else if (error.response?.status === 401) {
+          alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        } else if (error.response?.status === 400) {
+          alert("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại!");
+        } else {
+          alert(`Có lỗi xảy ra: ${error.response?.status || "Unknown error"}`);
+        }
+      } else {
+        alert("Có lỗi xảy ra khi cập nhật thông tin!");
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Hàm xử lý thay đổi input đổi mật khẩu
+  const handlePasswordChange = (
+    field: keyof ChangePasswordData,
+    value: string
+  ) => {
+    setChangePasswordData({
+      ...changePasswordData,
+      [field]: value,
+    });
+  };
+
+  // Hàm xử lý đổi mật khẩu
+  const handleChangePassword = async () => {
+    if (
+      !changePasswordData.matKhauHienTai ||
+      !changePasswordData.matKhauMoi ||
+      !changePasswordData.nhapLaiMatKhauMoi
+    ) {
+      alert("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
+    if (
+      changePasswordData.matKhauMoi !== changePasswordData.nhapLaiMatKhauMoi
+    ) {
+      alert("Mật khẩu mới và nhập lại mật khẩu không khớp!");
+      return;
+    }
+
+    if (changePasswordData.matKhauMoi.length < 8) {
+      alert("Mật khẩu mới phải có ít nhất 8 ký tự!");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const response = await axios.put(
+        "/api/docgia/doimatkhau/me",
+        changePasswordData
+      );
+      console.log("Password change response:", response.data); // Sử dụng response
+      alert("Đổi mật khẩu thành công!");
+
+      // Reset form
+      setChangePasswordData({
+        matKhauHienTai: "",
+        matKhauMoi: "",
+        nhapLaiMatKhauMoi: "",
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      if (axios.isAxiosError(error)) {
+        const errorMessage =
+          error.response?.data || "Có lỗi xảy ra khi đổi mật khẩu!";
+        alert(errorMessage);
+      } else {
+        alert("Có lỗi xảy ra khi đổi mật khẩu!");
+      }
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  // Thêm function handleMenuClick
+  const handleMenuClick = (menuKey: string) => {
+    setActiveMenu(menuKey);
+  };
+
+  // Thêm function format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  // Hàm lấy chi tiết đơn hàng (sử dụng endpoint có sẵn)
+  const fetchChiTietDonHang = async (maDonHang: string) => {
+    setIsLoadingOrderDetails(true);
+    try {
+      const response = await axios.get(
+        `/api/chitietdonhang/donhang/${maDonHang}`
+      );
+      setChiTietDonHang(response.data);
+      console.log("Chi tiết đơn hàng:", response.data);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      alert("Có lỗi xảy ra khi tải chi tiết đơn hàng!");
+      setChiTietDonHang([]);
+    } finally {
+      setIsLoadingOrderDetails(false);
+    }
+  };
+
+  // Hàm xử lý khi click vào đơn hàng
+  const handleOrderClick = (maDonHang: string) => {
+    if (selectedOrder === maDonHang) {
+      // Nếu đang mở thì đóng lại
+      setSelectedOrder(null);
+      setChiTietDonHang([]);
+    } else {
+      // Mở chi tiết đơn hàng mới
+      setSelectedOrder(maDonHang);
+      fetchChiTietDonHang(maDonHang);
+    }
+  };
+
+  // Hàm format trạng thái đơn hàng
+  const getOrderStatusText = (status: string) => {
+    switch (status) {
+      case "DANGXULY":
+        return "Đang xử lý";
+      case "DAGIAO":
+        return "Đã giao";
+      case "DAHUY":
+        return "Đã hủy";
+      case "GIAOTHATBAI":
+        return "Giao thất bại";
+      default:
+        return "Không xác định";
+    }
+  };
+
+  // Hàm get class CSS cho trạng thái
+  const getOrderStatusClass = (status: string) => {
+    switch (status) {
+      case "DANGXULY":
+        return styles["status-processing"]; // Màu vàng
+      case "DAGIAO":
+        return styles["status-completed"]; // Màu xanh lá
+      case "DAHUY":
+        return styles["status-cancelled"]; // Màu đỏ
+      case "GIAOTHATBAI":
+        return styles["status-failed"]; // Màu cam
+      default:
+        return styles["status-unknown"];
+    }
+  };
+
+  // Hàm xử lý chuyển trang
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < pagination.totalPages) {
+      fetchDonHangList(newPage);
+      // Đóng chi tiết đơn hàng khi chuyển trang
+      setSelectedOrder(null);
+      setChiTietDonHang([]);
+    }
+  };
+
+  // Hàm tạo số trang hiển thị
+  const getPageNumbers = () => {
+    const { currentPage, totalPages } = pagination;
+    const pages: number[] = [];
+
+    // Hiển thị tối đa 5 số trang
+    const maxDisplayPages = 5;
+
+    if (totalPages <= maxDisplayPages) {
+      // Nếu tổng số trang <= 5, hiển thị tất cả
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Nếu tổng số trang > 5, hiển thị thông minh
+      if (currentPage < 2) {
+        // Hiển thị 0,1,2,3,4
+        for (let i = 0; i < 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 3) {
+        // Hiển thị (totalPages-5)...(totalPages-1)
+        for (let i = totalPages - 5; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Hiển thị currentPage-2, currentPage-1, currentPage, currentPage+1, currentPage+2
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+
+    return pages;
+  };
+
+  // Hàm render nội dung chính
+  const renderContent = () => {
+    const currentData = editableData || profileData;
+
+    if (!currentData) return null;
+
+    // Xử lý ngày sinh
+    const ngaySinhParts = currentData.ngaySinh
+      ? currentData.ngaySinh.split("-").reverse()
+      : ["", "", ""];
+
+    // Xử lý giới tính từ enum string
+    const gioiTinh = currentData.gioiTinh; // "NAM", "NU", hoặc null
+
+    switch (activeMenu) {
+      case "hoSoCaNhan":
+        return (
+          <div className={styles["form-section"]}>
+            <h2 className="mb-4">Hồ sơ cá nhân</h2>
+
+            {/* 1. HỌ */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Họ*</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="text"
+                  className={styles["form-control"]}
+                  value={currentData.hoLot || ""}
+                  onChange={(e) => handleInputChange("hoLot", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 2. TÊN */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Tên*</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="text"
+                  className={styles["form-control"]}
+                  value={currentData.ten || ""}
+                  onChange={(e) => handleInputChange("ten", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 3. SỐ ĐIỆN THOẠI */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Số điện thoại</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="text"
+                  className={styles["form-control"]}
+                  value={currentData.dienThoai || ""}
+                  onChange={(e) =>
+                    handleInputChange("dienThoai", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 4. EMAIL */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Email</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="email"
+                  className={styles["form-control"]}
+                  value={currentData.email || ""}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 5. ĐỊA CHỈ */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Địa chỉ</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="text"
+                  className={styles["form-control"]}
+                  value={currentData.diaChi || ""}
+                  onChange={(e) => handleInputChange("diaChi", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 6. GIỚI TÍNH */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Giới tính*</label>
+              <div className={styles["radio-group"]}>
+                <label className={styles["radio-label"]}>
+                  <input
+                    type="radio"
+                    name="gioiTinh"
+                    value="NAM"
+                    checked={gioiTinh === "NAM"}
+                    onChange={() => handleInputChange("gioiTinh", "NAM")}
+                  />
+                  <span className={styles["radio-text"]}>Nam</span>
+                </label>
+                <label className={styles["radio-label"]}>
+                  <input
+                    type="radio"
+                    name="gioiTinh"
+                    value="NU"
+                    checked={gioiTinh === "NU"}
+                    onChange={() => handleInputChange("gioiTinh", "NU")}
+                  />
+                  <span className={styles["radio-text"]}>Nữ</span>
+                </label>
+              </div>
+            </div>
+
+            {/* 7. BIRTHDAY */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Birthday*</label>
+              <div className={styles["birthday-inputs"]}>
+                <input
+                  type="text"
+                  className={styles["form-control-small"]}
+                  value={ngaySinhParts[0] || ""}
+                  placeholder="DD"
+                  onChange={(e) => {
+                    const newParts = [...ngaySinhParts];
+                    newParts[0] = e.target.value;
+                    const newDate = `${newParts[2]}-${newParts[1].padStart(
+                      2,
+                      "0"
+                    )}-${newParts[0].padStart(2, "0")}`;
+                    handleInputChange("ngaySinh", newDate);
+                  }}
+                />
+                <input
+                  type="text"
+                  className={styles["form-control-small"]}
+                  value={ngaySinhParts[1] || ""}
+                  placeholder="MM"
+                  onChange={(e) => {
+                    const newParts = [...ngaySinhParts];
+                    newParts[1] = e.target.value;
+                    const newDate = `${newParts[2]}-${newParts[1].padStart(
+                      2,
+                      "0"
+                    )}-${newParts[0].padStart(2, "0")}`;
+                    handleInputChange("ngaySinh", newDate);
+                  }}
+                />
+                <input
+                  type="text"
+                  className={styles["form-control-year"]}
+                  value={ngaySinhParts[2] || ""}
+                  placeholder="YYYY"
+                  onChange={(e) => {
+                    const newParts = [...ngaySinhParts];
+                    newParts[2] = e.target.value;
+                    const newDate = `${newParts[2]}-${newParts[1].padStart(
+                      2,
+                      "0"
+                    )}-${newParts[0].padStart(2, "0")}`;
+                    handleInputChange("ngaySinh", newDate);
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* 8. NÚT LƯU THAY ĐỔI - Hiển thị luôn */}
+            <div className={styles["save-button-container"]}>
+              <button
+                className={styles["save-button"]}
+                onClick={handleSaveChanges}
+                disabled={isSaving}
+              >
+                {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
+            </div>
+          </div>
+        );
+      case "doiMatKhau":
+        return (
+          <div className={styles["form-section"]}>
+            <h2 className="mb-4">Đổi mật khẩu</h2>
+
+            {/* Mật khẩu hiện tại */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Mật khẩu hiện tại*</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="password"
+                  className={styles["form-control"]}
+                  placeholder="Mật khẩu hiện tại"
+                  value={changePasswordData.matKhauHienTai}
+                  onChange={(e) =>
+                    handlePasswordChange("matKhauHienTai", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Mật khẩu mới */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Mật khẩu mới*</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="password"
+                  className={styles["form-control"]}
+                  placeholder="Mật khẩu mới"
+                  value={changePasswordData.matKhauMoi}
+                  onChange={(e) =>
+                    handlePasswordChange("matKhauMoi", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Nhập lại mật khẩu mới */}
+            <div className={styles["form-group-horizontal"]}>
+              <label>Nhập lại mật khẩu mới*</label>
+              <div className={styles["input-wrapper"]}>
+                <input
+                  type="password"
+                  className={styles["form-control"]}
+                  placeholder="Nhập lại mật khẩu mới"
+                  value={changePasswordData.nhapLaiMatKhauMoi}
+                  onChange={(e) =>
+                    handlePasswordChange("nhapLaiMatKhauMoi", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Nút lưu thay đổi */}
+            <div className={styles["save-button-container"]}>
+              <button
+                className={styles["save-button"]}
+                onClick={handleChangePassword}
+                disabled={isChangingPassword}
+              >
+                {isChangingPassword ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
+            </div>
+          </div>
+        );
+      case "donHangCuaToi":
+        return (
+          <div className={styles["form-section"]}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Đơn hàng của tôi</h2>
+              {pagination.totalElements > 0 && (
+                <span className="text-muted">
+                  Tổng: {pagination.totalElements} đơn hàng
+                </span>
+              )}
+            </div>
+
+            {isLoadingOrders ? (
+              <div className="text-center p-4">
+                <i className="fas fa-spinner fa-spin me-2"></i>
+                Đang tải danh sách đơn hàng...
+              </div>
+            ) : donHangList.length === 0 ? (
+              <div className={styles["empty-orders"]}>
+                <div className="text-center p-5">
+                  <i
+                    className="fas fa-shopping-cart mb-3"
+                    style={{ fontSize: "3rem", color: "#ccc" }}
+                  ></i>
+                  <h4>Chưa có đơn hàng nào</h4>
+                  <p className="text-muted">
+                    Bạn chưa thực hiện đơn hàng nào. Hãy mua sắm ngay!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Danh sách đơn hàng */}
+                <div className={styles["orders-container"]}>
+                  {donHangList.map((donHang) => (
+                    <div
+                      key={donHang.maDonHang}
+                      className={styles["order-card"]}
+                    >
+                      {/* Header đơn hàng */}
+                      <div
+                        className={styles["order-header"]}
+                        onClick={() => handleOrderClick(donHang.maDonHang)}
+                      >
+                        <div className={styles["order-info"]}>
+                          <div className={styles["order-id"]}>
+                            <strong>#{donHang.maDonHang}</strong>
+                          </div>
+                          <div className={styles["order-date"]}>
+                            Ngày đặt:{" "}
+                            {new Date(donHang.ngayDat).toLocaleDateString(
+                              "vi-VN"
+                            )}
+                          </div>
+                        </div>
+
+                        <div className={styles["order-summary"]}>
+                          <div className={styles["order-total"]}>
+                            {formatCurrency(donHang.tongTien)}
+                          </div>
+                          <div
+                            className={`${
+                              styles["order-status"]
+                            } ${getOrderStatusClass(donHang.trangThaiDonHang)}`}
+                          >
+                            {getOrderStatusText(donHang.trangThaiDonHang)}
+                          </div>
+                          <div className={styles["expand-icon"]}>
+                            <i
+                              className={`fas ${
+                                selectedOrder === donHang.maDonHang
+                                  ? "fa-chevron-up"
+                                  : "fa-chevron-down"
+                              }`}
+                            ></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chi tiết đơn hàng */}
+                      {selectedOrder === donHang.maDonHang && (
+                        <div className={styles["order-details"]}>
+                          {isLoadingOrderDetails ? (
+                            <div className="text-center p-3">
+                              <i className="fas fa-spinner fa-spin me-2"></i>
+                              Đang tải chi tiết...
+                            </div>
+                          ) : chiTietDonHang.length > 0 ? (
+                            <>
+                              <h5 className="mb-3">Chi tiết sản phẩm:</h5>
+                              {chiTietDonHang.map((item, index) => (
+                                <div
+                                  key={index}
+                                  className={styles["order-item"]}
+                                >
+                                  <div className={styles["item-image"]}>
+                                    {item.anhBia ? (
+                                      <>
+                                        <img
+                                          src={`/api/uploads/${item.anhBia}`}
+                                          alt={item.tenSach}
+                                          loading="lazy"
+                                          onError={(e) => {
+                                            const target =
+                                              e.target as HTMLImageElement;
+                                            console.log(
+                                              "❌ Image load error for:",
+                                              item.anhBia
+                                            );
+                                            console.log(
+                                              "❌ Full URL:",
+                                              target.src
+                                            );
+
+                                            if (
+                                              target.src.includes(
+                                                "/api/uploads/"
+                                              )
+                                            ) {
+                                              console.log(
+                                                "❌ Trying direct uploads path..."
+                                              );
+                                              target.src = `/uploads/${item.anhBia}`;
+                                            } else {
+                                              target.style.display = "none";
+                                              const parent =
+                                                target.parentElement;
+                                              if (parent) {
+                                                const placeholder =
+                                                  parent.querySelector(
+                                                    ".placeholder"
+                                                  ) as HTMLElement;
+                                                if (placeholder) {
+                                                  placeholder.style.display =
+                                                    "flex";
+                                                }
+                                              }
+                                            }
+                                          }}
+                                          onLoad={() => {
+                                            console.log(
+                                              "✅ Image loaded successfully:",
+                                              item.anhBia
+                                            );
+                                          }}
+                                        />
+                                        <div
+                                          className="placeholder"
+                                          style={{
+                                            display: "none",
+                                            background: "#f3f4f6",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            height: "100%",
+                                            fontSize: "12px",
+                                            color: "#9ca3af",
+                                            flexDirection: "column",
+                                            gap: "8px",
+                                          }}
+                                        >
+                                          <i
+                                            className="fas fa-book"
+                                            style={{ fontSize: "24px" }}
+                                          ></i>
+                                          <span>Không có ảnh</span>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div
+                                        className="placeholder"
+                                        style={{
+                                          display: "flex",
+                                          background: "#f3f4f6",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          width: "100%",
+                                          height: "100%",
+                                          fontSize: "12px",
+                                          color: "#9ca3af",
+                                          flexDirection: "column",
+                                          gap: "8px",
+                                        }}
+                                      >
+                                        <i
+                                          className="fas fa-book"
+                                          style={{ fontSize: "24px" }}
+                                        ></i>
+                                        <span>Không có ảnh</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className={styles["item-details"]}>
+                                    <h6>{item.tenSach}</h6>
+                                    {item.tacGia && (
+                                      <p className="text-muted mb-1">
+                                        <i className="fas fa-user me-1"></i>
+                                        Tác giả: {item.tacGia}
+                                      </p>
+                                    )}
+                                    <div className="mt-auto">
+                                      <p className="mb-1">
+                                        <i className="fas fa-shopping-cart me-1"></i>
+                                        <span>
+                                          Số lượng:{" "}
+                                          <strong>{item.soLuong}</strong>
+                                        </span>
+                                      </p>
+                                      <p className="mb-0">
+                                        <i className="fas fa-tag me-1"></i>
+                                        <span>
+                                          Đơn giá:{" "}
+                                          <strong>
+                                            {formatCurrency(item.donGia)}
+                                          </strong>
+                                        </span>
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className={styles["item-total"]}>
+                                    <div className="text-end">
+                                      <div className="text-muted small">
+                                        Thành tiền
+                                      </div>
+                                      <div className="fw-bold">
+                                        {formatCurrency(
+                                          item.thanhTien ||
+                                            item.soLuong * item.donGia
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+
+                              <div className={styles["order-total-summary"]}>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <strong>Tổng cộng:</strong>
+                                  <strong className={styles["total-amount"]}>
+                                    {formatCurrency(donHang.tongTien)}
+                                  </strong>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-muted">
+                              Không có chi tiết sản phẩm
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {pagination.totalPages > 1 && (
+                  <div className={styles["pagination-container"]}>
+                    <nav aria-label="Order pagination">
+                      <ul className={styles["pagination"]}>
+                        {/* Previous Button */}
+                        <li
+                          className={`${styles["page-item"]} ${
+                            pagination.currentPage === 0
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handlePageChange(pagination.currentPage - 1)
+                            }
+                            disabled={pagination.currentPage === 0}
+                            aria-label="Previous"
+                          >
+                            <i className="fas fa-chevron-left"></i>
+                          </button>
+                        </li>
+
+                        {/* First page if not visible */}
+                        {pagination.currentPage > 2 && (
+                          <>
+                            <li className={styles["page-item"]}>
+                              <button
+                                className={styles["page-link"]}
+                                onClick={() => handlePageChange(0)}
+                              >
+                                1
+                              </button>
+                            </li>
+                            {pagination.currentPage > 3 && (
+                              <li
+                                className={`${styles["page-item"]} ${styles["disabled"]}`}
+                              >
+                                <span className={styles["page-link"]}>...</span>
+                              </li>
+                            )}
+                          </>
+                        )}
+
+                        {/* Page Numbers */}
+                        {getPageNumbers().map((pageNum) => (
+                          <li
+                            key={pageNum}
+                            className={`${styles["page-item"]} ${
+                              pageNum === pagination.currentPage
+                                ? styles["active"]
+                                : ""
+                            }`}
+                          >
+                            <button
+                              className={styles["page-link"]}
+                              onClick={() => handlePageChange(pageNum)}
+                            >
+                              {pageNum + 1}
+                            </button>
+                          </li>
+                        ))}
+
+                        {/* Last page if not visible */}
+                        {pagination.currentPage < pagination.totalPages - 3 && (
+                          <>
+                            {pagination.currentPage <
+                              pagination.totalPages - 4 && (
+                              <li
+                                className={`${styles["page-item"]} ${styles["disabled"]}`}
+                              >
+                                <span className={styles["page-link"]}>...</span>
+                              </li>
+                            )}
+                            <li className={styles["page-item"]}>
+                              <button
+                                className={styles["page-link"]}
+                                onClick={() =>
+                                  handlePageChange(pagination.totalPages - 1)
+                                }
+                              >
+                                {pagination.totalPages}
+                              </button>
+                            </li>
+                          </>
+                        )}
+
+                        {/* Next Button */}
+                        <li
+                          className={`${styles["page-item"]} ${
+                            pagination.currentPage >= pagination.totalPages - 1
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handlePageChange(pagination.currentPage + 1)
+                            }
+                            disabled={
+                              pagination.currentPage >=
+                              pagination.totalPages - 1
+                            }
+                            aria-label="Next"
+                          >
+                            <i className="fas fa-chevron-right"></i>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+
+                    {/* Page Info */}
+                    <div className={styles["pagination-info"]}>
+                      Trang {pagination.currentPage + 1} /{" "}
+                      {pagination.totalPages}{" "}
+                      <span className="text-muted ms-2">
+                        (Hiển thị {donHangList.length} /{" "}
+                        {pagination.totalElements} đơn hàng)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+
+      case "thongBao":
+        return <h2>Thông báo (Chức năng chưa phát triển)</h2>;
+      case "sachDaMuon":
+        return <h2>Sách đã mượn (Chức năng chưa phát triển)</h2>;
+      default:
+        return <h2>Chọn một mục từ menu bên trái.</h2>;
+    }
+  };
+
+  // (Phần còn lại của component Profile.tsx không thay đổi)
+
+  if (isLoading) {
+    // Chỉ hiển thị loading nếu profileData chưa được load
+    // Achievement dùng dữ liệu cứng nên không cần chờ
+    return (
+      <div className={`container ${styles["profile-container"]}`}>
+        <div className="text-center p-5">Đang tải dữ liệu hồ sơ...</div>
+      </div>
+    );
+  }
+
+  // Dữ liệu hiển thị trong header
+  const customerName = profileData
+    ? `${profileData.hoLot} ${profileData.ten}`
+    : "Khách Hàng";
+
+  return (
+    <div className={`container ${styles["profile-container"]}`}>
+      {/* Profile Header */}
+      <div className={styles["profile-header"]}>
+        <div className={styles["profile-avatar-placeholder"]}>
+          {/* Sử dụng icon giả định */}
+          <i className={memberIconClass}></i>
+        </div>
+        <div className={styles["user-info"]}>
+          <h2>{customerName}</h2>
+          <span className={styles["member-badge"]}>{currentMemberName}</span>
+          <p className="mt-2" style={{ height: "0.9rem" }}></p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className={styles["profile-content"]}>
+        {/* --- Sidebar Menu --- */}
+        <div className={styles["sidebar"]}>
+          <ul className={styles["sidebar-menu"]}>
+            <li className={styles["sidebar-item"]}>
+              <Link to="#" className={styles["sidebar-menu"]}>
+                <i className="fas fa-user me-2"></i> Thông tin tài khoản
+              </Link>
+            </li>
+
+            {menuItems.slice(1).map((item) => (
+              <li key={item.key} className={styles["sidebar-item"]}>
+                <Link
+                  to="#"
+                  onClick={() => handleMenuClick(item.key)}
+                  className={`${
+                    activeMenu === item.key ? styles["active"] : ""
+                  } 
+                              ${
+                                item.isIndented
+                                  ? styles["sidebar-sub-item"]
+                                  : ""
+                              }`}
+                >
+                  {/* HIỂN THỊ ICON NẾU CÓ */}
+                  {item.icon && <i className={`${item.icon} me-2`}></i>}
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* --- Nội dung chính --- */}
+        <div className={styles["content-area"]}>
+          {/* Section 1: Ưu đãi và Thành tích */}
+          <div className="row">
+            <div className="col-md-12">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2
+                  style={{
+                    color: "#043747",
+                    fontWeight: "bold",
+                    fontSize: "1.5rem",
+                    margin: 0,
+                  }}
+                >
+                  Thành tích năm {today}
+                </h2>
+                {/* Thêm indicator loading cho thống kê */}
+                {isLoading && (
+                  <div className="text-muted">
+                    <i className="fas fa-spinner fa-spin me-1"></i>
+                    Đang tải thống kê...
+                  </div>
+                )}
+              </div>
+
+              {/* Box chứa thông tin Ưu đãi và Thành tích */}
+              <div
+                className={styles["achievement-section"]}
+                style={{ gap: "20px", flexWrap: "nowrap" }}
+              >
+                {/* Cột 1: Số đơn hàng - HIỂN THỊ ĐỘNG */}
+                <div
+                  className={styles["achievement-card"]}
+                  style={{ flexBasis: "50%", minWidth: "unset" }}
+                >
+                  <h3>
+                    {isLoading ? (
+                      <i className="fas fa-spinner fa-spin"></i>
+                    ) : (
+                      achievement.soDonHang
+                    )}{" "}
+                    đơn hàng
+                  </h3>
+                  <p>
+                    Tổng số đơn hàng
+                    {!isLoading && achievement.soDonHang > 0 && (
+                      <span className="text-muted ms-1">
+                        (
+                        {activeMenu === "donHangCuaToi" &&
+                        donHangList.length > 0
+                          ? `${getCompletedOrdersCount()} hoàn thành`
+                          : ""}
+                        )
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Cột 2: Đã thanh toán - HIỂN THỊ ĐỘNG */}
+                <div
+                  className={styles["achievement-card"]}
+                  style={{ flexBasis: "50%", minWidth: "unset" }}
+                >
+                  <h3>
+                    {isLoading ? (
+                      <i className="fas fa-spinner fa-spin"></i>
+                    ) : (
+                      formatCurrency(achievement.daThanhToan)
+                    )}
+                  </h3>
+                  <p>
+                    Đã thanh toán
+                    {!isLoading && achievement.daThanhToan > 0 && (
+                      <span className="text-muted ms-1">
+                        (Đơn hàng đã giao)
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Thêm thống kê chi tiết nếu có dữ liệu */}
+              {!isLoading &&
+                achievement.soDonHang > 0 &&
+                activeMenu === "donHangCuaToi" &&
+                donHangList.length > 0 && (
+                  <div className="mt-3">
+                    <div
+                      className="d-flex gap-3 text-muted"
+                      style={{ fontSize: "0.9rem" }}
+                    >
+                      {(() => {
+                        const stats = getOrderStatusStats();
+                        return (
+                          <>
+                            {stats.DANGXULY > 0 && (
+                              <span>
+                                <i className="fas fa-clock me-1 text-warning"></i>
+                                {stats.DANGXULY} đang xử lý
+                              </span>
+                            )}
+                            {stats.DAGIAO > 0 && (
+                              <span>
+                                <i className="fas fa-check-circle me-1 text-success"></i>
+                                {stats.DAGIAO} đã giao
+                              </span>
+                            )}
+                            {stats.DAHUY > 0 && (
+                              <span>
+                                <i className="fas fa-times-circle me-1 text-danger"></i>
+                                {stats.DAHUY} đã hủy
+                              </span>
+                            )}
+                            {stats.GIAOTHATBAI > 0 && (
+                              <span>
+                                <i className="fas fa-exclamation-triangle me-1 text-warning"></i>
+                                {stats.GIAOTHATBAI} giao thất bại
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
+
+          <p
+            className="mt-3 text-end"
+            style={{
+              fontSize: "0.9rem",
+              color: "#6b7280",
+              visibility: "hidden",
+              height: "0.9rem",
+            }}
+          >
+            Quản lí
+          </p>
+
+          <hr className="my-5" />
+
+          {/* Nội dung hồ sơ cá nhân/địa chỉ/mật khẩu */}
+          {renderContent()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Profile;

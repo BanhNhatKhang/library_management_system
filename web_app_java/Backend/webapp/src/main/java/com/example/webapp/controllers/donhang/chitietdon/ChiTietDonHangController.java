@@ -8,7 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+// import java.util.Optional;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/chitietdonhang")
@@ -22,53 +23,40 @@ public class ChiTietDonHangController {
         return chiTietDonHangService.getAllChiTietDonHang();
     }
 
-    @GetMapping("/{maDonHang}/{maSach}")
-    public Optional<ChiTietDonHangDTO> getChiTietDonHangById(
-            @PathVariable String maDonHang,
-            @PathVariable String maSach) {
-        ChiTietDonHangId id = new ChiTietDonHangId(maDonHang, maSach);
-        return chiTietDonHangService.getChiTietDonHangById(id);
-    }
-
     @GetMapping("/donhang/{maDonHang}")
     public List<ChiTietDonHangDTO> getChiTietByMaDonHang(@PathVariable String maDonHang) {
         return chiTietDonHangService.getChiTietByMaDonHang(maDonHang);
     }
 
-    @GetMapping("/sach/{maSach}")
-    public List<ChiTietDonHangDTO> getChiTietByMaSach(@PathVariable String maSach) {
-        return chiTietDonHangService.getChiTietByMaSach(maSach);
+    @GetMapping("/id/{maDonHang}/{maSach}")
+    public ChiTietDonHangDTO getChiTietById(@PathVariable String maDonHang, @PathVariable String maSach) {
+        ChiTietDonHangId id = new ChiTietDonHangId(maDonHang, maSach);
+        return chiTietDonHangService.getChiTietById(id);
     }
 
     @GetMapping("/tongtien/{maDonHang}")
-    public ChiTietDonHangDTO getTongTienByMaDonHang(@PathVariable String maDonHang) {
+    public BigDecimal getTongTienByMaDonHang(@PathVariable String maDonHang) {
         return chiTietDonHangService.getTongTienByMaDonHang(maDonHang);
     }
 
-    @GetMapping("/topsach")
-    public List<ChiTietDonHangDTO> getTopSachBanChay() {
-        return chiTietDonHangService.getTopSachBanChay();
+    @GetMapping("/tongsoluong/{maDonHang}")
+    public Long getTongSoLuongByMaDonHang(@PathVariable String maDonHang) {
+        return chiTietDonHangService.getTongSoLuongByMaDonHang(maDonHang);
     }
-
 
     @PostMapping
-    public ChiTietDonHangDTO createChiTietDonHang(@RequestBody ChiTietDonHangDTO chiTietDonHangDTO) {
-        return chiTietDonHangService.saveChiTietDonHang(chiTietDonHangDTO);
+    public ChiTietDonHangDTO addChiTietDonHang(@RequestBody ChiTietDonHang chiTiet) {
+        return chiTietDonHangService.addChiTietDonHang(chiTiet);
     }
 
-    @PutMapping("/{maDonHang}/{maSach}")
-    public ChiTietDonHang updateChiTietDonHang(
-            @PathVariable String maDonHang,
-            @PathVariable String maSach,
-            @RequestBody ChiTietDonHang chiTietDonHang) {
-        ChiTietDonHangId id = new ChiTietDonHangId(maDonHang, maSach);
-        return chiTietDonHangService.updateChiTietDonHang(id, chiTietDonHang);
+    @PutMapping
+    public ChiTietDonHangDTO updateChiTietDonHang(@RequestBody ChiTietDonHang chiTiet) {
+        return chiTietDonHangService.updateChiTietDonHang(chiTiet);
     }
 
     @DeleteMapping("/{maDonHang}/{maSach}")
-    public String deleteChiTietDonHang(@PathVariable String maDonHang, @PathVariable String maSach) {
+    public void deleteChiTietDonHang(@PathVariable String maDonHang, @PathVariable String maSach) {
         ChiTietDonHangId id = new ChiTietDonHangId(maDonHang, maSach);
         chiTietDonHangService.deleteChiTietDonHang(id);
-        return "Xóa chi tiết đơn hàng thành công";
     }
 }

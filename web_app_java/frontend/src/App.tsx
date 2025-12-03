@@ -59,6 +59,12 @@ import BookDetails from "./pages/users/BookDetails";
 // giỏ hàng
 import Cart from "./pages/users/Cart";
 
+// lọc theo thể loại sách
+import AllCatBook from "./pages/users/AllCatBook";
+
+// hồ sơ người dùng
+import Profile from "./pages/users/Profile";
+
 function App() {
   const { role } = useAuth();
 
@@ -146,6 +152,10 @@ function App() {
               {/* Chi tiết sách */}
               <Route path="/sach/:maSach" element={<BookDetails />} />
               <Route path="/giohang" element={<Cart />} />
+              {/* Trang lọc tất cả thể loại */}
+              <Route path="/the-loai/:maTheLoai" element={<AllCatBook />} />
+              {/* Hồ sơ người dùng */}
+              <Route path="/profile" element={<Profile />} />
             </Routes>
             <Footer />
           </>

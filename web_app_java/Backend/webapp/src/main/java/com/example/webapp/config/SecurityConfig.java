@@ -60,42 +60,44 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .authorizeHttpRequests(auth -> auth
+                // PUBLIC endpoints
                 .requestMatchers(
                     "/api/xacthuc/**", 
                     "/api/home/**",
                     "/api/sach/image/**",
                     "/api/sach/id/**",
-                    "/api/sach/goi-y/**"         
+                    "/api/sach/goi-y/**",
+                    "/api/sach/theloai/**",    
+                    "/api/theloai/id/**",      
+                    "/api/nhaxuatban",
+                    "/uploads/**",
+                    "/api/uploads/**"         
                 ).permitAll()
 
-                .requestMatchers(HttpMethod.POST, "/api/theodoimuonsach")
-                .hasAnyAuthority("DOCGIA", "ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                // DOCGIA profile management
+                .requestMatchers("/api/docgia/thongtin/**").hasRole("DOCGIA")
+                .requestMatchers("/api/docgia/doimatkhau/**").hasRole("DOCGIA") 
+                .requestMatchers("/api/giohang/**").hasRole("DOCGIA")
                 
-                .requestMatchers(HttpMethod.GET, "/api/theodoimuonsach/{maDocGia}").hasRole("DOCGIA")
+                // SỬA: DÙNG HTTP METHOD để tách rõ ràng
+                // DOCGIA order access (chỉ GET own orders)
+                .requestMatchers(HttpMethod.GET, "/api/docgia/donhang/**").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.GET, "/api/chitietdonhang/donhang/**").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.POST, "/api/donhang/thanhtoan").hasRole("DOCGIA")
+                
+                // ADMIN order management (tất cả HTTP methods)
+                .requestMatchers(HttpMethod.GET, "/api/donhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers(HttpMethod.POST, "/api/donhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers(HttpMethod.PUT, "/api/donhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers(HttpMethod.DELETE, "/api/donhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                
+                .requestMatchers("/api/chitietdonhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/admin/**", "/api/sach/**", "/api/theloai/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/nhaxuatban/**", "/api/uudai/**", "/api/nhanvien/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/thongbao/**", "/api/theodoimuonsach/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/docgia/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
 
-                .requestMatchers(
-                    "/api/docgia/thongtin/**", 
-                    "/api/giohang/**"
-                ).hasRole("DOCGIA")
-                
-                .requestMatchers(
-                    "/api/admin/**",
-                    "/api/sach/**",   
-                    "/api/theloai/**",
-                    "/api/nhaxuatban/**", 
-                    "/api/uudai/**",
-                    "/api/docgia/**",    
-                    "/api/nhanvien/**",  
-                    "/api/donhang/**",   
-                    "/api/thongbao/**",  
-                    "/api/chitietdonhang/**", 
-                    "/api/theodoimuonsach/**" 
-                ).hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY") 
-
-                .requestMatchers(
-                    "/api/user/me" 
-                ).authenticated()
-                
+                .requestMatchers("/api/user/me").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

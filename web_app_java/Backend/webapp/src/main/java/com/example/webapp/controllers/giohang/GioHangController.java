@@ -2,9 +2,9 @@ package com.example.webapp.controllers.giohang;
 
 import com.example.webapp.dto.GioHangDTO;
 import com.example.webapp.dto.GioHangResponseDTO;
-import com.example.webapp.models.GioHangId;
 import com.example.webapp.services.GioHangService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -16,9 +16,9 @@ public class GioHangController {
     private GioHangService gioHangService;
 
     
-    @GetMapping("/{maDocGia}")
-    public List<GioHangResponseDTO> getGioHangByDocGia(@PathVariable String maDocGia) {
-        return gioHangService.getGioHangsByMaDocGia(maDocGia);
+    @GetMapping("/{emailDocGia}")
+    public List<GioHangResponseDTO> getGioHangByDocGia(@PathVariable("emailDocGia") String emailDocGia) {
+        return gioHangService.getGioHangsByMaDocGia(emailDocGia);
     }
 
    
@@ -28,21 +28,52 @@ public class GioHangController {
     }
 
     
+    // Endpoint mới cho thêm hoặc cập nhật
+    @PostMapping("/add")
+    public ResponseEntity<?> addOrUpdateGioHang(@RequestBody GioHangDTO gioHangDTO) {
+        try {
+            GioHangResponseDTO result = gioHangService.addOrUpdateGioHang(gioHangDTO);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("Controller error adding/updating cart: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    
     @PutMapping
-    public GioHangDTO updateGioHang(@RequestBody GioHangDTO gioHangDTO) {
-        return gioHangService.addOrUpdateGioHang(gioHangDTO); 
+    public ResponseEntity<?> updateGioHang(@RequestBody GioHangDTO gioHangDTO) {
+        try {
+            GioHangResponseDTO updatedItem = gioHangService.updateGioHang(gioHangDTO);
+            return ResponseEntity.ok(updatedItem);
+        } catch (Exception e) {
+            System.err.println("Controller error updating cart: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     
     @DeleteMapping
     public String deleteGioHangItem(@RequestBody GioHangDTO gioHangDTO) {
-        GioHangId id = new GioHangId(gioHangDTO.getMaDocGia(), gioHangDTO.getMaSach());
-        gioHangService.deleteGioHang(id);
-        return "Giỏ hàng được xóa thành công";
+        try {
+            // Sử dụng method mới để xóa theo identifier
+            gioHangService.deleteGioHangByIdentifier(gioHangDTO.getMaDocGia(), gioHangDTO.getMaSach());
+            return "Xóa sản phẩm khỏi giỏ hàng thành công";
+        } catch (Exception e) {
+            return "Lỗi: " + e.getMessage();
+        }
     }
     
-    @DeleteMapping("/all/{maDocGia}")
-    public void deleteAllGioHangByDocGia(@PathVariable String maDocGia) {
-        gioHangService.deleteAllGioHangByDocGia(maDocGia);
+    @DeleteMapping("/all/{docGiaIdentifier}")
+    public String deleteAllGioHangByDocGia(@PathVariable String docGiaIdentifier) {
+        try {
+            // Sử dụng method mới để xóa tất cả theo identifier
+            gioHangService.deleteAllGioHangByIdentifier(docGiaIdentifier);
+            return "Xóa toàn bộ giỏ hàng thành công";
+        } catch (Exception e) {
+            return "Lỗi: " + e.getMessage();
+        }
     }
 }
