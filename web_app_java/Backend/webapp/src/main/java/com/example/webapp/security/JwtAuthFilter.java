@@ -71,8 +71,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             if (parts.length >= 2) {
                                 String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
                                 ObjectMapper om = new ObjectMapper();
-                                // Map<String, Object> claims = om.readValue(payloadJson, Map.class);
                                 Map<String, Object> claims = om.readValue(payloadJson, new TypeReference<Map<String, Object>>() {});
+                                
                                 if (username == null) {
                                     Object sub = claims.get("sub");
                                     if (sub != null) username = sub.toString();
@@ -82,6 +82,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     if (r == null) r = claims.get("roles");
                                     if (r != null) role = r.toString();
                                 }
+                                
+                                // Thêm thông tin về thời gian hết hạn từ payload
+                                Object exp = claims.get("exp");
+                                if (exp != null) {
+                                    long expTime = ((Number) exp).longValue() * 1000; // Convert to milliseconds
+                                    java.util.Date expirationDate = new java.util.Date(expTime);
+                                    boolean isExpired = expirationDate.before(new java.util.Date());
+                                    System.out.println("JWT Filter - Token expires at: " + expirationDate);
+                                    System.out.println("JWT Filter - Token is expired: " + isExpired);
+                                }
+                                
                                 System.out.println("JWT Filter - Fallback parsed subject:" + username + " role:" + role);
                             }
                         } catch (Exception ex) {

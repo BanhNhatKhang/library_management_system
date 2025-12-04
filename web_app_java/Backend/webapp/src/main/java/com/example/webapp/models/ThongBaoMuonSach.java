@@ -32,7 +32,8 @@ public class ThongBaoMuonSach {
     public enum LoaiThongBao {
         SAPTOIHAN,
         QUAHAN,
-        DATRASACH
+        DATRASACH,
+        DADUYET
     }
     @NotNull
     @Enumerated(EnumType.STRING)

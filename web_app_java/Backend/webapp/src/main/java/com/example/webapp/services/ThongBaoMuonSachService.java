@@ -4,12 +4,14 @@ import com.example.webapp.models.*;
 import com.example.webapp.dto.ThongBaoMuonSachDTO;
 import com.example.webapp.repository.ThongBaoMuonSachRepository;
 import com.example.webapp.repository.TheoDoiMuonSachRepository;
+import com.example.webapp.repository.DocGiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,9 @@ public class ThongBaoMuonSachService {
 
     @Autowired
     private SimpMessagingTemplate tinNhanMau;
+
+    @Autowired
+    private DocGiaRepository docGiaRepository;
 
     public List<ThongBaoMuonSachDTO> getAll() {
         return thongBaoMuonSachRepository.findAll().stream().map(this::toDTO).toList();
@@ -70,7 +75,14 @@ public class ThongBaoMuonSachService {
     public ThongBaoMuonSach toEntity(ThongBaoMuonSachDTO thongBaoMuonSachDTO) {
         ThongBaoMuonSach thongBaoMuonSach = new ThongBaoMuonSach();
         thongBaoMuonSach.setNoiDung(thongBaoMuonSachDTO.getNoiDung());
-        thongBaoMuonSach.setThoiGianGui(thongBaoMuonSachDTO.getThoiGianGui());
+        
+        // Đảm bảo thoiGianGui luôn có giá trị
+        thongBaoMuonSach.setThoiGianGui(
+            thongBaoMuonSachDTO.getThoiGianGui() != null 
+                ? thongBaoMuonSachDTO.getThoiGianGui() 
+                : LocalDateTime.now()
+        );
+        
         thongBaoMuonSach.setLoaiThongBao(ThongBaoMuonSach.LoaiThongBao.valueOf(thongBaoMuonSachDTO.getLoaiThongBao()));
         thongBaoMuonSach.setTrangThaiDaDoc(thongBaoMuonSachDTO.getTrangThaiDaDoc());
 
@@ -101,39 +113,99 @@ public class ThongBaoMuonSachService {
     }
     
 
-    @Scheduled(cron = "0 0 8,16 * * *")
+    @Scheduled(cron = "0 0 8,16 * * *") // Chạy 2 lần/ngày lúc 8h và 16h
     public void guiThongBaoTuDong() {
-        List<TheoDoiMuonSach> muonSachList = theoDoiMuonSachRepository.findAll();
         LocalDate now = LocalDate.now();
-
+        
+        // Lấy danh sách sách đang được mượn
+        List<TheoDoiMuonSach> muonSachList = theoDoiMuonSachRepository.findByTrangThaiMuon(
+            TheoDoiMuonSach.TrangThaiMuon.DANGMUON
+        );
 
         for (TheoDoiMuonSach muonSach : muonSachList) {
             String tenSach = muonSach.getSach() != null ? muonSach.getSach().getTenSach() : muonSach.getId().getMaSach();
-
-            if (muonSach.getNgayTra() != null && ChronoUnit.DAYS.between(now, muonSach.getNgayTra()) == 2) {
-                ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
-                thongBao.setNoiDung("Sách " + tenSach + " sẽ tới hạn trả sau 2 ngày: " + muonSach.getNgayTra() + ". Vui lòng trả trước hạn.");
-                thongBao.setLoaiThongBao("SAPTOIHAN");
-                tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "queue/thongbao", thongBao.getNoiDung());
-                this.save(thongBao);
-
-            }
-            if (muonSach.getNgayTra() != null && now.isAfter(muonSach.getNgayTra())) {
-                ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
-                thongBao.setNoiDung("Sách " + tenSach + " đã quá hạn trả (hạn cuối: " + muonSach.getNgayTra() + "). Vui lòng nộp phạt.");
-                thongBao.setLoaiThongBao("QUAHAN");
-                tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "queue/thongbao", thongBao.getNoiDung());
-                this.save(thongBao);
-            }
-
-            if (muonSach.getTrangThaiMuon() == TheoDoiMuonSach.TrangThaiMuon.DADUYET) {
-                ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
-                thongBao.setNoiDung("Yêu cầu mượn sách " + tenSach + " đã được duyệt. Vui lòng nhận sách tại thư viện.");
-                thongBao.setLoaiThongBao("DADUYET");
-                tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "queue/thongbao", thongBao.getNoiDung());
-                this.save(thongBao);
+            
+            // 1. Kiểm tra sắp tới hạn (2-3 ngày)
+            if (muonSach.getNgayTra() != null) {
+                long soNgayConLai = ChronoUnit.DAYS.between(now, muonSach.getNgayTra());
+                
+                if (soNgayConLai == 2 || soNgayConLai == 3) {
+                    // Kiểm tra đã gửi thông báo SAPTOIHAN chưa
+                    if (!daGuiThongBao(muonSach, ThongBaoMuonSach.LoaiThongBao.SAPTOIHAN)) {
+                        ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
+                        thongBao.setNoiDung("Sách \"" + tenSach + "\" sẽ tới hạn trả vào ngày " + muonSach.getNgayTra() + ". Vui lòng chuẩn bị trả sách đúng hạn.");
+                        thongBao.setLoaiThongBao("SAPTOIHAN");
+                        
+                        this.save(thongBao);
+                        tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "/queue/thongbao", thongBao);
+                    }
+                }
+                
+                // 2. Kiểm tra quá hạn
+                if (now.isAfter(muonSach.getNgayTra())) {
+                    // Kiểm tra đã gửi thông báo QUAHAN chưa (gửi 1 lần/tuần)
+                    if (!daGuiThongBaoTrongTuan(muonSach, ThongBaoMuonSach.LoaiThongBao.QUAHAN)) {
+                        long soNgayQuaHan = ChronoUnit.DAYS.between(muonSach.getNgayTra(), now);
+                        ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
+                        thongBao.setNoiDung("Sách \"" + tenSach + "\" đã quá hạn trả " + soNgayQuaHan + " ngày (hạn cuối: " + muonSach.getNgayTra() + "). Vui lòng trả sách ngay và nộp phí phạt.");
+                        thongBao.setLoaiThongBao("QUAHAN");
+                        
+                        this.save(thongBao);
+                        tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "/queue/thongbao", thongBao);
+                    }
+                }
             }
         }
+        
+        // 3. Kiểm tra sách vừa được duyệt
+        List<TheoDoiMuonSach> sachDaDuyet = theoDoiMuonSachRepository.findByTrangThaiMuon(
+            TheoDoiMuonSach.TrangThaiMuon.DADUYET
+        );
+        
+        for (TheoDoiMuonSach muonSach : sachDaDuyet) {
+            if (!daGuiThongBao(muonSach, ThongBaoMuonSach.LoaiThongBao.DADUYET)) {
+                String tenSach = muonSach.getSach() != null ? muonSach.getSach().getTenSach() : muonSach.getId().getMaSach();
+                ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
+                thongBao.setNoiDung("Yêu cầu mượn sách \"" + tenSach + "\" đã được phê duyệt. Vui lòng đến thư viện để nhận sách trong vòng 3 ngày làm việc.");
+                thongBao.setLoaiThongBao("DADUYET");
+                
+                this.save(thongBao);
+                tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "/queue/thongbao", thongBao);
+            }
+        }
+    }
+
+    // Phương thức kiểm tra đã gửi thông báo chưa
+    private boolean daGuiThongBao(TheoDoiMuonSach muonSach, ThongBaoMuonSach.LoaiThongBao loaiThongBao) {
+        List<ThongBaoMuonSach> danhSach = thongBaoMuonSachRepository.findByTheoDoiMuonSach_Id_MaDocGiaAndTheoDoiMuonSach_Id_MaSachAndLoaiThongBao(
+            muonSach.getId().getMaDocGia(),
+            muonSach.getId().getMaSach(),
+            loaiThongBao
+        );
+        return !danhSach.isEmpty();
+    }
+
+    // Kiểm tra đã gửi thông báo trong tuần (cho thông báo quá hạn)
+    private boolean daGuiThongBaoTrongTuan(TheoDoiMuonSach muonSach, ThongBaoMuonSach.LoaiThongBao loaiThongBao) {
+        LocalDate tuanTruoc = LocalDate.now().minusDays(7);
+        List<ThongBaoMuonSach> danhSach = thongBaoMuonSachRepository.findByTheoDoiMuonSach_Id_MaDocGiaAndTheoDoiMuonSach_Id_MaSachAndLoaiThongBaoAndThoiGianGuiAfter(
+            muonSach.getId().getMaDocGia(),
+            muonSach.getId().getMaSach(),
+            loaiThongBao,
+            tuanTruoc.atStartOfDay()
+        );
+        return !danhSach.isEmpty();
+    }
+
+    // Phương thức tự động gửi thông báo khi trả sách (gọi từ service trả sách)
+    public void guiThongBaoTraSach(TheoDoiMuonSach muonSach) {
+        String tenSach = muonSach.getSach() != null ? muonSach.getSach().getTenSach() : muonSach.getId().getMaSach();
+        ThongBaoMuonSachDTO thongBao = taoThongBao(muonSach);
+        thongBao.setNoiDung("Bạn đã trả thành công sách \"" + tenSach + "\" vào ngày " + LocalDate.now() + ". Cảm ơn bạn đã sử dụng dịch vụ thư viện đúng quy định.");
+        thongBao.setLoaiThongBao("DATRASACH");
+        
+        this.save(thongBao);
+        tinNhanMau.convertAndSendToUser(muonSach.getId().getMaDocGia(), "/queue/thongbao", thongBao);
     }
 
     private ThongBaoMuonSachDTO taoThongBao(TheoDoiMuonSach muonSach) {
@@ -141,8 +213,170 @@ public class ThongBaoMuonSachService {
         thongBao.setMaDocGia(muonSach.getId().getMaDocGia());
         thongBao.setMaSach(muonSach.getId().getMaSach());
         thongBao.setNgayMuon(muonSach.getId().getNgayMuon().toString());
+        thongBao.setThoiGianGui(LocalDateTime.now()); // Thêm dòng này
         thongBao.setTrangThaiDaDoc(false);
         return thongBao;
+    }
+
+    public String taoThongBaoTuDong(String loaiThongBao, String noiDungMau) {
+        ThongBaoMuonSach.LoaiThongBao loai = ThongBaoMuonSach.LoaiThongBao.valueOf(loaiThongBao);
+        int soThongBaoTao = 0;
+        
+        switch (loai) {
+            case DADUYET:
+                soThongBaoTao = guiThongBaoChoPhieuDaDuyet(noiDungMau);
+                break;
+            case SAPTOIHAN:
+                soThongBaoTao = guiThongBaoSapToiHan(noiDungMau);
+                break;
+            case QUAHAN:
+                soThongBaoTao = guiThongBaoQuaHan(noiDungMau);
+                break;
+            case DATRASACH:
+                soThongBaoTao = guiThongBaoPhieuDaTra(noiDungMau);
+                break;
+        }
+        
+        return "Đã tạo " + soThongBaoTao + " thông báo loại " + loaiThongBao;
+    }
+
+    private int guiThongBaoChoPhieuDaDuyet(String noiDungMau) {
+        List<TheoDoiMuonSach> phieuDaDuyet = theoDoiMuonSachRepository.findByTrangThaiMuon(
+            TheoDoiMuonSach.TrangThaiMuon.DADUYET
+        );
+        
+        int count = 0;
+        for (TheoDoiMuonSach phieu : phieuDaDuyet) {
+            if (!daGuiThongBao(phieu, ThongBaoMuonSach.LoaiThongBao.DADUYET)) {
+                String tenSach = phieu.getSach() != null ? phieu.getSach().getTenSach() : phieu.getId().getMaSach();
+                ThongBaoMuonSachDTO thongBao = taoThongBao(phieu);
+                thongBao.setNoiDung(noiDungMau.replace("{tenSach}", tenSach));
+                thongBao.setLoaiThongBao("DADUYET");
+                
+                this.save(thongBao);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int guiThongBaoSapToiHan(String noiDungMau) {
+        LocalDate now = LocalDate.now();
+        LocalDate ngayKiemTra1 = now.plusDays(2);
+        LocalDate ngayKiemTra2 = now.plusDays(3);
+        
+        List<TheoDoiMuonSach> phieuSapToiHan = theoDoiMuonSachRepository.findByTrangThaiMuon(
+            TheoDoiMuonSach.TrangThaiMuon.DANGMUON
+        ).stream().filter(phieu -> 
+            phieu.getNgayTra() != null && 
+            (phieu.getNgayTra().equals(ngayKiemTra1) || phieu.getNgayTra().equals(ngayKiemTra2))
+        ).toList();
+        
+        int count = 0;
+        for (TheoDoiMuonSach phieu : phieuSapToiHan) {
+            if (!daGuiThongBao(phieu, ThongBaoMuonSach.LoaiThongBao.SAPTOIHAN)) {
+                String tenSach = phieu.getSach() != null ? phieu.getSach().getTenSach() : phieu.getId().getMaSach();
+                ThongBaoMuonSachDTO thongBao = taoThongBao(phieu);
+                thongBao.setNoiDung(noiDungMau.replace("{tenSach}", tenSach).replace("{ngayTra}", phieu.getNgayTra().toString()));
+                thongBao.setLoaiThongBao("SAPTOIHAN");
+                
+                this.save(thongBao);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int guiThongBaoQuaHan(String noiDungMau) {
+        LocalDate now = LocalDate.now();
+        
+        List<TheoDoiMuonSach> phieuQuaHan = theoDoiMuonSachRepository.findByTrangThaiMuon(
+            TheoDoiMuonSach.TrangThaiMuon.DANGMUON
+        ).stream().filter(phieu -> 
+            phieu.getNgayTra() != null && now.isAfter(phieu.getNgayTra())
+        ).toList();
+        
+        int count = 0;
+        for (TheoDoiMuonSach phieu : phieuQuaHan) {
+            if (!daGuiThongBaoTrongTuan(phieu, ThongBaoMuonSach.LoaiThongBao.QUAHAN)) {
+                String tenSach = phieu.getSach() != null ? phieu.getSach().getTenSach() : phieu.getId().getMaSach();
+                long soNgayQuaHan = ChronoUnit.DAYS.between(phieu.getNgayTra(), now);
+                
+                ThongBaoMuonSachDTO thongBao = taoThongBao(phieu);
+                thongBao.setNoiDung(noiDungMau
+                    .replace("{tenSach}", tenSach)
+                    .replace("{soNgayQuaHan}", String.valueOf(soNgayQuaHan))
+                    .replace("{ngayTra}", phieu.getNgayTra().toString()));
+                thongBao.setLoaiThongBao("QUAHAN");
+                
+                this.save(thongBao);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int guiThongBaoPhieuDaTra(String noiDungMau) {
+        LocalDate now = LocalDate.now();
+        
+        List<TheoDoiMuonSach> phieuDaTra = theoDoiMuonSachRepository.findByTrangThaiMuon(
+            TheoDoiMuonSach.TrangThaiMuon.DATRA
+        ).stream().filter(phieu -> 
+            // Chỉ gửi cho phiếu trả trong ngày hôm nay
+            phieu.getId().getNgayMuon().equals(now) || 
+            (phieu.getNgayTra() != null && phieu.getNgayTra().equals(now))
+        ).toList();
+        
+        int count = 0;
+        for (TheoDoiMuonSach phieu : phieuDaTra) {
+            if (!daGuiThongBao(phieu, ThongBaoMuonSach.LoaiThongBao.DATRASACH)) {
+                String tenSach = phieu.getSach() != null ? phieu.getSach().getTenSach() : phieu.getId().getMaSach();
+                
+                ThongBaoMuonSachDTO thongBao = taoThongBao(phieu);
+                thongBao.setNoiDung(noiDungMau
+                    .replace("{tenSach}", tenSach)
+                    .replace("{ngayTra}", now.toString()));
+                thongBao.setLoaiThongBao("DATRASACH");
+                
+                this.save(thongBao);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public void markAsRead(Long id) {
+        ThongBaoMuonSach thongBao = thongBaoMuonSachRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo"));
+        thongBao.setTrangThaiDaDoc(true);
+        thongBaoMuonSachRepository.save(thongBao);
+    }
+
+    public ThongBaoMuonSachDTO updateThongBao(Long id, ThongBaoMuonSachDTO dto) {
+        ThongBaoMuonSach existing = thongBaoMuonSachRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo"));
+        
+        existing.setNoiDung(dto.getNoiDung());
+        existing.setLoaiThongBao(ThongBaoMuonSach.LoaiThongBao.valueOf(dto.getLoaiThongBao()));
+        existing.setTrangThaiDaDoc(dto.getTrangThaiDaDoc());
+        
+        return toDTO(thongBaoMuonSachRepository.save(existing));
+    }
+
+    public List<ThongBaoMuonSachDTO> getByEmail(String email) {
+        System.out.println("Looking for docgia with email: " + email);
+        
+        // Tìm DocGia bằng email
+        DocGia docGia = docGiaRepository.findByEmail(email);
+        if (docGia == null) {
+            System.out.println("No docgia found with email: " + email);
+            return List.of(); // Trả về danh sách rỗng
+        }
+        
+        System.out.println("Found docgia: " + docGia.getMaDocGia());
+        
+        // Lấy thông báo bằng maDocGia
+        return getByMaDocGia(docGia.getMaDocGia());
     }
 
 }

@@ -84,7 +84,10 @@ public class SecurityConfig {
                 
                 // Cho phép độc giả tạo yêu cầu mượn sách
                 .requestMatchers(HttpMethod.POST, "/api/theodoimuonsach").hasRole("DOCGIA")
-                // .requestMatchers(HttpMethod.GET, "/api/theodoimuonsach/**").hasRole("DOCGIA")
+                // Thêm quyền cho DOCGIA truy cập thông báo 
+                .requestMatchers(HttpMethod.GET, "/api/thongbao/current-user").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.GET, "/api/thongbao/docgia/**").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.PUT, "/api/thongbao/*/mark-read").hasRole("DOCGIA")
 
                 // DOCGIA order access (chỉ GET own orders)
                 .requestMatchers(HttpMethod.GET, "/api/docgia/donhang/**").hasRole("DOCGIA")
@@ -103,9 +106,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/chitietdonhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/admin/**", "/api/sach/**", "/api/theloai/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/nhaxuatban/**", "/api/uudai/**", "/api/nhanvien/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
-                .requestMatchers("/api/thongbao/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/thongbao/auto/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/thongbao/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")        
                 .requestMatchers("/api/docgia/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
-
                 .requestMatchers("/api/user/me").authenticated()
                 .anyRequest().authenticated()
             )

@@ -104,10 +104,10 @@ const TBEdit: React.FC = () => {
               value={form.loaiThongBao}
               onChange={(e) => changeField("loaiThongBao", e.target.value)}
             >
-              <option value="THONGBAOCHUNG">THONGBAOCHUNG</option>
-              <option value="QUA_HAN">QUÁ HẠN</option>
-              <option value="SAP_DEN_HAN">SẮP ĐẾN HẠN</option>
-              <option value="HETHONG">HỆ THỐNG</option>
+              <option value="DADUYET">Đã duyệt</option>
+              <option value="QUAHAN">Quá hạn</option>
+              <option value="SAPTOIHAN">Sắp đến hạn</option>
+              <option value="DATRASACH">Đã trả sách</option>
             </select>
           </div>
 

@@ -47,10 +47,12 @@ interface HeaderCategory {
 
 interface Notification {
   id: number;
-  title: string;
-  message: string;
-  time: string;
-  isRead: boolean;
+  maDocGia: string;
+  maSach: string;
+  noiDung: string;
+  thoiGianGui: string;
+  loaiThongBao: string;
+  trangThaiDaDoc: boolean;
 }
 
 const mainCategories: HeaderCategory[] = [
@@ -119,38 +121,117 @@ const Header = () => {
     };
   }, [fetchCartCount]);
 
+  // Giữ lại chỉ function fetchNotifications này
+  const fetchNotifications = async () => {
+    try {
+      console.log("Fetching notifications for current user");
+      const res = await axios.get(`/api/thongbao/current-user`);
+      console.log("Notifications received:", res.data);
+      setNotifications(res.data || []);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setNotifications([]);
+    }
+  };
+
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
     const storedToken = localStorage.getItem("authToken");
-
     const storedFullName = localStorage.getItem("fullName") || storedUserName;
-
     const isUserLoggedIn = !!storedToken;
 
     if (isUserLoggedIn) {
       setIsLoggedIn(true);
       setUserName(storedUserName || "Tài Khoản");
       setFullName(storedFullName || storedUserName || "Khách hàng");
+
+      // Lấy thông báo cho user đã đăng nhập - không cần truyền tham số
+      fetchNotifications();
     } else {
       setIsLoggedIn(false);
       setUserName("Tài Khoản");
       setFullName("");
+      setNotifications([]);
     }
 
+    // Lấy danh mục sách
     axios
       .get("/api/home/sach-theo-theloai")
       .then((res) => {
         setCategoriesWithBooks(res.data);
       })
       .catch(() => setCategoriesWithBooks([]));
-
-    axios
-      .get("/api/home/thongbao")
-      .then((res) => setNotifications(res.data))
-      .catch(() => setNotifications([]));
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  // Đếm số thông báo chưa đọc
+  const unreadCount = notifications.filter((n) => !n.trangThaiDaDoc).length;
+
+  // Function để format thời gian
+  const formatNotificationTime = (timeString: string) => {
+    try {
+      const date = new Date(timeString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMins < 1) return "Vừa xong";
+      if (diffMins < 60) return `${diffMins} phút trước`;
+      if (diffHours < 24) return `${diffHours} giờ trước`;
+      if (diffDays < 7) return `${diffDays} ngày trước`;
+
+      return date.toLocaleDateString("vi-VN");
+    } catch {
+      return timeString;
+    }
+  };
+
+  // Function để lấy màu cho từng loại thông báo
+  const getNotificationColor = (loaiThongBao: string) => {
+    switch (loaiThongBao) {
+      case "DADUYET":
+        return "#10b981"; // Green
+      case "QUAHAN":
+        return "#ef4444"; // Red
+      case "SAPTOIHAN":
+        return "#f59e0b"; // Orange
+      case "DATRASACH":
+        return "#3b82f6"; // Blue
+      default:
+        return "#6b7280"; // Gray
+    }
+  };
+
+  // Function để lấy icon cho từng loại thông báo
+  const getNotificationIcon = (loaiThongBao: string) => {
+    switch (loaiThongBao) {
+      case "DADUYET":
+        return "fa-check-circle";
+      case "QUAHAN":
+        return "fa-exclamation-triangle";
+      case "SAPTOIHAN":
+        return "fa-clock";
+      case "DATRASACH":
+        return "fa-book";
+      default:
+        return "fa-bell";
+    }
+  };
+
+  // Function để mark thông báo là đã đọc
+  const markNotificationAsRead = async (notificationId: number) => {
+    try {
+      await axios.put(`/api/thongbao/${notificationId}/mark-read`);
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === notificationId ? { ...n, trangThaiDaDoc: true } : n
+        )
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
   const handleLogout = () => {
     // Xóa tất cả các khóa liên quan đến người dùng trong Local Storage
@@ -376,7 +457,7 @@ const Header = () => {
                       <i className="fas fa-bell"></i>
                       {unreadCount > 0 && (
                         <span className={styles["notification-badge"]}>
-                          {unreadCount}
+                          {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                       )}
                     </button>
@@ -390,34 +471,92 @@ const Header = () => {
                         onMouseLeave={() => setIsNotificationsOpen(false)}
                       >
                         <div className={styles["notification-header"]}>
-                          <h3>Thông báo</h3>
+                          <h3>Thông báo ({notifications.length})</h3>
                         </div>
                         <div className={styles["notification-list"]}>
-                          {notifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              className={`${styles["notification-item"]} ${
-                                notification.isRead
-                                  ? styles["read"]
-                                  : styles["unread"]
-                              }`}
-                            >
+                          {notifications.length === 0 ? (
+                            <div className={styles["notification-item"]}>
                               <div className={styles["notification-content"]}>
-                                <h4>{notification.title}</h4>
-                                <p>{notification.message}</p>
-                                <span className={styles["notification-time"]}>
-                                  {notification.time}
-                                </span>
+                                <p
+                                  style={{
+                                    textAlign: "center",
+                                    color: "#9ca3af",
+                                    fontStyle: "italic",
+                                  }}
+                                >
+                                  Không có thông báo nào
+                                </p>
                               </div>
-                              {!notification.isRead && (
-                                <div className={styles["unread-dot"]}></div>
-                              )}
                             </div>
-                          ))}
+                          ) : (
+                            notifications.slice(0, 10).map((notification) => (
+                              <div
+                                key={notification.id}
+                                className={`${styles["notification-item"]} ${
+                                  !notification.trangThaiDaDoc
+                                    ? styles["unread"]
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  markNotificationAsRead(notification.id)
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <div className={styles["notification-content"]}>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      marginBottom: "4px",
+                                    }}
+                                  >
+                                    <i
+                                      className={`fas ${getNotificationIcon(
+                                        notification.loaiThongBao
+                                      )}`}
+                                      style={{
+                                        color: getNotificationColor(
+                                          notification.loaiThongBao
+                                        ),
+                                        marginRight: "8px",
+                                        fontSize: "0.9rem",
+                                      }}
+                                    />
+                                    <h4
+                                      style={{ margin: 0, fontSize: "0.95rem" }}
+                                    >
+                                      Sách: {notification.maSach}
+                                    </h4>
+                                  </div>
+                                  <p
+                                    style={{
+                                      margin: "0 0 4px 0",
+                                      fontSize: "0.85rem",
+                                    }}
+                                  >
+                                    {notification.noiDung.length > 80
+                                      ? notification.noiDung.substring(0, 80) +
+                                        "..."
+                                      : notification.noiDung}
+                                  </p>
+                                  <span className={styles["notification-time"]}>
+                                    {formatNotificationTime(
+                                      notification.thoiGianGui
+                                    )}
+                                  </span>
+                                </div>
+                                {!notification.trangThaiDaDoc && (
+                                  <div className={styles["unread-dot"]}></div>
+                                )}
+                              </div>
+                            ))
+                          )}
                         </div>
-                        <div className={styles["notification-footer"]}>
-                          <a href="#">Xem tất cả</a>
-                        </div>
+                        {notifications.length > 0 && (
+                          <div className={styles["notification-footer"]}>
+                            <Link to="/profile">Xem tất cả</Link>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
