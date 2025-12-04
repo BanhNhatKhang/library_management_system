@@ -33,9 +33,12 @@ interface DonHang {
 interface ChiTietDonHang {
   maDonHang: string;
   maSach: string;
+  tenSach?: string; // THÊM
+  tacGia?: string; // THÊM
+  anhBia?: string; // THÊM
   soLuong: number;
   donGia: number;
-  tongTien: number;
+  thanhTien?: number;
 }
 
 const DHDetails: React.FC = () => {
@@ -72,11 +75,32 @@ const DHDetails: React.FC = () => {
   // Lấy chi tiết đơn hàng
   useEffect(() => {
     if (!maDonHang) return;
+
+    console.log("🔍 Fetching chi tiet for order:", maDonHang);
+
+    // SỬA: Sử dụng endpoint có sẵn trong DonHangController
     axios
-      .get(`/api/chitietdonhang/donhang/${maDonHang}`)
-      .then((res) => setChiTietList(res.data))
-      .catch(() => setChiTietList([]));
-  }, [maDonHang]);
+      .get(`/api/donhang/${maDonHang}/chitiet`) // Endpoint mới
+      .then((res) => {
+        console.log("✅ Chi tiet response:", res.data);
+        setChiTietList(res.data || []);
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching chi tiet:", error);
+        console.error("❌ Error response:", error.response?.data);
+
+        // FALLBACK: Nếu endpoint không có, thử cách khác
+        console.log("🔄 Trying alternative approach...");
+
+        // Lấy từ thông tin đơn hàng đã có
+        if (donHang) {
+          // Có thể backend đã include chi tiết trong response đơn hàng
+          console.log("📦 Current donHang data:", donHang);
+        }
+
+        setChiTietList([]);
+      });
+  }, [maDonHang, donHang]); // Thêm donHang vào dependency
 
   const formatDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString("vi-VN") : "—";
@@ -207,29 +231,81 @@ const DHDetails: React.FC = () => {
         {active === "chitiet" && (
           <div className={styles["tab-panel"]}>
             {chiTietList.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Mã sách</th>
-                    <th>Số lượng</th>
-                    <th>Đơn giá</th>
-                    <th>Tổng tiền</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chiTietList.map((ct) => (
-                    <tr key={`${ct.maSach}-${ct.maDonHang}`}>
-                      <td>{ct.maSach}</td>
-                      <td>{ct.soLuong}</td>
-                      <td>{formatPrice(ct.donGia)}</td>
-                      <td>{formatPrice(ct.tongTien)}</td>
+              <div className={styles["table-container"]}>
+                <table className={styles["data-table"]}>
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Mã sách</th>
+                      <th>Tên sách</th>
+                      <th>Số lượng</th>
+                      <th>Đơn giá</th>
+                      <th>Thành tiền</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {chiTietList.map((ct, index) => (
+                      <tr key={`${ct.maSach}-${ct.maDonHang}`}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <span className={styles["ma-sach"]} title={ct.maSach}>
+                            {ct.maSach}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={styles["ten-sach"]}
+                            title={ct.tenSach}
+                          >
+                            {ct.tenSach || "—"}
+                          </span>
+                        </td>
+                        <td className={styles["so-luong"]}>{ct.soLuong}</td>
+                        <td className={styles["gia-tien"]}>
+                          {formatPrice(ct.donGia)}
+                        </td>
+                        <td className={styles["thanh-tien"]}>
+                          {formatPrice(ct.thanhTien || ct.donGia * ct.soLuong)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className={styles["total-section"]}>
+                  <div className={styles["total-row"]}>
+                    <span>Tổng số lượng:</span>
+                    <span>
+                      {chiTietList.reduce((sum, ct) => sum + ct.soLuong, 0)}{" "}
+                      cuốn
+                    </span>
+                  </div>
+                  <div className={styles["total-row"]}>
+                    <span>Tổng tiền:</span>
+                    <span className={styles["total-amount"]}>
+                      {formatPrice(
+                        chiTietList.reduce(
+                          (sum, ct) =>
+                            sum + (ct.thanhTien || ct.donGia * ct.soLuong),
+                          0
+                        )
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className={styles["no-data"]}>
-                📚 Không có sách trong đơn hàng
+                <div className={styles["empty-state"]}>
+                  <h3>📦 Không có sách trong đơn hàng</h3>
+                  <p>
+                    Đơn hàng <strong>{maDonHang}</strong> chưa có chi tiết sách.
+                  </p>
+                  <p className={styles["suggestion"]}>
+                    💡 Có thể đơn hàng này đang được xử lý hoặc chưa được thêm
+                    sách.
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -239,31 +315,36 @@ const DHDetails: React.FC = () => {
         {active === "uudai" && (
           <div className={styles["tab-panel"]}>
             {donHang.uuDais && donHang.uuDais.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Mã ưu đãi</th>
-                    <th>Tên ưu đãi</th>
-                    <th>Phần trăm giảm</th>
-                    <th>Ngày bắt đầu</th>
-                    <th>Ngày kết thúc</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {donHang.uuDais.map((u) => (
-                    <tr key={u.maUuDai}>
-                      <td>{u.maUuDai}</td>
-                      <td>{u.tenUuDai}</td>
-                      <td>{u.phanTramGiam}%</td>
-                      <td>{formatDate(u.ngayBatDau)}</td>
-                      <td>{formatDate(u.ngayKetThuc)}</td>
+              <div className={styles["table-container"]}>
+                <table className={styles["data-table"]}>
+                  <thead>
+                    <tr>
+                      <th>Mã ưu đãi</th>
+                      <th>Tên ưu đãi</th>
+                      <th>Phần trăm giảm</th>
+                      <th>Ngày bắt đầu</th>
+                      <th>Ngày kết thúc</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {donHang.uuDais.map((u) => (
+                      <tr key={u.maUuDai}>
+                        <td>{u.maUuDai}</td>
+                        <td>{u.tenUuDai}</td>
+                        <td>{u.phanTramGiam}%</td>
+                        <td>{formatDate(u.ngayBatDau)}</td>
+                        <td>{formatDate(u.ngayKetThuc)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <div className={styles["no-data"]}>
-                🎁 Không có ưu đãi áp dụng
+                <div className={styles["empty-state"]}>
+                  <h3>🎁 Không có ưu đãi áp dụng</h3>
+                  <p>Đơn hàng này chưa sử dụng ưu đãi nào.</p>
+                </div>
               </div>
             )}
           </div>

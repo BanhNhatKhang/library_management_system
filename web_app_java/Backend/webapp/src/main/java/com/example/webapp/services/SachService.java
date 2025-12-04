@@ -118,9 +118,17 @@ public class SachService {
         return sachRepository.findByTacGia(tacGia).stream().map(this::toDTO).toList();
     }
 
-    public List<SachDTO> getSachByNhaXuatBan(String tenNhaXuatBan) {
-        return sachRepository.findByNhaXuatBan_TenNhaXuatBan(tenNhaXuatBan).stream().map(this::toDTO).toList();
+    public List<SachDTO> getSachByNhaXuatBan(String maNhaXuatBan) {
+    try {
+        // Lấy tất cả sách theo nhà xuất bản
+        return sachRepository.findByNhaXuatBan_MaNhaXuatBan(maNhaXuatBan)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    } catch (Exception e) {
+        throw new RuntimeException("Lỗi khi lấy sách theo nhà xuất bản: " + e.getMessage());
     }
+}
 
     public List<SachDTO> getSachGoiY(String maSach) {
         return getAllSach();

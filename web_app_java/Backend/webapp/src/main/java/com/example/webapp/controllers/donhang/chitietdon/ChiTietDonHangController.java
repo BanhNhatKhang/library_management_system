@@ -5,6 +5,7 @@ import com.example.webapp.models.ChiTietDonHang;
 import com.example.webapp.models.ChiTietDonHangId;
 import com.example.webapp.services.ChiTietDonHangService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,14 @@ public class ChiTietDonHangController {
     }
 
     @GetMapping("/donhang/{maDonHang}")
-    public List<ChiTietDonHangDTO> getChiTietByMaDonHang(@PathVariable String maDonHang) {
-        return chiTietDonHangService.getChiTietByMaDonHang(maDonHang);
+    public ResponseEntity<List<ChiTietDonHangDTO>> getChiTietByDonHang(@PathVariable String maDonHang) {
+        try {
+            List<ChiTietDonHangDTO> chiTietList = chiTietDonHangService.getChiTietByMaDonHang(maDonHang);
+            return ResponseEntity.ok(chiTietList);
+        } catch (Exception e) {
+            System.err.println("❌ Error getting chi tiet don hang: " + e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/id/{maDonHang}/{maSach}")

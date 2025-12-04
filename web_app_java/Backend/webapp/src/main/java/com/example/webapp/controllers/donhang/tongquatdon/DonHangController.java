@@ -5,7 +5,6 @@ import com.example.webapp.services.DonHangService;
 import com.example.webapp.dto.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.webapp.dto.ThanhToanRequestDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;
@@ -30,9 +29,31 @@ public class DonHangController {
                 .orElseThrow(() -> new RuntimeException("không tìm thấy mã đơn hàng với mã: " + maDonHang));
     }
 
+    @GetMapping("/{maDonHang}/chitiet")
+    public ResponseEntity<List<ChiTietDonHangDTO>> getChiTietDonHang(@PathVariable String maDonHang) {
+        try {
+            List<ChiTietDonHangDTO> chiTietList = donHangService.getChiTietDonHang(maDonHang);
+            return ResponseEntity.ok(chiTietList);
+        } catch (Exception e) {
+            System.err.println("❌ Error getting chi tiet don hang: " + e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/sdt/{dienThoai}")
-    public List<DonHangDTO> getDonHangByDienThoai(@PathVariable String dienThoai) {
-        return donHangService.getDonHangByDienThoai(dienThoai);
+    public ResponseEntity<List<DonHangDTO>> getDonHangBySoDienThoai(@PathVariable String dienThoai) {
+        try {
+            List<DonHangDTO> donHangList = donHangService.getDonHangBySoDienThoai(dienThoai);
+            
+            // Xử lý tên sách trong service đã đủ, không cần làm gì thêm ở đây
+            System.out.println("✅ Trả về " + donHangList.size() + " đơn hàng cho SĐT: " + dienThoai);
+            
+            return ResponseEntity.ok(donHangList);
+        } catch (Exception e) {
+            System.err.println("❌ Error getting orders by phone: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/ten")

@@ -258,4 +258,12 @@ public class DocGiaService {
         return docGia;
     }
 
+    // Thêm method này vào DocGiaService
+    public DocGia findByEmail(String email) {
+    DocGia docGia = docGiaRepository.findByEmail(email);
+    if (docGia == null) {
+        throw new RuntimeException("DocGia không tồn tại với email: " + email);
+    }
+    return docGia;
+}
 }

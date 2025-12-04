@@ -10,6 +10,23 @@ public class NhanVienDangKyDTO {
     private String diaChi;
     private LocalDate ngaySinh;
     private String matKhau;
+    private String vaiTro;
+    public String getVaiTro() {
+        return vaiTro;
+    }
+
+    public void setVaiTro(String vaiTro) {
+        this.vaiTro = vaiTro;
+    }
+    private String trangThai;
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
 
     public String getMaNhanVien() {
         return maNhanVien;

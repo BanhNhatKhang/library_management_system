@@ -2,6 +2,8 @@ package com.example.webapp.repository;
 
 import com.example.webapp.models.ChiTietDonHang;
 import com.example.webapp.models.ChiTietDonHangId;
+import com.example.webapp.models.DonHang;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,7 @@ import java.util.Optional;
 public interface ChiTietDonHangRepository extends JpaRepository<ChiTietDonHang, ChiTietDonHangId> {
 
     List<ChiTietDonHang> findByDonHang_MaDonHang(String maDonHang);
+    List<ChiTietDonHang> findByDonHang(DonHang donHang);
     List<ChiTietDonHang> findBySach_MaSach(String maSach);
     Optional<ChiTietDonHang> findByDonHang_MaDonHangAndSach_MaSach(String maDonHang, String maSach);
     long countByDonHang_MaDonHang(String maDonHang);

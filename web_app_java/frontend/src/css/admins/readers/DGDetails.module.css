@@ -120,6 +120,7 @@
 .dg-details table th,
 .dg-details table td {
   padding: 10px 14px;
+  color: black;
   border-bottom: 1px solid #e8e8e8;
   text-align: left;
 }
@@ -139,7 +140,7 @@
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 500;
-  color: #fff;
+  color: black;
 }
 
 .dg-details .trang-thai.dang-muon {
@@ -176,4 +177,215 @@
 
 .dg-details .btn-edit:hover {
   background: #0b5ed7;
+}
+
+/* THÊM: Styles cho phân trang */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-size: 0.9rem;
+}
+
+.pagination-info {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #dee2e6;
+  background: #ffffff;
+  color: #495057;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: 600;
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+  color: #adb5bd;
+}
+
+.pagination-btn.nav-btn {
+  padding: 0.5rem 0.8rem;
+  font-weight: 600;
+  min-width: auto;
+}
+
+.pagination-summary {
+  display: flex;
+  align-items: center;
+}
+
+.items-per-page {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.3rem 0.6rem;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+/* THÊM: Styles cho table */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 0;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f1f3f4;
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* THÊM: Styles cho các elements đặc biệt */
+.ma-sach,
+.ma-don-hang {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ten-sach {
+  display: inline-block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.gia-tien {
+  color: #e74c3c;
+  font-weight: 600;
+  text-align: right;
+}
+
+.trang-thai-don-hang {
+  background: #d1ecf1;
+  color: #0c5460;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* THÊM: Responsive design */
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .pagination-controls {
+    gap: 0.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination-btn {
+    padding: 0.4rem 0.6rem;
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+  }
+
+  .data-table {
+    font-size: 0.8rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 4px;
+  }
+
+  .ten-sach {
+    max-width: 120px;
+  }
+
+  .ma-sach,
+  .ma-don-hang {
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-info,
+  .pagination-summary {
+    font-size: 0.8rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 3px;
+    font-size: 0.75rem;
+  }
 }

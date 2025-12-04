@@ -8,7 +8,10 @@ interface NhanVien {
   hoTen: string;
   dienThoai: string;
   email: string;
-  trangThai?: string;
+  diaChi?: string;
+  ngaySinh?: string;
+  vaiTro?: string; // THÊM
+  trangThai?: string; // THÊM
 }
 
 type NVSortKey = "maNhanVien" | "hoTen" | "dienThoai" | "email";
@@ -91,6 +94,32 @@ const NVManager: React.FC = () => {
     return sortOrder === "asc" ? cmp : -cmp;
   });
 
+  const getTrangThaiClass = (trangThai?: string) => {
+    switch (trangThai) {
+      case "HOATDONG":
+        return "bg-success";
+      case "NGHI":
+        return "bg-warning";
+      case "KHOA":
+        return "bg-danger";
+      default:
+        return "bg-secondary";
+    }
+  };
+
+  const getTrangThaiDisplay = (trangThai?: string) => {
+    switch (trangThai) {
+      case "HOATDONG":
+        return "Hoạt động";
+      case "NGHI":
+        return "Nghỉ";
+      case "KHOA":
+        return "Khóa";
+      default:
+        return "—";
+    }
+  };
+
   return (
     <div className={styles["nv-manager"]}>
       <h2>Quản lý nhân viên</h2>
@@ -159,7 +188,14 @@ const NVManager: React.FC = () => {
                 <td>{nv.hoTen}</td>
                 <td>{nv.dienThoai}</td>
                 <td>{nv.email}</td>
-                <td>{nv.trangThai || "—"}</td>
+                <td>
+                  <span
+                    className={`badge ${getTrangThaiClass(nv.trangThai)}`}
+                    title={nv.trangThai}
+                  >
+                    {getTrangThaiDisplay(nv.trangThai)}
+                  </span>
+                </td>
                 <td className="text-end">
                   <Link
                     to={`/admin/nhanvien/${nv.maNhanVien}`}

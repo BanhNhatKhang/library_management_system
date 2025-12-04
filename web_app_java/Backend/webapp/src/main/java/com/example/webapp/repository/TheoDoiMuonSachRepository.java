@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TheoDoiMuonSachRepository extends JpaRepository<TheoDoiMuonSach, TheoDoiMuonSachId> {
@@ -18,6 +20,7 @@ public interface TheoDoiMuonSachRepository extends JpaRepository<TheoDoiMuonSach
     
     List<TheoDoiMuonSach> findByTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon trangThaiMuon);
     boolean existsBySach_MaSachAndTrangThaiMuonIn(String maSach, List<TrangThaiMuon> trangThais);
+    List<TheoDoiMuonSach> findByIdNgayMuonBetween(LocalDate start, LocalDate end);
     
     // Thêm method kiểm tra phiếu mượn của độc giả với sách cụ thể
     @Query("SELECT t FROM TheoDoiMuonSach t WHERE t.docGia.maDocGia = :maDocGia AND t.sach.maSach = :maSach AND t.trangThaiMuon IN :trangThais ORDER BY t.id.ngayMuon DESC")

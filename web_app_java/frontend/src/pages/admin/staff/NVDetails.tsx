@@ -11,6 +11,7 @@ interface NhanVien {
   diaChi?: string;
   ngaySinh?: string;
   trangThai?: string;
+  vaiTro?: string;
 }
 
 const NVDetails: React.FC = () => {
@@ -45,7 +46,7 @@ const NVDetails: React.FC = () => {
         <Link to="/admin/nhanvien" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <h2 className={styles["page-title"]}>📖 Chi tiết nhân viên</h2>
+        <h2 className={styles["page-title"]}>👨‍💼 Chi tiết nhân viên</h2>
       </div>
 
       <div className={styles["info-section"]}>
@@ -58,12 +59,12 @@ const NVDetails: React.FC = () => {
           <span className={styles["info-value"]}>{nhanVien.hoTen}</span>
         </div>
         <div className={styles["info-item"]}>
-          <span className={styles["info-label"]}>Điện thoại:</span>
-          <span className={styles["info-value"]}>{nhanVien.dienThoai}</span>
-        </div>
-        <div className={styles["info-item"]}>
           <span className={styles["info-label"]}>Email:</span>
           <span className={styles["info-value"]}>{nhanVien.email}</span>
+        </div>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Điện thoại:</span>
+          <span className={styles["info-value"]}>{nhanVien.dienThoai}</span>
         </div>
         <div className={styles["info-item"]}>
           <span className={styles["info-label"]}>Địa chỉ:</span>
@@ -72,13 +73,25 @@ const NVDetails: React.FC = () => {
         <div className={styles["info-item"]}>
           <span className={styles["info-label"]}>Ngày sinh:</span>
           <span className={styles["info-value"]}>
-            {nhanVien.ngaySinh || "—"}
+            {nhanVien.ngaySinh
+              ? new Date(nhanVien.ngaySinh).toLocaleDateString("vi-VN")
+              : "—"}
+          </span>
+        </div>
+        <div className={styles["info-item"]}>
+          <span className={styles["info-label"]}>Vai trò:</span>
+          <span className={styles["info-value"]}>
+            {getVaiTroDisplay(nhanVien.vaiTro)}
           </span>
         </div>
         <div className={styles["info-item"]}>
           <span className={styles["info-label"]}>Trạng thái:</span>
-          <span className={styles["info-value"]}>
-            {nhanVien.trangThai || "—"}
+          <span
+            className={`${styles["info-value"]} ${
+              styles["trang-thai"]
+            } ${getTrangThaiClass(nhanVien.trangThai)}`}
+          >
+            {getTrangThaiDisplay(nhanVien.trangThai)}
           </span>
         </div>
       </div>
@@ -91,6 +104,48 @@ const NVDetails: React.FC = () => {
       </Link>
     </div>
   );
+};
+
+// Helper functions
+const getVaiTroDisplay = (vaiTro?: string) => {
+  switch (vaiTro) {
+    case "ADMIN":
+      return "Quản trị viên";
+    case "QUANLY":
+      return "Quản lý";
+    case "THUTHU":
+      return "Thủ thư";
+    case "NHANVIEN":
+      return "Nhân viên";
+    default:
+      return "—";
+  }
+};
+
+const getTrangThaiDisplay = (trangThai?: string) => {
+  switch (trangThai) {
+    case "HOATDONG":
+      return "Hoạt động";
+    case "NGHI":
+      return "Nghỉ";
+    case "KHOA":
+      return "Khóa";
+    default:
+      return "—";
+  }
+};
+
+const getTrangThaiClass = (trangThai?: string) => {
+  switch (trangThai) {
+    case "HOATDONG":
+      return styles["hoatdong"];
+    case "NGHI":
+      return styles["nghi"];
+    case "KHOA":
+      return styles["khoa"];
+    default:
+      return "";
+  }
 };
 
 export default NVDetails;

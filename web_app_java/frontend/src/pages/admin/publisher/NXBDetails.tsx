@@ -25,13 +25,16 @@ const NXBDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
+  // THÊM: State cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(7); // 7 sách mỗi trang
+
   useEffect(() => {
     if (!maNhaXuatBan) return;
 
     setLoading(true);
     setError("");
 
-    // Lấy thông tin nhà xuất bản và sách của nhà xuất bản
     Promise.all([
       axios.get(`/api/nhaxuatban/${maNhaXuatBan}`),
       axios.get(`/api/sach/nxb/${encodeURIComponent(maNhaXuatBan)}`),
@@ -39,6 +42,7 @@ const NXBDetails = () => {
       .then(([nxbRes, sachRes]) => {
         setNxb(nxbRes.data);
         setSachList(sachRes.data || []);
+        setCurrentPage(1); // Reset về trang 1
       })
       .catch((err) => {
         console.error("Lỗi khi tải dữ liệu:", err);
@@ -49,9 +53,60 @@ const NXBDetails = () => {
       });
   }, [maNhaXuatBan]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN").format(price) + " đ";
+  // THÊM: Tính toán phân trang
+  const totalPages = Math.ceil(sachList.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSach = sachList.slice(startIndex, endIndex);
+
+  // THÊM: Handlers cho phân trang
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // THÊM: Generate page numbers
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+
+    return pages;
+  };
+
+  // const formatPrice = (price: number) => {
+  //   return new Intl.NumberFormat("vi-VN").format(price) + " đ";
+  // };
 
   if (loading) {
     return (
@@ -120,60 +175,138 @@ const NXBDetails = () => {
 
         {/* Cột phải - Sách của nhà xuất bản */}
         <div className={styles["sach-section"]}>
-          <h3 className={styles["sach-title"]}>
-            📚 Sách của nhà xuất bản ({sachList.length})
-          </h3>
+          {/* THÊM: Header với thông tin phân trang */}
+          <div className={styles["sach-header"]}>
+            <h3 className={styles["sach-title"]}>
+              📚 Sách của nhà xuất bản ({sachList.length})
+            </h3>
+
+            {/* THÊM: Pagination info */}
+            {sachList.length > itemsPerPage && (
+              <div className={styles["pagination-info-header"]}>
+                Trang {currentPage}/{totalPages}{" "}
+                <span className={styles["items-info"]}>
+                  (Hiển thị {startIndex + 1}-
+                  {Math.min(endIndex, sachList.length)} trong số{" "}
+                  {sachList.length})
+                </span>
+              </div>
+            )}
+          </div>
 
           {sachList.length === 0 ? (
             <div className={styles["no-data"]}>
               <p>📚 Hiện tại chưa có sách nào của nhà xuất bản này</p>
             </div>
           ) : (
-            <div className={styles["sach-grid"]}>
-              {sachList.map((sach) => (
-                <div key={sach.maSach} className={styles["sach-card"]}>
-                  <div className={styles["sach-image"]}>
-                    <img
-                      src={
-                        sach.anhBia
-                          ? (() => {
-                              const pathParts = sach.anhBia.split("/");
-                              const folder = pathParts[0];
-                              const filename = pathParts[1];
-                              return `http://localhost:8080/api/sach/image/${folder}/${filename}`;
-                            })()
-                          : "/default-book.png"
-                      }
-                      alt={sach.tenSach}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "/default-book.png";
-                      }}
-                    />
-                  </div>
-
-                  <div className={styles["sach-info"]}>
-                    <h4 className={styles["sach-name"]}>{sach.tenSach}</h4>
-                    <p className={styles["sach-author"]}>👤 {sach.tacGia}</p>
-                    <p className={styles["sach-price"]}>
-                      💰 {formatPrice(sach.donGia)}
-                    </p>
-                    <p className={styles["sach-quantity"]}>
-                      📦 Còn lại: {sach.soLuong}
-                    </p>
-
+            <>
+              {/* SỬA: Hiển thị dạng danh sách đơn giản */}
+              <div className={styles["sach-list"]}>
+                {currentSach.map((sach) => (
+                  <div key={sach.maSach} className={styles["sach-item"]}>
+                    <div className={styles["sach-content"]}>
+                      <Link
+                        to={`/admin/sach/${sach.maSach}`}
+                        className={styles["sach-link"]}
+                        title={`Xem chi tiết: ${sach.tenSach}`}
+                      >
+                        {sach.tenSach}
+                      </Link>
+                    </div>
                     <div className={styles["sach-actions"]}>
                       <Link
                         to={`/admin/sach/${sach.maSach}`}
-                        className={styles["view-btn"]}
+                        className={styles["view-btn-small"]}
+                        title="Xem chi tiết"
                       >
-                        👁️ Xem chi tiết
+                        <i className="fas fa-eye"></i>
                       </Link>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* THÊM: Pagination Controls */}
+              {totalPages > 1 && (
+                <div className={styles["pagination-container"]}>
+                  <div className={styles["pagination"]}>
+                    {/* Previous button */}
+                    <button
+                      className={`${styles["pagination-btn"]} ${
+                        styles["nav-btn"]
+                      } ${currentPage === 1 ? styles["disabled"] : ""}`}
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 1}
+                    >
+                      ◀ Trước
+                    </button>
+
+                    {/* First page */}
+                    {currentPage > 3 && totalPages > 5 && (
+                      <>
+                        <button
+                          className={styles["pagination-btn"]}
+                          onClick={() => handlePageChange(1)}
+                        >
+                          1
+                        </button>
+                        {currentPage > 4 && (
+                          <span className={styles["pagination-dots"]}>...</span>
+                        )}
+                      </>
+                    )}
+
+                    {/* Page numbers */}
+                    {getPageNumbers().map((page) => (
+                      <button
+                        key={page}
+                        className={`${styles["pagination-btn"]} ${
+                          page === currentPage ? styles["active"] : ""
+                        }`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    {/* Last page */}
+                    {currentPage < totalPages - 2 && totalPages > 5 && (
+                      <>
+                        {currentPage < totalPages - 3 && (
+                          <span className={styles["pagination-dots"]}>...</span>
+                        )}
+                        <button
+                          className={styles["pagination-btn"]}
+                          onClick={() => handlePageChange(totalPages)}
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+
+                    {/* Next button */}
+                    <button
+                      className={`${styles["pagination-btn"]} ${
+                        styles["nav-btn"]
+                      } ${
+                        currentPage === totalPages ? styles["disabled"] : ""
+                      }`}
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                    >
+                      Sau ▶
+                    </button>
+                  </div>
+
+                  {/* Items per page indicator */}
+                  <div className={styles["pagination-summary"]}>
+                    <span className={styles["items-per-page"]}>
+                      {itemsPerPage} sách/trang
+                    </span>
+                  </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>

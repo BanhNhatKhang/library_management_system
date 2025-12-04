@@ -9,6 +9,8 @@ import com.example.webapp.repository.UuDaiRepository;
 import com.example.webapp.repository.DocGiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -79,14 +81,55 @@ public class UuDaiService {
         return toDTO(uuDaiRepository.save(uuDai));
     }
 
+    @Transactional
     public void deleteUuDai(String maUuDai) {
         if (!uuDaiRepository.existsByMaUuDai(maUuDai)) {
             throw new RuntimeException("Ưu đãi không tồn tại");
         }
-        uuDaiRepository.deleteById(maUuDai);
+        
+        try {
+            // SỬA: Thêm logic kiểm tra ràng buộc trước khi xóa
+            Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDai);
+            if (uuDaiOpt.isPresent()) {
+                UuDai uuDai = uuDaiOpt.get();
+                
+                // Kiểm tra xem ưu đãi có đang được sử dụng trong đơn hàng không
+                if (!uuDai.getDonHangs().isEmpty()) {
+                    throw new RuntimeException("Không thể xóa ưu đãi này vì đang được sử dụng trong " + 
+                                             uuDai.getDonHangs().size() + " đơn hàng. " +
+                                             "Bạn có thể chỉnh sửa ngày kết thúc để vô hiệu hóa ưu đãi.");
+                }
+                
+                // Kiểm tra xem ưu đãi có đang được áp dụng cho sách không
+                if (!uuDai.getSachs().isEmpty()) {
+                    // Xóa liên kết với sách trước
+                    uuDai.getSachs().clear();
+                    uuDaiRepository.save(uuDai);
+                }
+            }
+            
+            // Thực hiện xóa
+            uuDaiRepository.deleteById(maUuDai);
+            
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = e.getMessage();
+            
+            if (errorMessage.contains("donhang_uudai")) {
+                throw new RuntimeException("Không thể xóa ưu đãi này vì đã được sử dụng trong đơn hàng. " +
+                                         "Bạn có thể chỉnh sửa ngày kết thúc để vô hiệu hóa ưu đãi thay vì xóa.");
+            } else if (errorMessage.contains("sach_uudai")) {
+                throw new RuntimeException("Không thể xóa ưu đãi này vì đang được áp dụng cho sách. " +
+                                         "Vui lòng bỏ liên kết với sách trước khi xóa.");
+            } else {
+                throw new RuntimeException("Không thể xóa ưu đãi này do có ràng buộc dữ liệu. " +
+                                         "Vui lòng kiểm tra lại hoặc liên hệ quản trị viên.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi không xác định khi xóa ưu đãi: " + e.getMessage());
+        }
     }
 
-        // sinh mã ưu đãi tiếp theo dạng UD001, UD002, ...
+    // sinh mã ưu đãi tiếp theo dạng UD001, UD002, ...
     public String generateNextMaUD() {
         List<UuDai> all = uuDaiRepository.findAll();
         int max = 0;
@@ -204,5 +247,34 @@ public class UuDaiService {
         uuDai.setNgayBatDau(dto.getNgayBatDau());
         uuDai.setNgayKetThuc(dto.getNgayKetThuc());
         return uuDai;
+    }
+
+    // THÊM: Method để vô hiệu hóa ưu đãi thay vì xóa
+    @Transactional
+    public UuDaiDTO deactivateUuDai(String maUuDai) {
+        Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDai);
+        if (uuDaiOpt.isEmpty()) {
+            throw new RuntimeException("Ưu đãi không tồn tại");
+        }
+        
+        UuDai uuDai = uuDaiOpt.get();
+        
+        // Set ngày kết thúc = hôm qua để vô hiệu hóa
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        uuDai.setNgayKetThuc(yesterday);
+        
+        UuDai saved = uuDaiRepository.save(uuDai);
+        return toDTO(saved);
+    }
+
+    // THÊM: Method kiểm tra ưu đãi có thể xóa không
+    public boolean canDeleteUuDai(String maUuDai) {
+        Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDai);
+        if (uuDaiOpt.isEmpty()) {
+            return false;
+        }
+        
+        UuDai uuDai = uuDaiOpt.get();
+        return uuDai.getDonHangs().isEmpty() && uuDai.getSachs().isEmpty();
     }
 }

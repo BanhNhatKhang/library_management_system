@@ -51,9 +51,15 @@ public class SachController {
         return sachService.getSachByTacGia(tenTacGia);
     }
 
-    @GetMapping("/nxb/{tenNhaXuatBan}")
-    public List<SachDTO> getSachByNhaXuatBan(@PathVariable String tenNhaXuatBan) {
-        return sachService.getSachByNhaXuatBan(tenNhaXuatBan);
+
+    @GetMapping("/nxb/{maNhaXuatBan}")
+    public ResponseEntity<List<SachDTO>> getSachByNhaXuatBan(@PathVariable String maNhaXuatBan) {
+        try {
+            List<SachDTO> sachList = sachService.getSachByNhaXuatBan(maNhaXuatBan);
+            return ResponseEntity.ok(sachList);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/goi-y/{maSach}") 

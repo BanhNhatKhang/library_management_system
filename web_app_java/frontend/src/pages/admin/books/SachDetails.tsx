@@ -35,6 +35,10 @@ const SachDetails = () => {
   const [error, setError] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"info" | "phieu-muon">("info");
 
+  // THÊM: State cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Số phiếu mượn mỗi trang
+
   useEffect(() => {
     if (!maSach) return;
 
@@ -49,6 +53,8 @@ const SachDetails = () => {
       .then(([sachRes, phieuMuonRes]) => {
         setSach(sachRes.data);
         setPhieuMuonList(phieuMuonRes.data || []);
+        // Reset về trang 1 khi load data mới
+        setCurrentPage(1);
       })
       .catch((err) => {
         console.error("Lỗi khi tải dữ liệu:", err);
@@ -58,6 +64,57 @@ const SachDetails = () => {
         setLoading(false);
       });
   }, [maSach]);
+
+  // THÊM: Tính toán phân trang
+  const totalPages = Math.ceil(phieuMuonList.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPhieuMuon = phieuMuonList.slice(startIndex, endIndex);
+
+  // THÊM: Handlers cho phân trang
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // THÊM: Generate page numbers
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+
+    return pages;
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN");
@@ -260,45 +317,151 @@ const SachDetails = () => {
         {activeTab === "phieu-muon" && (
           <div className={styles["tab-panel"]}>
             <div className={styles["phieu-muon-section"]}>
+              {/* THÊM: Header với thông tin phân trang */}
+              {phieuMuonList.length > 0 && (
+                <div className={styles["phieu-muon-header"]}>
+                  <div className={styles["total-info"]}>
+                    📋 Tổng cộng: <strong>{phieuMuonList.length}</strong> phiếu
+                    mượn
+                    {totalPages > 1 && (
+                      <span className={styles["page-info"]}>
+                        | Trang {currentPage}/{totalPages} (Hiển thị{" "}
+                        {startIndex + 1}-
+                        {Math.min(endIndex, phieuMuonList.length)} trong số{" "}
+                        {phieuMuonList.length})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {phieuMuonList.length === 0 ? (
                 <div className={styles["no-data"]}>
                   <p>📚 Hiện tại không có ai đang mượn sách này</p>
                 </div>
               ) : (
-                <div className={styles["table-container"]}>
-                  <table className={styles["phieu-muon-table"]}>
-                    <thead>
-                      <tr>
-                        <th>Mã độc giả</th>
-                        <th>Ngày mượn</th>
-                        <th>Ngày trả</th>
-                        <th>Trạng thái</th>
-                        <th>Mã nhân viên</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {phieuMuonList.map((pm, idx) => (
-                        <tr key={idx}>
-                          <td>{pm.maDocGia}</td>
-                          <td>{formatDate(pm.ngayMuon)}</td>
-                          <td>
-                            {pm.ngayTra ? formatDate(pm.ngayTra) : "Chưa trả"}
-                          </td>
-                          <td>
-                            <span
-                              className={`${styles["trang-thai"]} ${
-                                styles[getTrangThaiClass(pm.trangThaiMuon)]
-                              }`}
-                            >
-                              {pm.trangThaiMuon}
-                            </span>
-                          </td>
-                          <td>{pm.maNhanVien}</td>
+                <>
+                  <div className={styles["table-container"]}>
+                    <table className={styles["phieu-muon-table"]}>
+                      <thead>
+                        <tr>
+                          <th>STT</th>
+                          <th>Mã độc giả</th>
+                          <th>Ngày mượn</th>
+                          <th>Ngày trả</th>
+                          <th>Trạng thái</th>
+                          <th>Mã nhân viên</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {/* SỬA: Sử dụng currentPhieuMuon thay vì phieuMuonList */}
+                        {currentPhieuMuon.map((pm, idx) => (
+                          <tr key={idx}>
+                            <td>{startIndex + idx + 1}</td> {/* THÊM: STT */}
+                            <td>{pm.maDocGia}</td>
+                            <td>{formatDate(pm.ngayMuon)}</td>
+                            <td>
+                              {pm.ngayTra ? formatDate(pm.ngayTra) : "Chưa trả"}
+                            </td>
+                            <td>
+                              <span
+                                className={`${styles["trang-thai"]} ${
+                                  styles[getTrangThaiClass(pm.trangThaiMuon)]
+                                }`}
+                              >
+                                {pm.trangThaiMuon}
+                              </span>
+                            </td>
+                            <td>{pm.maNhanVien}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* THÊM: Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className={styles["pagination-container"]}>
+                      <div className={styles["pagination"]}>
+                        {/* Previous button */}
+                        <button
+                          className={`${styles["pagination-btn"]} ${
+                            currentPage === 1 ? styles["disabled"] : ""
+                          }`}
+                          onClick={handlePrevPage}
+                          disabled={currentPage === 1}
+                          title="Trang trước"
+                        >
+                          ◀
+                        </button>
+
+                        {/* First page */}
+                        {currentPage > 3 && totalPages > 5 && (
+                          <>
+                            <button
+                              className={styles["pagination-btn"]}
+                              onClick={() => handlePageChange(1)}
+                            >
+                              1
+                            </button>
+                            {currentPage > 4 && (
+                              <span className={styles["pagination-dots"]}>
+                                ...
+                              </span>
+                            )}
+                          </>
+                        )}
+
+                        {/* Page numbers */}
+                        {getPageNumbers().map((page) => (
+                          <button
+                            key={page}
+                            className={`${styles["pagination-btn"]} ${
+                              page === currentPage ? styles["active"] : ""
+                            }`}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        ))}
+
+                        {/* Last page */}
+                        {currentPage < totalPages - 2 && totalPages > 5 && (
+                          <>
+                            {currentPage < totalPages - 3 && (
+                              <span className={styles["pagination-dots"]}>
+                                ...
+                              </span>
+                            )}
+                            <button
+                              className={styles["pagination-btn"]}
+                              onClick={() => handlePageChange(totalPages)}
+                            >
+                              {totalPages}
+                            </button>
+                          </>
+                        )}
+
+                        {/* Next button */}
+                        <button
+                          className={`${styles["pagination-btn"]} ${
+                            currentPage === totalPages ? styles["disabled"] : ""
+                          }`}
+                          onClick={handleNextPage}
+                          disabled={currentPage === totalPages}
+                          title="Trang sau"
+                        >
+                          ▶
+                        </button>
+                      </div>
+
+                      {/* THÊM: Items per page info */}
+                      <div className={styles["pagination-info"]}>
+                        <span>Hiển thị {itemsPerPage} phiếu mỗi trang</span>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

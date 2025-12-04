@@ -13,6 +13,7 @@ import java.util.Set;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +51,93 @@ public class DonHangService {
             .map(this::toDTO)
             .collect(Collectors.toList());
     }
+
+    public List<ChiTietDonHangDTO> getChiTietDonHang(String maDonHang) {
+        try {
+            List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang_MaDonHang(maDonHang);
+            return chiTietList.stream()
+                    .map(this::convertChiTietToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("❌ Error in getChiTietDonHang: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<DonHangDTO> getDonHangBySoDienThoai(String dienThoai) {
+        try {
+            System.out.println("🔍 Tìm đơn hàng theo SĐT: " + dienThoai);
+            
+            // SỬA: Không dùng Optional
+            DocGia docGia = docGiaRepository.findByDienThoai(dienThoai);
+            if (docGia == null) {
+                System.out.println("❌ Không tìm thấy độc giả với SĐT: " + dienThoai);
+                return new ArrayList<>();
+            }
+            
+            System.out.println("✅ Tìm thấy độc giả: " + docGia.getMaDocGia());
+            
+            // Tìm đơn hàng của độc giả
+            List<DonHang> donHangList = donHangRepository.findByDocGia(docGia);
+            System.out.println("📦 Tìm thấy " + donHangList.size() + " đơn hàng");
+            
+            List<DonHangDTO> dtoList = new ArrayList<>();
+            
+            for (DonHang donHang : donHangList) {
+                DonHangDTO dto = toDTO(donHang);
+                
+                // Lấy chi tiết đơn hàng
+                List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang(donHang);
+                List<ChiTietDonHangDTO> chiTietDTOList = new ArrayList<>();
+                
+                // THÊM: Tạo tên sách tổng hợp để hiển thị
+                StringBuilder tenSachBuilder = new StringBuilder();
+                
+                for (ChiTietDonHang chiTiet : chiTietList) {
+                    ChiTietDonHangDTO chiTietDTO = convertChiTietToDTO(chiTiet);
+                    chiTietDTOList.add(chiTietDTO);
+                    
+                    // Ghép tên sách
+                    if (tenSachBuilder.length() > 0) {
+                        tenSachBuilder.append(", ");
+                    }
+                    tenSachBuilder.append(chiTiet.getSach().getTenSach());
+                }
+                
+                dto.setChiTietDonHangList(chiTietDTOList);
+                
+                // THÊM: Set tên sách để hiển thị trong frontend
+                if (chiTietList.size() == 1) {
+                    dto.setTenSach(chiTietList.get(0).getSach().getTenSach());
+                } else if (chiTietList.size() > 1) {
+                    dto.setTenSach(chiTietList.get(0).getSach().getTenSach() + " và " + (chiTietList.size() - 1) + " sách khác");
+                } else {
+                    dto.setTenSach("Không có sách");
+                }
+                
+                dtoList.add(dto);
+            }
+            
+            return dtoList;
+        } catch (Exception e) {
+            System.err.println("❌ Error in getDonHangBySoDienThoai: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    // THÊM: Helper method để convert ChiTietDonHang sang DTO
+    private ChiTietDonHangDTO convertChiTietToDTO(ChiTietDonHang chiTiet) {
+        ChiTietDonHangDTO dto = new ChiTietDonHangDTO();
+        dto.setMaSach(chiTiet.getSach().getMaSach());
+        dto.setTenSach(chiTiet.getSach().getTenSach()); // QUAN TRỌNG: Lấy tên sách
+        dto.setSoLuong(chiTiet.getSoLuong());
+        dto.setDonGia(chiTiet.getDonGia());
+        BigDecimal thanhTien = chiTiet.getDonGia().multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
+        dto.setThanhTien(thanhTien);
+        return dto;
+    }
+
 
     public Page<DonHangDTO> getDonHangByMaDocGiaPaginated(String maDocGia, Pageable pageable) {
         Page<DonHang> donHangPage = donHangRepository.findActiveByDocGia_MaDocGia(maDocGia, pageable);

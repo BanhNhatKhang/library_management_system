@@ -4,12 +4,20 @@ import java.time.LocalDate;
 
 public class NhanVienDTO {
     private String maNhanVien;
-    private String hoTen;
+    private String hoTen; // Map từ hoTenNV của Entity
     private String email;
     private String dienThoai;
     private String diaChi;
     private LocalDate ngaySinh;
+    
+    // THÊM: Các field thiếu
+    private String vaiTro; // Enum -> String
+    private String trangThai; // Enum -> String
 
+    // Constructors
+    public NhanVienDTO() {}
+
+    // Getters và Setters
     public String getMaNhanVien() {
         return maNhanVien;
     }
@@ -42,6 +50,14 @@ public class NhanVienDTO {
         this.dienThoai = dienThoai;
     }
 
+    public String getDiaChi() {
+        return diaChi;
+    }
+
+    public void setDiaChi(String diaChi) {
+        this.diaChi = diaChi;
+    }
+
     public LocalDate getNgaySinh() {
         return ngaySinh;
     }
@@ -49,10 +65,21 @@ public class NhanVienDTO {
     public void setNgaySinh(LocalDate ngaySinh) {
         this.ngaySinh = ngaySinh;
     }
-    public String getDiaChi() {
-        return diaChi;
+
+    // THÊM: Getters/Setters cho các field mới
+    public String getVaiTro() {
+        return vaiTro;
     }
-    public void setDiaChi(String diaChi) {
-        this.diaChi = diaChi;
+
+    public void setVaiTro(String vaiTro) {
+        this.vaiTro = vaiTro;
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
     }
 }

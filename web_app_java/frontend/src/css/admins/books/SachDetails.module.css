@@ -366,6 +366,183 @@ img:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+/* THÊM: Styles cho phân trang */
+
+/* Header phiếu mượn */
+.phieu-muon-header {
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.total-info {
+  font-size: 0.95rem;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.page-info {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Pagination container */
+.pagination-container {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+/* Pagination controls */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #495057;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: 600;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+  color: #adb5bd;
+}
+
+.pagination-dots {
+  padding: 0 0.5rem;
+  color: #6c757d;
+  font-weight: bold;
+}
+
+/* Pagination info */
+.pagination-info {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* STT column style */
+.phieu-muon-table th:first-child,
+.phieu-muon-table td:first-child {
+  width: 60px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Table improvements */
+.phieu-muon-table {
+  margin-bottom: 0; /* Remove bottom margin since pagination handles spacing */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .pagination {
+    gap: 0.2rem;
+  }
+
+  .pagination-btn {
+    padding: 0.4rem 0.6rem;
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+  }
+
+  .total-info {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .page-info {
+    width: 100%;
+    text-align: center;
+  }
+
+  .phieu-muon-header {
+    padding: 0.6rem 0.8rem;
+  }
+
+  /* Hide some page numbers on mobile */
+  .pagination-btn:nth-child(n + 6):nth-child(-n + 10) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-btn {
+    padding: 0.3rem 0.5rem;
+    min-width: 1.8rem;
+    height: 1.8rem;
+    font-size: 0.75rem;
+  }
+
+  .pagination-info {
+    font-size: 0.8rem;
+  }
+}
+
+/* Animation cho page transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.phieu-muon-table tbody {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .main-container {

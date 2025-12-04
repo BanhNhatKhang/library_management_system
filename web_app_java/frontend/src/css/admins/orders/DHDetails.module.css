@@ -131,3 +131,87 @@
   padding: 30px 0;
   font-style: italic;
 }
+
+/* THÊM: Styles cho table chi tiết */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.data-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f1f3f4;
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.ma-sach {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ten-sach {
+  color: #2c3e50;
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.so-luong {
+  text-align: center;
+  font-weight: 600;
+}
+
+.gia-tien,
+.thanh-tien {
+  text-align: right;
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.total-section {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-top: 2px solid #dee2e6;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-weight: 600;
+}
+
+.total-amount {
+  color: #e74c3c;
+  font-size: 1.1rem;
+  font-weight: 700;
+}

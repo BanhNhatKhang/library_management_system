@@ -26,6 +26,7 @@
   font-size: 14px;
   transition: all 0.3s;
 }
+
 .muon-details .back-link:hover {
   background-color: #5a6268;
   transform: translateY(-1px);
@@ -38,28 +39,203 @@
   flex: 1;
   text-align: center;
 }
+
 .muon-details .spacer {
   width: 120px;
 }
 
-/* Info layout */
+/* THÊM: Tab Navigation */
+.muon-details .tab-navigation {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.muon-details .tab-button {
+  background: transparent;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.muon-details .tab-button:hover {
+  color: #0d6efd;
+}
+
+.muon-details .tab-button.active {
+  color: #0d6efd;
+  border-bottom-color: #0d6efd;
+  font-weight: 600;
+}
+
+/* THÊM: Tab Panel */
+.muon-details .tab-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Info layout - cập nhật */
 .muon-details .info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .muon-details .info-item {
-  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
 }
 
 .muon-details .info-label {
-  font-weight: bold;
+  font-weight: 600;
+  color: #444;
+  min-width: 150px;
 }
 
 .muon-details .info-value {
-  color: #555;
+  color: #222;
+  flex: 1;
+  text-align: right;
 }
 
-/* Table */
+/* THÊM: Book image styles */
+.book-image {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.book-cover {
+  max-width: 120px;
+  max-height: 160px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* THÊM: Calculated info section */
+.calculated-info {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e9ecef;
+}
+
+.calculated-info h4 {
+  margin-bottom: 15px;
+  color: #495057;
+  font-size: 1.1rem;
+}
+
+/* Status styles - cập nhật */
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 12px;
+  display: inline-block;
+}
+
+.status.choduyet {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.status.daduyet {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status.tuchoi {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status.dangmuon {
+  background: #cce7ff;
+  color: #004085;
+  border: 1px solid #a6d4ff;
+}
+
+.status.datra {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d1d3d4;
+}
+
+/* Action section - cập nhật */
+.action-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+  text-align: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.edit-btn,
+.view-btn,
+.return-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-btn {
+  background: #007bff;
+}
+
+.edit-btn:hover {
+  background: #0056b3;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.view-btn {
+  background: #28a745;
+}
+
+.view-btn:hover {
+  background: #1e7e34;
+  text-decoration: none;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.return-btn {
+  background: #17a2b8;
+}
+
+.return-btn:hover {
+  background: #117a8b;
+  transform: translateY(-1px);
+}
+
+/* Table - giữ nguyên cho tương lai */
 .muon-details table {
   width: 100%;
   border-collapse: collapse;
@@ -105,64 +281,61 @@
   border-radius: 4px;
 }
 
-.status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 500;
-  text-transform: uppercase;
-  font-size: 12px;
+/* THÊM: Responsive design */
+@media (max-width: 768px) {
+  .muon-details .tab-navigation {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .muon-details .tab-button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .muon-details .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .muon-details .info-value {
+    text-align: left;
+    margin-top: 5px;
+  }
+
+  .book-image {
+    justify-content: flex-start;
+  }
+
+  .action-section {
+    flex-direction: column;
+  }
+
+  .edit-btn,
+  .view-btn,
+  .return-btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
 }
 
-.status.choduyet {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
-}
+@media (max-width: 480px) {
+  .muon-details {
+    padding: 15px 20px;
+  }
 
-.status.daduyet {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
+  .muon-details .page-title {
+    font-size: 18px;
+  }
 
-.status.tuchoi {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
+  .muon-details .tab-button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
 
-.status.dangmuon {
-  background: #cce7ff;
-  color: #004085;
-  border: 1px solid #a6d4ff;
-}
-
-.status.datra {
-  background: #e2e3e5;
-  color: #383d41;
-  border: 1px solid #d1d3d4;
-}
-
-.action-section {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #dee2e6;
-  text-align: center;
-}
-
-.edit-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.edit-btn:hover {
-  background: #0056b3;
-  text-decoration: none;
-  color: white;
+  .book-cover {
+    max-width: 100px;
+    max-height: 130px;
+  }
 }

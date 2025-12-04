@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 
 import java.security.Key;
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
 
     private static String secret;
-    private static long expirationMillis = 3600_000L; 
+    private static long expirationMillis = 3600_000L; // 1 hour
+    private static long refreshExpirationMillis = 604_800_000L; // 7 days
     private static long allowedClockSkewSeconds = 0L;
 
     @Value("${jwt.secret}")
@@ -29,6 +31,11 @@ public class JwtUtil {
     @Value("${jwt.expiration-ms:3600000}")
     public void setExpirationMillis(long expMs) {
         JwtUtil.expirationMillis = expMs;
+    }
+
+    @Value("${jwt.refresh-expiration-ms:604800000}")
+    public void setRefreshExpirationMillis(long refreshExpMs) {
+        JwtUtil.refreshExpirationMillis = refreshExpMs;
     }
 
     @Value("${jwt.allowed-clock-skew-seconds:0}")
@@ -48,6 +55,15 @@ public class JwtUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public static String generateRefreshToken(String subject) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpirationMillis))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -80,20 +96,49 @@ public class JwtUtil {
 
     public static boolean validateJwtToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getKey())
-                    .setAllowedClockSkewSeconds(allowedClockSkewSeconds)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return !claims.getExpiration().before(new Date());
+            Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .setAllowedClockSkewSeconds(allowedClockSkewSeconds)
+                .build()
+                .parseClaimsJws(token);
+            System.out.println("JWT Validation Success");
+            return true;
+        } catch (ExpiredJwtException e) {
+            System.out.println("JWT Validation Failed - Expired: " + e.getMessage());
+            return false;
         } catch (JwtException e) {
-            System.out.println("JWT Validation Failed - Error: " + e.getMessage()); // Thêm log này
+            System.out.println("JWT Validation Failed - Error: " + e.getMessage());
             return false;
-        } catch (IllegalArgumentException e) {
-            System.out.println("JWT Validation Failed - Error: Token trống/không hợp lệ");
+        } catch (Exception e) {
+            System.out.println("JWT Validation Failed - Unexpected Error: " + e.getMessage());
             return false;
+        }
+    }
+
+    public static boolean isTokenExpired(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .setAllowedClockSkewSeconds(allowedClockSkewSeconds)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+            Date expiration = claims.getExpiration();
+            Date now = new Date();
+
+            boolean expired = expiration.before(now);
+            System.out.println("Token expiration: " + expiration);
+            System.out.println("Current time: " + now);
+            System.out.println("Token expired: " + expired);
+
+            return expired;
+        } catch (ExpiredJwtException e) {
+            System.out.println("JWT isTokenExpired - ExpiredJwtException: " + e.getMessage());
+            return true;
+        } catch (Exception e) {
+            System.out.println("JWT isTokenExpired - Other exception: " + e.getMessage());
+            return true; // Coi như expired nếu không parse được
         }
     }
 }

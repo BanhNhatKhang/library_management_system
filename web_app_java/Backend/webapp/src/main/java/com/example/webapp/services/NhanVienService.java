@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NhanVienService {
-
+    
     @Autowired
     private NhanVienRepository nhanVienRepository;
 
@@ -21,11 +22,15 @@ public class NhanVienService {
     private PasswordEncoder passwordEncoder;
 
     public List<NhanVienDTO> getAllNhanVien() {
-        return nhanVienRepository.findAll().stream().map(this::toDTO).toList();
+        List<NhanVien> nhanVienList = nhanVienRepository.findAll();
+        return nhanVienList.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<NhanVienDTO> getNhanVienById(String maNhanVien) {
-        return nhanVienRepository.findById(maNhanVien).map(this::toDTO);
+        return nhanVienRepository.findById(maNhanVien)
+                .map(this::toDTO);
     }
 
     public String generateMaNhanVien() {
@@ -44,6 +49,42 @@ public class NhanVienService {
 
         nhanVien.setMatKhau(passwordEncoder.encode(nhanVien.getMatKhau()));
         return nhanVienRepository.save(nhanVien);
+    }
+
+        public NhanVien toEntity(NhanVienDangKyDTO dto) {
+        NhanVien entity = new NhanVien();
+        entity.setMaNhanVien(dto.getMaNhanVien());
+        entity.setHoTenNV(dto.getHoTen());
+        entity.setEmail(dto.getEmail());
+        entity.setDienThoai(dto.getDienThoai());
+        entity.setDiaChi(dto.getDiaChi());
+        entity.setNgaySinh(dto.getNgaySinh());
+        
+        // SỬA: Set password cho registration
+        if (dto.getMatKhau() != null) {
+            entity.setMatKhau(dto.getMatKhau()); // Có thể cần hash password
+        }
+        
+        // Convert String sang enum
+        if (dto.getVaiTro() != null) {
+            try {
+                entity.setVaiTro(NhanVien.VaiTroNhanVien.valueOf(dto.getVaiTro()));
+            } catch (IllegalArgumentException e) {
+                entity.setVaiTro(NhanVien.VaiTroNhanVien.NHANVIEN); // Default
+            }
+        }
+        
+        if (dto.getTrangThai() != null) {
+            try {
+                entity.setTrangThai(NhanVien.TrangThaiNhanVien.valueOf(dto.getTrangThai()));
+            } catch (IllegalArgumentException e) {
+                entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default
+            }
+        } else {
+            entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default cho nhân viên mới
+        }
+        
+        return entity;
     }
 
     public NhanVien updateNhanVien(String maNhanVien, NhanVien nhanVien) {
@@ -90,37 +131,61 @@ public class NhanVienService {
         return nv;
     }
 
-    public NhanVienDTO toDTO(NhanVien nhanVien) {
-        NhanVienDTO nhanVienDTO = new NhanVienDTO();
-        nhanVienDTO.setMaNhanVien(nhanVien.getMaNhanVien());
-        nhanVienDTO.setHoTen(nhanVien.getHoTenNV());
-        nhanVienDTO.setEmail(nhanVien.getEmail());
-        nhanVienDTO.setDienThoai(nhanVien.getDienThoai());
-        nhanVienDTO.setNgaySinh(nhanVien.getNgaySinh());
-        nhanVienDTO.setDiaChi(nhanVien.getDiaChi());
-        return nhanVienDTO;
-    }
-
-    public NhanVien toEntity(NhanVienDangKyDTO nhanVienDangKyDTO) {
-        NhanVien nhanVien = new NhanVien();
-        nhanVien.setMaNhanVien(nhanVienDangKyDTO.getMaNhanVien());
-        nhanVien.setHoTenNV(nhanVienDangKyDTO.getHoTen());
-        nhanVien.setEmail(nhanVienDangKyDTO.getEmail());
-        nhanVien.setDienThoai(nhanVienDangKyDTO.getDienThoai());
-        nhanVien.setNgaySinh(nhanVienDangKyDTO.getNgaySinh());
-        nhanVien.setMatKhau(nhanVienDangKyDTO.getMatKhau());
-        nhanVien.setDiaChi(nhanVienDangKyDTO.getDiaChi());
+    public NhanVien findByEmail(String email) {
+        NhanVien nhanVien = nhanVienRepository.findByEmail(email);
+        if (nhanVien == null) {
+            throw new RuntimeException("NhanVien không tồn tại với email: " + email);
+        }
         return nhanVien;
     }
 
-    public NhanVien toEntity(NhanVienDTO nhanVienDTO) {
-        NhanVien nhanVien = new NhanVien();
-        nhanVien.setMaNhanVien(nhanVienDTO.getMaNhanVien());
-        nhanVien.setHoTenNV(nhanVienDTO.getHoTen());
-        nhanVien.setEmail(nhanVienDTO.getEmail());
-        nhanVien.setDienThoai(nhanVienDTO.getDienThoai());
-        nhanVien.setNgaySinh(nhanVienDTO.getNgaySinh());
-        nhanVien.setDiaChi(nhanVienDTO.getDiaChi());
-        return nhanVien;
+        public NhanVienDTO toDTO(NhanVien entity) {
+        NhanVienDTO dto = new NhanVienDTO();
+        dto.setMaNhanVien(entity.getMaNhanVien());
+        dto.setHoTen(entity.getHoTenNV()); // SỬA: Map từ hoTenNV
+        dto.setEmail(entity.getEmail());
+        dto.setDienThoai(entity.getDienThoai());
+        dto.setDiaChi(entity.getDiaChi());
+        dto.setNgaySinh(entity.getNgaySinh());
+        
+        // SỬA: Convert enum sang String
+        if (entity.getVaiTro() != null) {
+            dto.setVaiTro(entity.getVaiTro().name()); // Hoặc .toString()
+        }
+        
+        if (entity.getTrangThai() != null) {
+            dto.setTrangThai(entity.getTrangThai().name()); // Hoặc .toString()
+        }
+        
+        return dto;
+    }
+
+        public NhanVien toEntity(NhanVienDTO dto) {
+        NhanVien entity = new NhanVien();
+        entity.setMaNhanVien(dto.getMaNhanVien());
+        entity.setHoTenNV(dto.getHoTen()); // SỬA: Map sang hoTenNV
+        entity.setEmail(dto.getEmail());
+        entity.setDienThoai(dto.getDienThoai());
+        entity.setDiaChi(dto.getDiaChi());
+        entity.setNgaySinh(dto.getNgaySinh());
+        
+        // SỬA: Convert String sang enum
+        if (dto.getVaiTro() != null) {
+            try {
+                entity.setVaiTro(NhanVien.VaiTroNhanVien.valueOf(dto.getVaiTro()));
+            } catch (IllegalArgumentException e) {
+                entity.setVaiTro(NhanVien.VaiTroNhanVien.NHANVIEN); // Default
+            }
+        }
+        
+        if (dto.getTrangThai() != null) {
+            try {
+                entity.setTrangThai(NhanVien.TrangThaiNhanVien.valueOf(dto.getTrangThai()));
+            } catch (IllegalArgumentException e) {
+                entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default
+            }
+        }
+        
+        return entity;
     }
 }

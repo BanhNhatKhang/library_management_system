@@ -13,7 +13,7 @@ public interface SachRepository extends JpaRepository<Sach, String> {
     Optional<Sach> findByMaSach(String maSach);
     Optional<Sach> findByTenSach(String tenSach);
     List<Sach> findByTacGia(String tacGia);
-    List<Sach> findByNhaXuatBan_TenNhaXuatBan(String tenNhaXuatBan);
+    List<Sach> findByNhaXuatBan_MaNhaXuatBan(String tenNhaXuatBan);
     List<Sach> findByTheLoais_MaTheLoai(String maTheLoai);
     boolean existsByMaSach(String maSach);
     boolean existsByTenSach(String tenSach);

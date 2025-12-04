@@ -1,55 +1,671 @@
 .dashboard {
-  padding: 20px;
+  padding: 15px; /* SỬA: Giảm padding */
+  height: 100vh; /* SỬA: Full viewport height */
+  overflow: hidden; /* SỬA: Bỏ scrollbar */
+  display: flex;
+  flex-direction: column;
 }
 
+.dashboard-header {
+  margin-bottom: 1rem; /* SỬA: Giảm margin */
+  text-align: center;
+  flex-shrink: 0; /* SỬA: Không co lại */
+}
+
+.dashboard-subtitle {
+  color: #666;
+  margin-top: 0.3rem; /* SỬA: Giảm margin */
+  font-size: 0.9rem; /* SỬA: Giảm font size */
+}
+
+/* SỬA: Tối ưu tab navigation - không chiếm nhiều không gian */
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem; /* SỬA: Giảm margin */
+  border-bottom: 2px solid #e9ecef;
+  flex-shrink: 0; /* SỬA: Không co lại */
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.6rem 1.2rem; /* SỬA: Giảm padding */
+  font-size: 0.95rem; /* SỬA: Giảm font size */
+  font-weight: 600;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-button:hover {
+  color: #495057;
+  background-color: #f8f9fa;
+}
+
+.tab-button.tab-active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: #fff;
+}
+
+/* SỬA: Tab content chiếm hết không gian còn lại */
+.dashboard-content {
+  flex: 1; /* SỬA: Chiếm hết không gian còn lại */
+  overflow: hidden; /* SỬA: Bỏ scrollbar */
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in-out;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  padding-right: 5px;
+  padding-bottom: 2rem; /* SỬA: THÊM padding bottom */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* SỬA: Stats grid compact hơn */
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 30px;
+  margin-bottom: 1rem; /* SỬA: Giảm margin */
+  flex-shrink: 0; /* SỬA: Không co lại */
 }
 
 .stats-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.stats-row .stat-card {
-  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem; /* SỬA: Giảm gap */
+  margin-bottom: 0.8rem; /* SỬA: Giảm margin */
 }
 
 .stat-card {
   background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.8rem; /* SỬA: Giảm padding */
+  border-radius: 6px; /* SỬA: Giảm border radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+  min-height: 80px; /* SỬA: Giảm chiều cao */
 }
 
 .stat-card i {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 20px; /* SỬA: Giảm font size */
+  margin-bottom: 0.3rem; /* SỬA: Giảm margin */
   color: #007bff;
 }
 
+.stat-card h3 {
+  margin: 0.3rem 0 0.2rem 0; /* SỬA: Giảm margin */
+  font-size: 1.3rem; /* SỬA: Giảm font size */
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 0.8rem; /* SỬA: Giảm font size */
+  color: #666;
+}
+
+/* SỬA: Charts grid - BỎ flex: 1 để không bị ép chiều cao */
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 30px;
+  gap: 0.8rem; /* SỬA: Giảm gap */
+  margin-bottom: 1rem; /* SỬA: THÊM margin bottom */
+  flex-shrink: 0; /* SỬA: Không co lại */
 }
 
 .chart-card {
   background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.8rem; /* SỬA: Giảm padding */
+  border-radius: 6px; /* SỬA: Giảm border radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 300px; /* SỬA: THÊM chiều cao cố định */
+  display: flex;
+  flex-direction: column;
 }
 
-.recent-activity {
+.chart-card h3 {
+  margin: 0 0 0.8rem 0; /* SỬA: Giảm margin */
+  font-size: 1rem; /* SỬA: Giảm font size */
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* SỬA: Responsive container cho charts */
+.chart-card .recharts-wrapper {
+  flex: 1;
+  min-height: 0; /* SỬA: Cho phép shrink */
+}
+
+/* SỬA: Đơn hàng theo trạng thái - riêng biệt và có khoảng cách */
+.orders-chart {
   background: #fff;
-  padding: 16px;
-  border-radius: 12px;
+  padding: 1rem;
+  border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 350px; /* SỬA: Chiều cao cố định */
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem; /* SỬA: Margin bottom lớn */
+  flex-shrink: 0;
+  margin-top: 1rem; /* SỬA: THÊM margin top */
+}
+
+.orders-chart h3 {
+  margin: 0 0 0.8rem 0;
+  font-size: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.orders-chart .recharts-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+/* SỬA: Scrollbar to hơn và dễ kéo hơn cho tab content */
+.tab-content::-webkit-scrollbar {
+  width: 12px; /* SỬA: Tăng độ rộng từ 6px lên 12px */
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px; /* SỬA: Tăng border radius */
+  margin: 5px 0; /* SỬA: Thêm margin để tạo khoảng cách */
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    #888 0%,
+    #666 100%
+  ); /* SỬA: Gradient đẹp hơn */
+  border-radius: 6px; /* SỬA: Tăng border radius */
+  min-height: 50px; /* SỬA: THÊM chiều cao tối thiểu cho thumb */
+  border: 2px solid #f1f1f1; /* SỬA: Thêm border để tạo khoảng cách */
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #555 0%,
+    #333 100%
+  ); /* SỬA: Gradient đậm hơn khi hover */
+  cursor: pointer; /* SỬA: Thêm cursor pointer */
+}
+
+.tab-content::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    180deg,
+    #333 0%,
+    #111 100%
+  ); /* SỬA: Gradient rất đậm khi click */
+}
+
+/* SỬA: Cải thiện scroll behavior */
+.tab-content {
+  animation: fadeIn 0.3s ease-in-out;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden; /* SỬA: Ẩn scroll ngang */
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth; /* SỬA: Scroll mượt */
+  scrollbar-gutter: stable; /* SỬA: Giữ không gian cho scrollbar */
+}
+
+/* SỬA: Thêm padding bên phải để tránh content bị che bởi scrollbar */
+.tab-content {
+  padding-right: 5px; /* SỬA: Thêm padding bên phải */
+}
+
+/* SỬA: Cải thiện chiều cao content để có thể scroll đầy đủ */
+.stats-grid {
+  margin-bottom: 1.5rem; /* SỬA: Tăng margin */
+  flex-shrink: 0;
+}
+
+.chart-card {
+  background: #fff;
+  padding: 1rem; /* SỬA: Tăng padding */
+  border-radius: 8px; /* SỬA: Tăng border radius */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 320px; /* SỬA: Tăng chiều cao từ 300px lên 320px */
+  display: flex;
+  flex-direction: column;
+}
+
+.orders-chart {
+  background: #fff;
+  padding: 1rem; /* SỬA: Tăng padding */
+  border-radius: 8px; /* SỬA: Tăng border radius */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 350px; /* SỬA: Tăng chiều cao từ 300px lên 350px */
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem; /* SỬA: Tăng margin bottom */
+  flex-shrink: 0;
+}
+
+/* SỬA: Thêm style cho smooth scrolling với mouse wheel */
+.tab-content {
+  /* Existing properties... */
+  overscroll-behavior-y: contain; /* SỬA: Ngăn scroll propagation */
+}
+
+/* SỬA: Alternative scrollbar for Firefox */
+.tab-content {
+  scrollbar-width: auto; /* SỬA: Auto width cho Firefox */
+  scrollbar-color: #888 #f1f1f1; /* SỬA: Màu thumb và track cho Firefox */
+}
+
+/* SỬA: Cải thiện responsive - scrollbar vẫn dễ sử dụng trên mobile */
+@media (max-width: 768px) {
+  .tab-content::-webkit-scrollbar {
+    width: 14px; /* SỬA: Tăng thêm width trên mobile để dễ touch */
+  }
+
+  .tab-content::-webkit-scrollbar-thumb {
+    min-height: 60px; /* SỬA: Tăng min-height trên mobile */
+    border: 3px solid #f1f1f1; /* SỬA: Tăng border cho dễ touch */
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-content::-webkit-scrollbar {
+    width: 16px; /* SỬA: Tăng thêm nữa trên màn hình nhỏ */
+  }
+
+  .tab-content::-webkit-scrollbar-thumb {
+    min-height: 80px; /* SỬA: Tăng đáng kể min-height */
+  }
+}
+
+.tab-content::after {
+  content: "";
+  height: 50px; /* SỬA: Tăng từ 20px lên 50px */
+  flex-shrink: 0;
+}
+/* Giữ nguyên các CSS khác... */
+.dashboard {
+  padding: 15px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  margin-bottom: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dashboard-subtitle {
+  color: #666;
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-button:hover {
+  color: #495057;
+  background-color: #f8f9fa;
+}
+
+.tab-button.tab-active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: #fff;
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 0.8rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  min-height: 80px;
+}
+
+.stat-card i {
+  font-size: 20px;
+  margin-bottom: 0.3rem;
+  color: #007bff;
+}
+
+.stat-card h3 {
+  margin: 0.3rem 0 0.2rem 0;
+  font-size: 1.3rem;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.chart-card h3 {
+  margin: 0 0 0.8rem 0;
+  font-size: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.chart-card .recharts-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.orders-chart h3 {
+  margin: 0 0 0.8rem 0;
+  font-size: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.orders-chart .recharts-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Activities styles giữ nguyên */
+.activities-container {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.activities-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.activities-header h3 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.1rem;
+}
+
+.activities-description {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
+
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.activity-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.activity-icon {
+  margin-right: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.activity-order {
+  padding: 0.3rem;
+  background: #e8f5e8;
+  border-radius: 4px;
+}
+
+.activity-register {
+  padding: 0.3rem;
+  background: #e3f2fd;
+  border-radius: 4px;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-message {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.2rem;
+  line-height: 1.3;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.activity-badge {
+  margin-left: 0.8rem;
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-order {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-register {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.no-activities {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: #6c757d;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-activities-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.no-activities h4 {
+  margin: 0 0 0.8rem 0;
+  color: #495057;
+  font-size: 1.1rem;
+}
+
+.no-activities p {
+  margin: 0;
+  max-width: 350px;
+  margin: 0 auto;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.activities-summary {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.activities-summary h4 {
+  text-align: center;
+  margin: 0 0 0.8rem 0;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+}
+
+.summary-item {
+  text-align: center;
+  padding: 0.6rem;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summary-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 0.3rem;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* SỬA: Responsive design compact */
+@media (max-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    margin-bottom: 1.5rem;
+  }
+
+  .orders-chart {
+    height: 320px; /* SỬA: Giảm chiều cao trên tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .tab-content {
+    padding-bottom: 3rem; /* SỬA: Tăng padding bottom trên mobile */
+  }
+
+  .orders-chart {
+    height: 280px; /* SỬA: Giảm chiều cao trên mobile */
+    margin-bottom: 1.5rem;
+  }
+
+  .charts-grid {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders-chart {
+    height: 250px; /* SỬA: Giảm thêm trên màn hình nhỏ */
+  }
+
+  .tab-content::after {
+    height: 30px; /* SỬA: Giảm space trên mobile */
+  }
+}
+
+/* SỬA: Chỉ activities list có scrollbar đẹp */
+.activities-list::-webkit-scrollbar {
+  width: 4px; /* SỬA: Scrollbar mỏng hơn */
+}
+
+.activities-list::-webkit-scrollbar-track {
+  background: transparent; /* SỬA: Trong suốt */
+}
+
+.activities-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2); /* SỬA: Mờ hơn */
+  border-radius: 2px;
+}
+
+.activities-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
 }

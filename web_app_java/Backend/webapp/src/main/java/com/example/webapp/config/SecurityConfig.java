@@ -118,6 +118,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/thongbao/auto/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/thongbao/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")        
                 .requestMatchers("/api/docgia/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers(HttpMethod.GET, "/api/sach/nxb/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/user/me").authenticated()
                 .anyRequest().authenticated()
             )
