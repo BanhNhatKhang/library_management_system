@@ -98,71 +98,123 @@ public class TheoDoiMuonSachService {
             .collect(Collectors.toList());
     }
 
-    public TheoDoiMuonSachDTO save(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
+    // Thêm method kiểm tra trạng thái mượn
+    public String checkBorrowStatus(String docGiaIdentifier, String maSach) {
         // 1. Xử lý Mã Độc Giả (MaDocGia / Email)
+        DocGia docGia;
+        
+        if (docGiaIdentifier != null && docGiaIdentifier.startsWith("DG")) {
+            // Trường hợp là Mã DocGia: Tìm theo ID
+            docGia = docGiaRepository.findById(docGiaIdentifier)
+                .orElse(null);
+        } else {
+            // Trường hợp là Email (Subject): Tìm theo Email
+            docGia = docGiaRepository.findByEmail(docGiaIdentifier);
+        }
+        
+        if (docGia == null) {
+            return null; // Không tìm thấy độc giả, cho phép mượn
+        }
+        
+        String maDocGiaThucTe = docGia.getMaDocGia();
+        
+        // 2. Kiểm tra sách có tồn tại không
+        Sach sach = sachRepository.findById(maSach).orElse(null);
+        if (sach == null) {
+            return "Sách không tồn tại";
+        }
+        
+        // 3. Tìm phiếu mượn có trạng thái "đang hoạt động" (không được mượn tiếp)
+        List<TheoDoiMuonSach.TrangThaiMuon> activeStates = List.of(
+            TheoDoiMuonSach.TrangThaiMuon.CHODUYET,
+            TheoDoiMuonSach.TrangThaiMuon.DADUYET, 
+            TheoDoiMuonSach.TrangThaiMuon.DANGMUON
+        );
+        
+        List<TheoDoiMuonSach> activeRecords = theoDoiMuonSachRepository
+            .findByDocGiaAndSachAndTrangThaiMuonIn(maDocGiaThucTe, maSach, activeStates);
+            
+        if (!activeRecords.isEmpty()) {
+            TheoDoiMuonSach latestRecord = activeRecords.get(0); // Lấy bản ghi mới nhất
+            String trangThaiText = getTrangThaiText(latestRecord.getTrangThaiMuon());
+            return "Sách \"" + sach.getTenSach() + "\" đang được " + trangThaiText + ", không thể đăng ký mượn";
+        }
+        
+        return null; // Cho phép mượn
+    }
+    
+    // Helper method để chuyển enum thành text hiển thị
+    private String getTrangThaiText(TheoDoiMuonSach.TrangThaiMuon trangThai) {
+        switch (trangThai) {
+            case CHODUYET: return "chờ duyệt";
+            case DADUYET: return "đã duyệt";
+            case DANGMUON: return "đang mượn";
+            case TUCHOI: return "từ chối";
+            case DATRA: return "đã trả";
+            default: return "xử lý";
+        }
+    }
+
+    public TheoDoiMuonSachDTO save(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
+        // 1. Kiểm tra trạng thái mượn trước khi lưu
+        String checkResult = checkBorrowStatus(theoDoiMuonSachDTO.getMaDocGia(), theoDoiMuonSachDTO.getMaSach());
+        if (checkResult != null) {
+            throw new RuntimeException(checkResult);
+        }
+        
+        // 2. Xử lý Mã Độc Giả (MaDocGia / Email) - code cũ giữ nguyên
         String docGiaIdentifier = theoDoiMuonSachDTO.getMaDocGia();
         DocGia docGia;
 
         if (docGiaIdentifier != null && docGiaIdentifier.startsWith("DG")) {
-            // Trường hợp là Mã DocGia: Tìm theo ID
             docGia = docGiaRepository.findById(docGiaIdentifier)
                 .orElseThrow(() -> new RuntimeException("Độc giả không tồn tại (ID: " + docGiaIdentifier + ")"));
         } else {
-            // Trường hợp là Email (Subject): Tìm theo Email
-            // PHẢI ĐẢM BẢO docGiaRepository CÓ PHƯƠNG THỨC findByEmail(String email)
             docGia = docGiaRepository.findByEmail(docGiaIdentifier); 
             if (docGia == null) {
                 throw new RuntimeException("Độc giả không tồn tại (Email: " + docGiaIdentifier + ")");
             }
         }
 
-        // Lấy Mã Độc Giả thực tế để tạo ID
         String maDocGiaThucTe = docGia.getMaDocGia();
         
-        // 2. Kiểm tra sách
+        // 3. Kiểm tra sách
         Sach sach = sachRepository.findById(theoDoiMuonSachDTO.getMaSach())
             .orElseThrow(() -> new RuntimeException("Sách không tồn tại"));
 
-        // 3. Xử lý Nhân viên (luôn là null khi độc giả tạo phiếu)
+        // 4-6. Code cũ giữ nguyên cho phần còn lại...
         NhanVien nhanVien = null; 
         if (theoDoiMuonSachDTO.getMaNhanVien() != null && !theoDoiMuonSachDTO.getMaNhanVien().isEmpty()) {
              nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
                  .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
         }
 
-        // 4. Tính Ngày Trả (Ngay Muon + 14 ngày)
         LocalDate ngayMuon = theoDoiMuonSachDTO.getNgayMuon();
         if (ngayMuon == null) {
              throw new RuntimeException("Ngày mượn không được để trống!");
         }
-        // Tính ngày trả dự kiến
-        LocalDate ngayTraDuKien = ngayMuon.plus(14, ChronoUnit.DAYS); // Thêm 14 ngày
+        LocalDate ngayTraDuKien = ngayMuon.plus(14, ChronoUnit.DAYS);
         
-        // 5. Tạo ID và kiểm tra trùng lặp (dùng NgayMuon từ DTO, MaDocGia thực tế)
         TheoDoiMuonSachId id = new TheoDoiMuonSachId(
             maDocGiaThucTe, 
             theoDoiMuonSachDTO.getMaSach(), 
-            ngayMuon // Sử dụng Ngay Muon đã kiểm tra
+            ngayMuon
         );
         
         if (theoDoiMuonSachRepository.findById(id).isPresent()) {
              throw new RuntimeException("Yêu cầu mượn cho sách này của độc giả vào ngày này đã tồn tại!");
         }
 
-        // 6. Tạo và lưu Entity
         TheoDoiMuonSach theoDoiMuonSach = new TheoDoiMuonSach();
         theoDoiMuonSach.setId(id);
         theoDoiMuonSach.setDocGia(docGia);
         theoDoiMuonSach.setSach(sach);
-        theoDoiMuonSach.setNhanVien(nhanVien); // null
-        
-        // Gán Ngày Trả đã tính toán
+        theoDoiMuonSach.setNhanVien(nhanVien);
         theoDoiMuonSach.setNgayTra(ngayTraDuKien); 
         
-        // Gán trạng thái 
         String trangThaiString = theoDoiMuonSachDTO.getTrangThaiMuon();
         if (trangThaiString == null) {
-            trangThaiString = "CHODUYET"; // Đảm bảo trạng thái mặc định
+            trangThaiString = "CHODUYET";
         }
         theoDoiMuonSach.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(trangThaiString));
 

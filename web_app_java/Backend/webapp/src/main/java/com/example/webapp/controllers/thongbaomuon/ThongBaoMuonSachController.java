@@ -1,4 +1,4 @@
-package com.example.webapp.controllers.thongbaomuon.thongbao;
+package com.example.webapp.controllers.thongbaomuon;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;

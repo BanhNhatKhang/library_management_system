@@ -7,11 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.time.LocalDate.parse;
+
+import com.example.webapp.security.JwtUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/theodoimuonsach")
@@ -111,5 +117,37 @@ public class TheoDoiMuonSachController {
     public void delete(@RequestParam String maDocGia, @RequestParam String maSach, @RequestParam String ngayMuon) {
         TheoDoiMuonSachId id = new TheoDoiMuonSachId(maDocGia, maSach, parse(ngayMuon));
         theoDoiMuonSachService.delete(id);
+    }
+
+    @GetMapping("/check-borrow-status")
+    public ResponseEntity<Map<String, Object>> checkBorrowStatus(
+        @RequestParam String maSach, 
+        HttpServletRequest request
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Lấy email từ JWT token
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                String email = JwtUtil.getUsernameFromToken(token);
+                
+                String checkResult = theoDoiMuonSachService.checkBorrowStatus(email, maSach);
+                
+                response.put("canBorrow", checkResult == null);
+                response.put("message", checkResult);
+                
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("canBorrow", false);
+                response.put("message", "Vui lòng đăng nhập để mượn sách");
+                return ResponseEntity.status(401).body(response);
+            }
+        } catch (Exception e) {
+            response.put("canBorrow", false);
+            response.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
     }
 }

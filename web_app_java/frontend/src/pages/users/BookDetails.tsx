@@ -253,27 +253,41 @@ export default function BookDetails() {
       return;
     }
 
-    // 2. Lấy maDocGia (Subject) từ token
-    const maDocGia = getSubjectFromToken();
-    if (!maDocGia) {
-      setMessage({
-        text: "Không tìm thấy thông tin Độc Giả. Vui lòng đăng nhập lại.",
-        type: "error",
-      });
-      return;
-    }
-
-    const today = new Date().toISOString().split("T")[0]; // Định dạng yyyy-MM-dd
-
-    const payload: BorrowRequestDTO = {
-      maDocGia: maDocGia,
-      maSach: maSach,
-      ngayMuon: today,
-      trangThaiMuon: "CHODUYET", // Trạng thái CHỜ DUYỆT
-      maNhanVien: null, // Yêu cầu từ độc giả, chưa có Nhân viên xử lý
-    };
-
     try {
+      // 2. Kiểm tra trạng thái mượn trước
+      const checkResponse = await axios.get(
+        `/api/theodoimuonsach/check-borrow-status?maSach=${maSach}`
+      );
+
+      if (!checkResponse.data.canBorrow) {
+        setMessage({
+          text: checkResponse.data.message,
+          type: "error",
+        });
+        return;
+      }
+
+      // 3. Lấy maDocGia từ token
+      const maDocGia = getSubjectFromToken();
+      if (!maDocGia) {
+        setMessage({
+          text: "Không tìm thấy thông tin Độc Giả. Vui lòng đăng nhập lại.",
+          type: "error",
+        });
+        return;
+      }
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const payload: BorrowRequestDTO = {
+        maDocGia: maDocGia,
+        maSach: maSach,
+        ngayMuon: today,
+        trangThaiMuon: "CHODUYET",
+        maNhanVien: null,
+      };
+
+      // 4. Gửi yêu cầu mượn
       await axios.post("/api/theodoimuonsach", payload);
       setMessage({
         text: "Yêu cầu mượn sách đã được gửi thành công. Vui lòng chờ phê duyệt!",
@@ -282,8 +296,7 @@ export default function BookDetails() {
     } catch (error) {
       console.error("Error sending borrow request:", error);
 
-      let errorMessage =
-        "Lỗi: Không thể gửi yêu cầu mượn. Có thể bạn đã có yêu cầu cho sách này đang chờ duyệt.";
+      let errorMessage = "Lỗi: Không thể gửi yêu cầu mượn.";
 
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
@@ -295,6 +308,11 @@ export default function BookDetails() {
         ) {
           errorMessage = (axiosError.response.data as { message: string })
             .message;
+        } else if (
+          axiosError.response?.data &&
+          typeof axiosError.response.data === "string"
+        ) {
+          errorMessage = axiosError.response.data;
         }
       }
 
