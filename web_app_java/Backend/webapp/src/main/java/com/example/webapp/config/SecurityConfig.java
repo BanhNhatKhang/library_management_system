@@ -71,7 +71,9 @@ public class SecurityConfig {
                     "/api/theloai/id/**",      
                     "/api/nhaxuatban",
                     "/uploads/**",
-                    "/api/uploads/**"         
+                    "/api/uploads/**",
+                    "/api/uudai/public",
+                    "/api/search/**"        
                 ).permitAll()
 
                 // DOCGIA profile management
@@ -89,6 +91,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/thongbao/current-user").hasRole("DOCGIA")
                 .requestMatchers(HttpMethod.GET, "/api/thongbao/docgia/**").hasRole("DOCGIA")
                 .requestMatchers(HttpMethod.PUT, "/api/thongbao/*/mark-read").hasRole("DOCGIA")
+
+                // DOCGIA ưu đãi management - SỬA: Thêm các endpoint này
+                .requestMatchers("/api/uudai/save/**").hasRole("DOCGIA")
+                .requestMatchers("/api/uudai/saved").hasRole("DOCGIA") 
+                .requestMatchers("/api/uudai/unsave/**").hasRole("DOCGIA")
+                
 
                 // DOCGIA order access (chỉ GET own orders)
                 .requestMatchers(HttpMethod.GET, "/api/docgia/donhang/**").hasRole("DOCGIA")

@@ -7,6 +7,7 @@ import com.example.webapp.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.*;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Objects;
@@ -61,6 +63,43 @@ public class SachService {
                                 .anyMatch(tl -> tl.getTenTheLoai().equalsIgnoreCase(tenTheLoai)))
             .map(this::toDTO)
             .toList();
+    }
+
+    public List<SachDTO> searchSachByTen(String tenSach) {
+        return sachRepository.findByTenSachContainingIgnoreCase(tenSach)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<SachDTO> searchSachByTheLoai(String theLoai) {
+        return sachRepository.findSachByTheLoaiContaining(theLoai)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<SachDTO> searchSachGlobal(String query) {
+        Set<SachDTO> resultSet = new HashSet<>();
+        
+        // Tìm theo tên sách
+        resultSet.addAll(searchSachByTen(query));
+        
+        // Tìm theo tác giả
+        resultSet.addAll(getSachByTacGia(query));
+        
+        // Tìm theo nhà xuất bản
+        resultSet.addAll(getSachByNhaXuatBan(query));
+        
+        return new ArrayList<>(resultSet);
+    }
+
+    public List<String> getAuthorSuggestions(String query, int limit) {
+        return sachRepository.findDistinctTacGiaContaining(query, PageRequest.of(0, limit));
+    }
+
+    public List<String> getPublisherSuggestions(String query, int limit) {
+        return nhaXuatBanRepository.findTenNhaXuatBanContaining(query, PageRequest.of(0, limit));
     }
 
     public List<SachDTO> getSachByMaTheLoai(String maTheLoai) {

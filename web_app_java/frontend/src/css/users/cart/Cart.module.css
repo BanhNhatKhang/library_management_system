@@ -443,3 +443,35 @@
     margin-bottom: 5px;
   }
 }
+/* ưu đãi */
+.promo-applied {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.promotion-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.no-promotion {
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+/* Thêm style cơ bản cho promotion-item */
+.promotion-item {
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: background-color 0.2s ease;
+}
+
+.promotion-item:hover {
+  background-color: #f9fafb;
+}

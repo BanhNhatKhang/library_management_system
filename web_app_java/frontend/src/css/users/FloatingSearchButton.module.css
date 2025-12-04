@@ -1,0 +1,200 @@
+.floating-search-container {
+  position: fixed;
+  bottom: 540px;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+/* Search Bar - Slide from right */
+.search-bar {
+  width: 0;
+  height: 50px;
+  background: white;
+  border-radius: 25px 0 0 25px;
+  box-shadow: 0 4px 16px rgba(48, 140, 136, 0.2);
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  border: 2px solid #e2e8f0;
+}
+
+.search-bar.expanded {
+  width: 396px; /* Độ dài yêu cầu */
+  border-color: #308c88;
+}
+
+.search-form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  gap: 10px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  background: transparent;
+  color: #1a202c;
+  height: 100%;
+  padding: 0 5px;
+}
+
+.search-input::placeholder {
+  color: #a0aec0;
+}
+
+.search-submit-btn {
+  background: linear-gradient(135deg, #308c88, #2d7873);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-submit-btn:hover {
+  background: linear-gradient(135deg, #2d7873, #26665f);
+  transform: scale(1.05);
+}
+
+.search-submit-btn i {
+  font-size: 0.8rem;
+}
+
+.floating-search-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 8%;
+  background: linear-gradient(135deg, #c1dddc, #c1dddc);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(48, 140, 136, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+}
+
+.floating-search-btn:hover {
+  background: linear-gradient(135deg, #2d7873, #26665f);
+  box-shadow: 0 6px 20px rgba(48, 140, 136, 0.5);
+}
+
+.floating-search-btn.expanded {
+  background: linear-gradient(135deg, #2d7873, #26665f);
+}
+
+.floating-search-btn i {
+  font-size: 1rem;
+  margin-bottom: 2px;
+  transition: transform 0.3s ease;
+}
+/* 
+.floating-search-btn.expanded i {
+  transform: rotate(180deg);
+} */
+
+.btn-label {
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .floating-search-container {
+    bottom: 120px;
+    right: 0px;
+  }
+
+  .floating-search-btn {
+    width: 45px;
+    height: 45px;
+  }
+
+  .floating-search-btn i {
+    font-size: 0.9rem;
+  }
+
+  .btn-label {
+    font-size: 0.45rem;
+  }
+
+  .search-modal {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .search-input {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
+
+  .search-submit-btn {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 576px) {
+  .floating-search-container {
+    bottom: 100px;
+    right: 0px;
+  }
+
+  .floating-search-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .floating-search-btn i {
+    font-size: 0.8rem;
+  }
+
+  .btn-label {
+    font-size: 0.4rem;
+    letter-spacing: 0.1;
+  }
+}
+
+/* SỬA: Thêm hiệu ứng sticky edge */
+.floating-search-btn:hover {
+  background: linear-gradient(135deg, #2d7873, #26665f);
+  transform: translateX(-3px); /* SỬA: Di chuyển xa màn hình khi hover */
+  box-shadow: 0 6px 20px rgba(48, 140, 136, 0.5);
+  border-radius: 8px 0 0 8px; /* SỬA: Bo góc trái, vuông góc phải */
+}
+
+@media (max-width: 768px) {
+  .floating-search-btn:hover {
+    transform: translateX(-2px);
+    border-radius: 6px 0 0 6px;
+  }
+}
+
+@media (max-width: 576px) {
+  .floating-search-btn:hover {
+    transform: translateX(-1px);
+    border-radius: 5px 0 0 5px;
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import styles from "../../css/users/profile/Profile.module.css";
 import axios from "../../../axiosConfig";
 
@@ -210,6 +210,15 @@ function Profile() {
       totalElements: 0,
       pageSize: 5,
     });
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "orders") {
+      setActiveMenu("donHangCuaToi");
+    }
+  }, [searchParams]);
 
   // Dữ liệu giả định cứng
   const memberIconClass = "fas fa-user";

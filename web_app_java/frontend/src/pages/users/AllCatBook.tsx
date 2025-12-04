@@ -252,21 +252,6 @@ function AllCatBook() {
         <div className="col-lg-3">
           <div className={styles["sidebar"]}>
             <h3 className={styles["sidebar-title"]}>Nhóm sản phẩm</h3>
-            <ul className={styles["category-list"]}>
-              {/* Giả lập danh mục sản phẩm như trong ảnh */}
-              <li>
-                <Link to="#">Văn học</Link>
-              </li>
-              <li className={styles["active-item"]}>
-                <Link to={`/the-loai/${maTheLoai}`}>
-                  {currentCategory ? currentCategory.tenTheLoai : "Tiểu thuyết"}
-                </Link>
-              </li>
-              <li>
-                <Link to="#">Truyện Ngắn - Tản Văn</Link>
-              </li>
-              {/* ... Thêm các danh mục khác nếu cần ... */}
-            </ul>
 
             <hr />
 

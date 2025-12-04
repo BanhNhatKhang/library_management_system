@@ -16,7 +16,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  color: #043747;
+  color: #c1dddc;
 }
 
 .sale-title {
@@ -48,9 +48,10 @@
 }
 
 .section-title {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   font-size: 1.5rem;
   font-weight: 600;
-  color: #374151;
+  color: white;
   margin-bottom: 20px;
 }
 
@@ -102,6 +103,7 @@
 
 .category-name {
   font-size: 0.85rem;
+  color: white;
   display: inline-block;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -194,17 +196,301 @@
 }
 
 .btn-view-all-books {
-  background-color: transparent;
-  border: 1px solid #b45309;
-  color: #b45309;
-  padding: 10px 30px;
-  border-radius: 20px;
-  font-weight: 500;
+  display: inline-block;
+  background: linear-gradient(135deg, #043747, #0f4c75);
+  color: white;
   text-decoration: none;
-  transition: all 0.2s;
+  padding: 6px 16px; /* Còn nhỏ hơn nữa */
+  border-radius: 4px; /* Bo góc nhỏ hơn */
+  font-weight: 500;
+  font-size: 0.85rem; /* Font nhỏ hơn */
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 6px rgba(4, 55, 71, 0.2);
 }
 
 .btn-view-all-books:hover {
-  background-color: #b45309;
+  background: linear-gradient(135deg, #0f4c75, #043747);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(4, 55, 71, 0.3);
   color: white;
+}
+
+.promotion-section {
+  background: linear-gradient(135deg, #043747 0%, #c1dddc 100%);
+  padding: 30px 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.promotion-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="60" cy="80" r="2.5" fill="rgba(255,255,255,0.1)"/></svg>')
+    repeat;
+  pointer-events: none;
+}
+
+.promotion-header {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.promotion-header .section-title {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.promotion-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.promotion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.promotion-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 100px;
+}
+
+/* .promotion-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #043747;
+} */
+
+.promo-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #ffa726, #fb8c00);
+}
+
+.promo-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.promo-main-content {
+  flex: 1;
+}
+
+.promo-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.promo-description {
+  color: #718096;
+  font-size: 0.875rem;
+  margin: 4px 0 0 0;
+  line-height: 1.3;
+}
+
+.promo-validity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #a0aec0;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+.promo-action {
+  flex-shrink: 0;
+}
+
+.save-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  white-space: nowrap;
+}
+
+.save-button:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.save-button.saved {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.promo-category {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.category-label-discount {
+  background: linear-gradient(135deg, #ffa726, #fb8c00);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.category-display-section {
+  background: linear-gradient(135deg, #043747 0%, #c1dddc 100%);
+  padding: 30px 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-label-freeship {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.discount-badge-corner {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #ff4757, #ff3742);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.no-promotion {
+  text-align: center;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}
+
+.empty-state h4,
+.empty-state p {
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .promotion-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .promotion-card {
+    padding: 12px;
+    min-height: auto;
+  }
+
+  .promo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .promo-title {
+    font-size: 0.9rem;
+  }
+
+  .promo-description {
+    font-size: 0.8rem;
+  }
+
+  .save-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .promotion-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+    padding: 16px 12px;
+  }
+
+  .promo-content {
+    text-align: center;
+  }
+
+  .promo-validity {
+    justify-content: center;
+  }
+
+  .discount-badge-corner {
+    top: 4px;
+    right: 4px;
+  }
+
+  .promo-category {
+    top: 4px;
+    left: 4px;
+  }
 }

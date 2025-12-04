@@ -3,6 +3,8 @@ package com.example.webapp.models;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "DOCGIA")
@@ -64,6 +66,16 @@ public class DocGia {
     @Column(name = "TRANGTHAI", columnDefinition = "TRANGTHAI_DOCGIA")
     private TrangThaiDocGia trangThai = TrangThaiDocGia.HOATDONG;
 
+    // THÊM: Quan hệ Many-to-Many với UuDai đã lưu
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "DOCGIA_UUDAI_DALUU",
+        joinColumns = @JoinColumn(name = "MADOCGIA"),
+        inverseJoinColumns = @JoinColumn(name = "MAUUDAI")
+    )
+    private Set<UuDai> uuDaisDaLuu = new HashSet<>();
+
+    // Constructors
     public DocGia() {}
 
     public DocGia(String maDocGia, String hoLot, String ten, VaiTroDocGia vaiTro, GioiTinh gioiTinh, String diaChi, LocalDate ngaySinh, String dienThoai, String email, String matKhau, TrangThaiDocGia trangThai) {
@@ -80,8 +92,7 @@ public class DocGia {
         this.trangThai = trangThai;
     }
 
-    // Getters và Setters cho DocGia
-
+    // Getters và Setters cho DocGia (existing)
     public String getMaDocGia() { return maDocGia; }
     public void setMaDocGia(String maDocGia) { this.maDocGia = maDocGia; }
 
@@ -115,4 +126,25 @@ public class DocGia {
     public TrangThaiDocGia getTrangThai() { return trangThai; }
     public void setTrangThai(TrangThaiDocGia trangThai) { this.trangThai = trangThai; }
 
+    // THÊM: Getter và Setter cho ưu đãi đã lưu
+    public Set<UuDai> getUuDaisDaLuu() {
+        return uuDaisDaLuu;
+    }
+
+    public void setUuDaisDaLuu(Set<UuDai> uuDaisDaLuu) {
+        this.uuDaisDaLuu = uuDaisDaLuu;
+    }
+
+    // THÊM: Helper methods để quản lý ưu đãi
+    public void addUuDaiDaLuu(UuDai uuDai) {
+        this.uuDaisDaLuu.add(uuDai);
+    }
+
+    public void removeUuDaiDaLuu(UuDai uuDai) {
+        this.uuDaisDaLuu.remove(uuDai);
+    }
+
+    public boolean hasUuDaiDaLuu(UuDai uuDai) {
+        return this.uuDaisDaLuu.contains(uuDai);
+    }
 }

@@ -6,9 +6,11 @@ import com.example.webapp.dto.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.webapp.dto.ThanhToanRequestDTO;
+import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/donhang")
@@ -58,5 +60,30 @@ public class DonHangController {
     public String deleteDonHang(@PathVariable String maDonHang) {
         donHangService.deleteDonHang(maDonHang);
         return "Đơn hàng với ID " + maDonHang + " đã được xóa thành công";
+    }
+
+    @PostMapping("/{maDonHang}/apply-uudai")
+    public ResponseEntity<?> applyUuDai(
+            @PathVariable String maDonHang,
+            @RequestParam String maUuDai) {
+        try {
+            // Kiểm tra xung đột trước
+            String conflictMessage = donHangService.validateUuDaiConflict(maDonHang, maUuDai);
+            if (conflictMessage != null) {
+                return ResponseEntity.ok().body(Map.of(
+                    "warning", conflictMessage,
+                    "canProceed", true
+                ));
+            }
+            
+            // Tính toán và áp dụng ưu đãi tốt nhất
+            DonHangDTO result = donHangService.calculateBestDiscount(maDonHang, maUuDai);
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", e.getMessage()
+            ));
+        }
     }
 }

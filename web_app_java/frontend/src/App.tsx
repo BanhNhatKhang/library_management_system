@@ -65,6 +65,18 @@ import AllCatBook from "./pages/users/AllCatBook";
 // hồ sơ người dùng
 import Profile from "./pages/users/Profile";
 
+// tất cả sách
+import AllBooks from "./pages/users/AllBooks";
+
+// tất cả sách giảm giá
+import FlashSale from "./pages/users/FlashSale";
+
+// tìm kiếm nổi
+import FloatingSearchButton from "./components/users/FloatingSearchButton";
+
+// chuyển hướng tìm kiếm
+import SearchPage from "./pages/users/SearchPage";
+
 function App() {
   const { role } = useAuth();
 
@@ -156,7 +168,14 @@ function App() {
               <Route path="/the-loai/:maTheLoai" element={<AllCatBook />} />
               {/* Hồ sơ người dùng */}
               <Route path="/profile" element={<Profile />} />
+              {/* Tất cả sách */}
+              <Route path="/sach/tat-ca" element={<AllBooks />} />
+              {/* Tất cả sách giảm giá */}
+              <Route path="/flash-sale" element={<FlashSale />} />
+              {/* Chuyển hướng trang tìm kiếm */}
+              <Route path="/search" element={<SearchPage />} />
             </Routes>
+            <FloatingSearchButton />
             <Footer />
           </>
         }

@@ -1,8 +1,7 @@
 package com.example.webapp.services;
 
 import com.example.webapp.models.*;
-import com.example.webapp.dto.DonHangDTO;
-import com.example.webapp.dto.ThanhToanRequestDTO;
+import com.example.webapp.dto.*;
 import com.example.webapp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
+import java.math.RoundingMode;
 
 @Service
 public class DonHangService {
@@ -95,6 +95,7 @@ public class DonHangService {
         return donHangRepository.save(donHang);
     }
 
+    @Transactional
     public DonHangDTO thanhToan(Principal principal, ThanhToanRequestDTO request) {
         try {
             // Giả lập delay xử lý thanh toán
@@ -112,23 +113,39 @@ public class DonHangService {
             
             // Tạo đơn hàng mới
             DonHang donHang = new DonHang();
-            
-            // Tạo mã đơn hàng tự động
-            LocalDate today = LocalDate.now();
-            String datePart = today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
-            long count = donHangRepository.count() + 1;
-            String newId = String.format("DH%s-%03d", datePart, count);
-            
-            donHang.setMaDonHang(newId);
-            donHang.setNgayDat(today);
+            donHang.setMaDonHang(generateNextMaDH());
+            donHang.setNgayDat(LocalDate.now());
             donHang.setTongTien(request.getTongTien());
             donHang.setTrangThai(DonHang.TrangThaiDonHang.DANGXULY);
             donHang.setDocGia(docGia);
-            
-            // Lưu đơn hàng
-            DonHang savedDonHang = donHangRepository.save(donHang);
-            
-            // Tạo chi tiết đơn hàng từ giỏ hàng
+
+            // *** THÊM LOGIC XỬ LÝ ƯU ĐÃI ***
+            if (request.getMaUuDai() != null && !request.getMaUuDai().trim().isEmpty()) {
+                Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(request.getMaUuDai());
+                if (uuDaiOpt.isPresent()) {
+                    UuDai uuDai = uuDaiOpt.get();
+                    
+                    // Kiểm tra ưu đãi còn hiệu lực
+                    LocalDate now = LocalDate.now();
+                    if ((now.isAfter(uuDai.getNgayBatDau()) || now.equals(uuDai.getNgayBatDau())) &&
+                        (now.isBefore(uuDai.getNgayKetThuc()) || now.equals(uuDai.getNgayKetThuc()))) {
+                        
+                        // Thêm ưu đãi vào đơn hàng
+                        donHang.getUuDais().add(uuDai);
+                        
+                        System.out.println("Applied uu dai: " + uuDai.getMaUuDai() + " to order: " + donHang.getMaDonHang());
+                    } else {
+                        System.out.println("UuDai expired or not yet active: " + request.getMaUuDai());
+                    }
+                } else {
+                    System.out.println("UuDai not found: " + request.getMaUuDai());
+                }
+            }
+
+            // Lưu đơn hàng trước
+            donHang = donHangRepository.save(donHang);
+
+            // Tạo chi tiết đơn hàng và xóa khỏi giỏ hàng
             for (String maSach : request.getMaSachList()) {
                 // Lấy thông tin từ giỏ hàng
                 GioHangId gioHangId = new GioHangId(maDocGiaThucTe, maSach);
@@ -138,12 +155,12 @@ public class DonHangService {
                     GioHang gioHang = gioHangOpt.get();
                     
                     // Tạo ID cho chi tiết đơn hàng
-                    ChiTietDonHangId chiTietId = new ChiTietDonHangId(savedDonHang.getMaDonHang(), maSach);
+                    ChiTietDonHangId chiTietId = new ChiTietDonHangId(donHang.getMaDonHang(), maSach);
                     
                     // Tạo chi tiết đơn hàng
                     ChiTietDonHang chiTiet = new ChiTietDonHang();
                     chiTiet.setId(chiTietId);
-                    chiTiet.setDonHang(savedDonHang);
+                    chiTiet.setDonHang(donHang);
                     chiTiet.setSach(gioHang.getSach());
                     chiTiet.setSoLuong(gioHang.getSoLuong());
                     
@@ -166,7 +183,7 @@ public class DonHangService {
                 }
             }
             
-            return toDTO(savedDonHang);
+            return toDTO(donHang);
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -247,4 +264,154 @@ public class DonHangService {
         return donHang;
     }
 
+    private String generateNextMaDH() {
+        // Lấy ngày hiện tại định dạng yyyyMMdd
+        java.time.LocalDate today = java.time.LocalDate.now();
+        String datePart = today.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        // Tìm mã đơn hàng lớn nhất trong ngày
+        List<DonHang> donHangsToday = donHangRepository.findByNgayDat(today);
+        int maxSequence = 0;
+        
+        for (DonHang dh : donHangsToday) {
+            String maDH = dh.getMaDonHang();
+            if (maDH != null && maDH.startsWith("DH" + datePart + "-")) {
+                try {
+                    String sequencePart = maDH.substring(maDH.lastIndexOf("-") + 1);
+                    int sequence = Integer.parseInt(sequencePart);
+                    maxSequence = Math.max(maxSequence, sequence);
+                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                    // Ignore invalid format
+                }
+            }
+        }
+
+        // Tạo mã mới
+        int nextSequence = maxSequence + 1;
+        return String.format("DH%s-%03d", datePart, nextSequence);
+    }
+
+    public DonHangDTO calculateBestDiscount(String maDonHang, String maUuDaiDonHang) {
+        // SỬA: Sử dụng findById thay vì findByMaDonHang
+        Optional<DonHang> donHangOpt = donHangRepository.findById(maDonHang);
+        if (donHangOpt.isEmpty()) {
+            throw new RuntimeException("Đơn hàng không tồn tại");
+        }
+        
+        DonHang donHang = donHangOpt.get();
+        BigDecimal tongTienGoc = donHang.getTongTien();
+        
+        // Tính tổng tiền với ưu đãi từ sách
+        BigDecimal tongTienVoiUuDaiSach = calculateTotalWithSachUuDai(donHang);
+        BigDecimal giamGiaTuSach = tongTienGoc.subtract(tongTienVoiUuDaiSach);
+        
+        // Tính tổng tiền với ưu đãi từ đơn hàng (không tính ưu đãi sách)
+        BigDecimal tongTienVoiUuDaiDonHang = tongTienGoc;
+        BigDecimal giamGiaTuDonHang = BigDecimal.ZERO;
+        
+        if (maUuDaiDonHang != null && !maUuDaiDonHang.trim().isEmpty()) {
+            Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDaiDonHang);
+            if (uuDaiOpt.isPresent()) {
+                UuDai uuDai = uuDaiOpt.get();
+                giamGiaTuDonHang = tongTienGoc.multiply(uuDai.getPhanTramGiam())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                tongTienVoiUuDaiDonHang = tongTienGoc.subtract(giamGiaTuDonHang);
+            }
+        }
+        
+        // Chọn phương án tốt nhất cho khách hàng
+        String uuDaiApDung;
+        BigDecimal tongTienCuoiCung;
+        BigDecimal tongGiamGia;
+        
+        if (giamGiaTuSach.compareTo(giamGiaTuDonHang) >= 0) {
+            // Ưu đãi từ sách tốt hơn
+            uuDaiApDung = "Ưu đãi từ sách";
+            tongTienCuoiCung = tongTienVoiUuDaiSach;
+            tongGiamGia = giamGiaTuSach;
+            
+            // SỬA: Xóa ưu đãi đơn hàng bằng cách clear Set
+            donHang.getUuDais().clear();
+        } else {
+            // Ưu đãi từ đơn hàng tốt hơn
+            uuDaiApDung = "Mã ưu đãi: " + maUuDaiDonHang;
+            tongTienCuoiCung = tongTienVoiUuDaiDonHang;
+            tongGiamGia = giamGiaTuDonHang;
+            
+            // SỬA: Áp dụng ưu đãi đơn hàng bằng cách thêm vào Set
+            Optional<UuDai> uuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDaiDonHang);
+            if (uuDaiOpt.isPresent()) {
+                donHang.getUuDais().clear(); // Xóa ưu đãi cũ
+                donHang.getUuDais().add(uuDaiOpt.get()); // Thêm ưu đãi mới
+            }
+        }
+        
+        donHang.setTongTien(tongTienCuoiCung);
+        donHangRepository.save(donHang);
+        
+        // SỬA: Sử dụng method toDTO có sẵn
+        DonHangDTO result = toDTO(donHang);
+        
+        // SỬA: Tạo enhanced DTO để trả về thông tin chi tiết
+        DonHangEnhancedDTO enhancedResult = new DonHangEnhancedDTO();
+        enhancedResult.setMaDonHang(result.getMaDonHang());
+        enhancedResult.setMaDocGia(result.getMaDocGia());
+        enhancedResult.setNgayDat(result.getNgayDat());
+        enhancedResult.setTongTien(result.getTongTien());
+        enhancedResult.setTrangThaiDonHang(result.getTrangThaiDonHang());
+        enhancedResult.setUuDaiApDung(uuDaiApDung);
+        enhancedResult.setTongGiamGia(tongGiamGia);
+        
+        return enhancedResult;
+    }
+    
+    private BigDecimal calculateTotalWithSachUuDai(DonHang donHang) {
+        // SỬA: Lấy chi tiết đơn hàng từ repository thay vì từ entity
+        List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang_MaDonHang(donHang.getMaDonHang());
+        
+        return chiTietList.stream()
+            .map(ct -> {
+                Sach sach = ct.getSach();
+                BigDecimal donGia = sach.getDonGia();
+                
+                // Tìm ưu đãi tốt nhất cho sách này
+                Double maxGiamGia = sach.getUuDais().stream()
+                    .filter(this::isUuDaiActive)
+                    .map(ud -> ud.getPhanTramGiam().doubleValue())
+                    .max(Double::compareTo)
+                    .orElse(0.0);
+                
+                BigDecimal giamGia = donGia.multiply(BigDecimal.valueOf(maxGiamGia))
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                
+                return donGia.subtract(giamGia).multiply(BigDecimal.valueOf(ct.getSoLuong()));
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    
+    private boolean isUuDaiActive(UuDai uuDai) {
+        LocalDate now = LocalDate.now();
+        return (uuDai.getNgayBatDau().isBefore(now) || uuDai.getNgayBatDau().equals(now)) &&
+               (uuDai.getNgayKetThuc().isAfter(now) || uuDai.getNgayKetThuc().equals(now));
+    }
+    
+    // SỬA: Tạo method kiểm tra xung đột ưu đãi đơn giản hơn
+    public String validateUuDaiConflict(String maDonHang, String maUuDaiMoi) {
+        Optional<DonHang> donHangOpt = donHangRepository.findById(maDonHang);
+        if (donHangOpt.isEmpty()) {
+            return "Đơn hàng không tồn tại";
+        }
+        
+        List<ChiTietDonHang> chiTietList = chiTietDonHangRepository.findByDonHang_MaDonHang(maDonHang);
+        
+        // Kiểm tra xem có sách nào trong đơn hàng đã có ưu đãi không
+        boolean hasSachWithUuDai = chiTietList.stream()
+            .anyMatch(ct -> !ct.getSach().getUuDais().isEmpty());
+        
+        if (hasSachWithUuDai) {
+            return "Đơn hàng đã có sách với ưu đãi riêng. Hệ thống sẽ tự động chọn ưu đãi tốt nhất.";
+        }
+        
+        return null; // Không có xung đột
+    }
 }

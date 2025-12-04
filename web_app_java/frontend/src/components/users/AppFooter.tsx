@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "../../css/users/AppFooter.module.css";
-import { Link } from "react-router-dom";
 
 // Dữ liệu giả lập (mock data) cho các cột liên kết
 const services = [
@@ -25,22 +24,15 @@ const Footer: React.FC = () => {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
-        {/* Phần Xem tất cả */}
-        <div className={styles.header}>
-          <Link to="/tat-ca" className={styles.viewAllButton}>
-            Xem tất cả
-          </Link>
-        </div>
-
         <div className={styles.mainContent}>
           {/* Cột 1: Thông tin liên hệ và Logo */}
           <div className={styles.infoColumn}>
             {/* Logo Fahasa */}
-            <img
+            {/* <img
               src={getIcon("logo-fahasa")}
               alt="Fahasa Logo"
               className={styles.logo}
-            />
+            /> */}
 
             <p className={styles.fahasaInfo}>
               Lầu 5, 387-389 Hai Bà Trưng Quận 3 TP HCM

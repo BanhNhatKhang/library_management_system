@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import styles from "../../css/users/cart/Cart.module.css";
-import { Link } from "react-router-dom";
 import axios from "../../../axiosConfig";
 import { useAuth } from "../../context/AuthContext";
 
@@ -68,6 +67,20 @@ const Cart: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  // Thêm state cho ưu đãi
+  const [availableUuDai, setAvailableUuDai] = useState<UuDai[]>([]);
+  const [selectedUuDai, setSelectedUuDai] = useState<string | null>(null);
+
+  // Interface cho UuDai
+  interface UuDai {
+    maUuDai: string;
+    tenUuDai: string;
+    moTa: string;
+    phanTramGiam: number;
+    ngayBatDau: string;
+    ngayKetThuc: string;
+  }
+
   // LẤY maDocGia ĐỘNG TỪ TOKEN
   const maDocGia = getSubjectFromToken();
 
@@ -111,9 +124,34 @@ const Cart: React.FC = () => {
     }
   }, [maDocGia, role]); // <-- Dependencies của fetchCartItems
 
+  // Fetch danh sách ưu đãi có sẵn
+  const fetchAvailableUuDai = useCallback(async () => {
+    try {
+      const response = await axios.get<UuDai[]>(`/api/uudai/saved`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+
+      // Lọc ưu đãi còn hiệu lực
+      const now = new Date();
+      const validUuDai = response.data.filter((uudai) => {
+        const ngayKetThuc = new Date(uudai.ngayKetThuc);
+        const ngayBatDau = new Date(uudai.ngayBatDau);
+        return now >= ngayBatDau && now <= ngayKetThuc;
+      });
+
+      setAvailableUuDai(validUuDai);
+    } catch (error) {
+      console.error("Error fetching uu dai:", error);
+      setAvailableUuDai([]);
+    }
+  }, []);
+
   useEffect(() => {
     fetchCartItems();
-  }, [fetchCartItems]);
+    fetchAvailableUuDai();
+  }, [fetchCartItems, fetchAvailableUuDai]);
 
   //   useEffect(() => {
   //     fetchCartItems();
@@ -263,7 +301,7 @@ const Cart: React.FC = () => {
     }
   };
 
-  // Hàm xử lý thanh toán (giữ nguyên như đã viết trước đó)
+  // Cập nhật hàm handleCheckout
   const handleCheckout = async () => {
     if (selectedItems.length === 0) {
       alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
@@ -280,7 +318,7 @@ const Cart: React.FC = () => {
         `Bạn có chắc chắn muốn thanh toán ${
           selectedItems.length
         } sản phẩm?\n\nSản phẩm: ${itemNames}\n\nTổng tiền: ${formatCurrency(
-          totalDiscounted
+          finalTotal
         )}`
       )
     ) {
@@ -293,7 +331,8 @@ const Cart: React.FC = () => {
       const requestData = {
         maDocGia: maDocGia,
         maSachList: selectedItems,
-        tongTien: totalDiscounted,
+        tongTien: finalTotal,
+        maUuDai: selectedUuDai, // Thêm ưu đãi được chọn
       };
 
       console.log("Processing payment:", requestData);
@@ -306,16 +345,23 @@ const Cart: React.FC = () => {
       alert(
         `Thanh toán thành công!\n\n` +
           `Mã đơn hàng: ${response.data.maDonHang}\n` +
-          `Tổng tiền: ${formatCurrency(totalDiscounted)}\n` +
+          `Tổng tiền: ${formatCurrency(finalTotal)}\n` +
+          `${
+            selectedUuDai
+              ? "Ưu đãi đã áp dụng: " +
+                availableUuDai.find((u) => u.maUuDai === selectedUuDai)
+                  ?.tenUuDai +
+                "\n"
+              : ""
+          }` +
           `Ngày đặt: ${response.data.ngayDat}\n\n` +
           `Cảm ơn bạn đã mua hàng!`
       );
 
-      // Refresh giỏ hàng để cập nhật danh sách
+      // Reset tất cả
       await fetchCartItems();
-
-      // Reset selected items
       setSelectedItems([]);
+      setSelectedUuDai(null);
 
       // Thông báo header cập nhật
       window.dispatchEvent(new Event("cartUpdated"));
@@ -358,7 +404,13 @@ const Cart: React.FC = () => {
     }
   };
 
-  const { totalDiscounted, totalPrice } = useMemo(() => {
+  // Xử lý chọn ưu đãi
+  const handleSelectUuDai = (maUuDai: string) => {
+    setSelectedUuDai(maUuDai === selectedUuDai ? null : maUuDai);
+  };
+
+  // Tính toán tổng tiền với ưu đãi
+  const { totalDiscounted, totalPrice, additionalDiscount } = useMemo(() => {
     const selected = cartItems.filter((item) =>
       selectedItems.includes(item.id)
     );
@@ -370,11 +422,28 @@ const Cart: React.FC = () => {
       (sum, item) => sum + item.originalPrice * item.quantity,
       0
     );
-    return { totalDiscounted, totalPrice };
-  }, [cartItems, selectedItems]);
 
-  const totalDiscount = totalPrice - totalDiscounted;
-  const VAT_RATE = 0;
+    // Tính giảm giá từ ưu đãi được chọn
+    let additionalDiscount = 0;
+    if (selectedUuDai) {
+      const selectedUuDaiInfo = availableUuDai.find(
+        (u) => u.maUuDai === selectedUuDai
+      );
+      if (selectedUuDaiInfo) {
+        additionalDiscount =
+          totalDiscounted * (selectedUuDaiInfo.phanTramGiam / 100);
+      }
+    }
+
+    return {
+      totalDiscounted,
+      totalPrice,
+      additionalDiscount,
+    };
+  }, [cartItems, selectedItems, selectedUuDai, availableUuDai]);
+
+  const finalTotal = totalDiscounted - additionalDiscount;
+  // const totalDiscount = totalPrice - finalTotal;
 
   // --- RENDERING ---
   return (
@@ -383,7 +452,6 @@ const Cart: React.FC = () => {
         <h2 className={styles["cart-title"]}>
           GIỎ HÀNG ({cartItems.length} sản phẩm)
         </h2>
-        {/* Xóa nút "Xóa đã chọn" */}
       </div>
 
       <div className={styles["cart-container"]}>
@@ -549,59 +617,58 @@ const Cart: React.FC = () => {
           )}
         </div>
 
-        {/* Cột thông tin thanh toán (Giữ nguyên) */}
+        {/* Cột thông tin thanh toán (CẬP NHẬT) */}
         <div className={styles["cart-summary"]}>
-          {/* Phần Khuyến mãi */}
+          {/* Phần Ưu đãi */}
           <div className={styles["promotion-box"]}>
             <div className={styles["promotion-header"]}>
               <i className="fas fa-tags me-2"></i>
-              <span className={styles["box-title"]}>KHUYẾN MÃI</span>
-              <Link to="#" className={styles["view-more"]}>
-                Xem thêm
-              </Link>
+              <span className={styles["box-title"]}>ƯU ĐÃI</span>
             </div>
-            <div className={styles["promotion-item"]}>
-              <div className={styles["promo-title-row"]}>
-                <span className={styles["promo-title"]}>
-                  Mã Giảm 10K - TOÀN SÀN
-                </span>
-                <i
-                  className="fas fa-info-circle"
-                  title="Không bao gồm một số sản phẩm Manga."
-                ></i>
+
+            {availableUuDai.length === 0 ? (
+              <div className={styles["no-promotion"]}>
+                <p className="text-muted text-center py-3">
+                  Hiện tại không có ưu đãi nào khả dụng
+                </p>
               </div>
-              <p className={styles["promo-desc"]}>
-                Đơn hàng từ 130K - Không bao gồm giá trị của các sản phẩm sau
-                Manga. Ngoài...
-              </p>
-              <div className={styles["promo-action"]}>
-                <span className={styles["promo-hsd"]}>HSD: 30/11/2025</span>
-                <span className={styles["promo-min-buy"]}>
-                  Mua thêm {formatCurrency(130000)}
-                </span>
-                <button className={styles["promo-apply-btn"]}>Mua thêm</button>
+            ) : (
+              <div className={styles["promotion-list"]}>
+                {availableUuDai.map((uudai) => (
+                  <div
+                    key={uudai.maUuDai}
+                    className={styles["promotion-item"]}
+                    onClick={() => handleSelectUuDai(uudai.maUuDai)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className={styles["promo-title-row"]}>
+                      <input
+                        type="radio"
+                        name="uudai"
+                        checked={selectedUuDai === uudai.maUuDai}
+                        onChange={() => handleSelectUuDai(uudai.maUuDai)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      <span className={styles["promo-title"]}>
+                        {uudai.tenUuDai} - Giảm {uudai.phanTramGiam}%
+                      </span>
+                    </div>
+                    <p className={styles["promo-desc"]}>{uudai.moTa}</p>
+                    <div className={styles["promo-action"]}>
+                      <span className={styles["promo-hsd"]}></span>
+                      {selectedUuDai === uudai.maUuDai && (
+                        <span className={styles["promo-applied"]}>
+                          Đã áp dụng - Giảm {formatCurrency(additionalDiscount)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <Link to="#" className={styles["gift-card-link"]}>
-              Hướng dẫn sử dụng Gift Card{" "}
-              <i className="fas fa-question-circle"></i>
-            </Link>
+            )}
           </div>
 
-          {/* Phần Nhận quà */}
-          <div className={styles["gift-box"]}>
-            <div className={styles["gift-header"]}>
-              <i className="fas fa-gift me-2"></i>
-              <span className={styles["box-title"]}>Nhận quà</span>
-              <Link to="#" className={styles["select-gift"]}>
-                Chọn quà
-                <i className="fas fa-chevron-right ms-2"></i>
-              </Link>
-            </div>
-            <p className={styles["gift-placeholder"]}>Không có quà tặng nào</p>
-          </div>
-
-          {/* Phần Tổng kết */}
+          {/* Phần Tổng kết - Cập nhật với ưu đãi */}
           <div className={styles["summary-details"]}>
             <div className={styles["summary-row"]}>
               <span>Thành tiền</span>
@@ -610,19 +677,23 @@ const Cart: React.FC = () => {
               </span>
             </div>
             <div className={styles["summary-row"]}>
-              <span>Giảm giá</span>
+              <span>Giảm giá sách</span>
               <span className={styles["summary-value"]}>
-                {formatCurrency(totalDiscount)}
+                -{formatCurrency(totalPrice - totalDiscounted)}
               </span>
             </div>
+            {selectedUuDai && additionalDiscount > 0 && (
+              <div className={styles["summary-row"]}>
+                <span>Giảm giá ưu đãi</span>
+                <span className={styles["summary-value"]}>
+                  -{formatCurrency(additionalDiscount)}
+                </span>
+              </div>
+            )}
             <div className={styles["summary-row"]}>
-              <span>Phí vận chuyển</span>
-              <span className={styles["summary-value"]}>0 ₫</span>
-            </div>
-            <div className={styles["summary-row"]}>
-              <span>Tổng Giảm (Gồm VAT)</span>
+              <span>Tổng cộng</span>
               <span className={styles["summary-total"]}>
-                {formatCurrency(totalDiscounted + VAT_RATE)}
+                {formatCurrency(finalTotal)}
               </span>
             </div>
           </div>
@@ -645,7 +716,7 @@ const Cart: React.FC = () => {
           <p className={styles["checkout-note"]}>
             {isProcessingPayment
               ? "Vui lòng không tắt trang trong quá trình xử lý..."
-              : "(Giảm giá trên web chỉ áp dụng cho bạn bè)"}
+              : "Cảm ơn bạn đã mua hàng!"}
           </p>
         </div>
       </div>

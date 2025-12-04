@@ -2,23 +2,28 @@ package com.example.webapp.services;
 
 import com.example.webapp.models.Sach;
 import com.example.webapp.models.UuDai;
+import com.example.webapp.models.DocGia;
 import com.example.webapp.dto.SachDTO;
 import com.example.webapp.dto.UuDaiDTO;
 import com.example.webapp.repository.UuDaiRepository;
+import com.example.webapp.repository.DocGiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.stream.Collectors;
 
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 @Service
 public class UuDaiService {
 
     @Autowired
     private UuDaiRepository uuDaiRepository;
+
+    @Autowired
+    private DocGiaRepository docGiaRepository;
 
     @Autowired
     private SachService sachService;
@@ -100,6 +105,83 @@ public class UuDaiService {
         }
         int next = max + 1;
         return "UD" + String.format("%03d", next);
+    }
+
+    public List<UuDaiDTO> getActiveUuDaiNotLinkedToBooks() {
+        LocalDate now = LocalDate.now();
+        List<UuDai> activeUuDai = uuDaiRepository.findActiveUuDaiNotLinkedToBooks(now);
+        
+        return activeUuDai.stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    public String saveUuDaiForDocGia(String email, String maUuDai) {
+        // SỬA: Tìm DocGia bằng email thay vì maDocGia
+        DocGia docGia = docGiaRepository.findByEmail(email);
+        if (docGia == null) {
+            throw new RuntimeException("Không tìm thấy độc giả với email: " + email);
+        }
+        
+        Optional<UuDai> uuDaiOpt = uuDaiRepository.findById(maUuDai);
+        if (uuDaiOpt.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy ưu đãi");
+        }
+        
+        UuDai uuDai = uuDaiOpt.get();
+        
+        // Kiểm tra ưu đãi còn hiệu lực
+        LocalDate now = LocalDate.now();
+        if (uuDai.getNgayKetThuc().isBefore(now)) {
+            throw new RuntimeException("Ưu đãi đã hết hạn");
+        }
+        
+        // Kiểm tra đã lưu chưa
+        if (docGia.hasUuDaiDaLuu(uuDai)) {
+            throw new RuntimeException("Bạn đã lưu ưu đãi này rồi");
+        }
+        
+        // Lưu ưu đãi
+        docGia.addUuDaiDaLuu(uuDai);
+        docGiaRepository.save(docGia);
+        
+        return "Lưu ưu đãi thành công";
+    }
+
+    public String unsaveUuDaiForDocGia(String email, String maUuDai) {
+        // SỬA: Tìm DocGia bằng email thay vì maDocGia
+        DocGia docGia = docGiaRepository.findByEmail(email);
+        if (docGia == null) {
+            throw new RuntimeException("Không tìm thấy độc giả với email: " + email);
+        }
+        
+        Optional<UuDai> uuDaiOpt = uuDaiRepository.findById(maUuDai);
+        if (uuDaiOpt.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy ưu đãi");
+        }
+        
+        UuDai uuDai = uuDaiOpt.get();
+        
+        // Xóa ưu đãi khỏi danh sách đã lưu
+        docGia.removeUuDaiDaLuu(uuDai);
+        docGiaRepository.save(docGia);
+        
+        return "Bỏ lưu ưu đãi thành công";
+    }
+
+    public List<UuDaiDTO> getSavedUuDaiByEmail(String email) {
+        // SỬA: Tìm DocGia bằng email thay vì maDocGia
+        DocGia docGia = docGiaRepository.findByEmail(email);
+        if (docGia == null) {
+            return List.of();
+        }
+        
+        LocalDate now = LocalDate.now();
+        
+        return docGia.getUuDaisDaLuu().stream()
+            .filter(uuDai -> uuDai.getNgayKetThuc().isAfter(now) || uuDai.getNgayKetThuc().equals(now))
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
     public UuDaiDTO toDTO(UuDai uuDai) {

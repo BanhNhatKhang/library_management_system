@@ -290,7 +290,7 @@ const Header = () => {
         <i className="fas fa-user-gear me-2"></i>
         {fullName}
       </Link>
-      <Link to="/don-hang" className={styles["dropdown-item"]}>
+      <Link to="/profile?tab=orders" className={styles["dropdown-item"]}>
         <i className="fas fa-receipt me-2"></i>
         Đơn hàng của tôi
       </Link>
@@ -446,16 +446,6 @@ const Header = () => {
 
               {/* Các icon bên phải */}
               <div className={styles["header-icons"]}>
-                <div className={styles["search-wrapper"]}>
-                  <input
-                    type="text"
-                    className={styles["search-input"]}
-                    placeholder="Tìm kiếm sách, tác giả, thể loại..."
-                  />
-                  <button className={styles["search-btn"]}>
-                    <i className="fas fa-search"></i>
-                  </button>
-                </div>
                 <div className={styles["icons-group"]}>
                   {/* Notification icon với dropdown */}
                   <div
