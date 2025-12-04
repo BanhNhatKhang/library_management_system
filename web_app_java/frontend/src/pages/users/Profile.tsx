@@ -125,6 +125,17 @@ interface TheoDoiMuonSach {
   };
 }
 
+interface ThongBaoMuonSachDTO {
+  id: number;
+  maDocGia: string;
+  maSach?: string; // Tên sách được lấy từ mã sách khi cần
+  ngayMuon?: string;
+  noiDung: string;
+  thoiGianGui: string; // LocalDateTime
+  loaiThongBao: "DADUYET" | "SAPTOIHAN" | "QUAHAN" | "DATRASACH" | string;
+  trangThaiDaDoc: boolean;
+}
+
 function Profile() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [editableData, setEditableData] = useState<UserProfile | null>(null);
@@ -139,6 +150,25 @@ function Profile() {
   const [selectedBorrowedBook, setSelectedBorrowedBook] = useState<
     string | null
   >(null);
+
+  const [thongBaoList, setThongBaoList] = useState<ThongBaoMuonSachDTO[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [notificationPagination, setNotificationPagination] =
+    useState<Pagination>({
+      currentPage: 0,
+      totalPages: 0,
+      totalElements: 0,
+      pageSize: 10, // Giả định hiển thị 10 thông báo mỗi trang
+    });
+  // State để lưu trạng thái lọc: null (tất cả), true (đã đọc), false (chưa đọc)
+  const [notificationFilter, setNotificationFilter] = useState<boolean | null>(
+    null
+  );
+  const [expandedNotification, setExpandedNotification] = useState<
+    number | null
+  >(null);
+
+  const today = new Date().getFullYear();
 
   // Xóa isEditing state vì không cần nữa
   // const [isEditing, setIsEditing] = useState(false);
@@ -180,8 +210,6 @@ function Profile() {
       totalElements: 0,
       pageSize: 5,
     });
-
-  const today = new Date().getFullYear();
 
   // Dữ liệu giả định cứng
   const memberIconClass = "fas fa-user";
@@ -360,6 +388,230 @@ function Profile() {
     [borrowedBooksPagination.pageSize]
   );
 
+  // Hàm lấy danh sách thông báo với phân trang và lọc
+  const fetchThongBaoList = React.useCallback(
+    async (
+      page = 0,
+      unreadOnly: boolean | null = null,
+      readOnly: boolean | null = null
+    ) => {
+      setIsLoadingNotifications(true);
+      try {
+        const response = await axios.get("/api/thongbao/current-user", {
+          params: {
+            page: page,
+            size: notificationPagination.pageSize,
+            sort: "thoiGianGui,desc", // Sắp xếp theo thời gian gửi giảm dần
+            unreadOnly: unreadOnly, // true/false/null
+            readOnly: readOnly, // true/false/null
+          },
+        });
+
+        // Backend trả về format Spring Data Page (content, totalElements,...)
+        if (response.data.content) {
+          setThongBaoList(response.data.content);
+          setNotificationPagination({
+            currentPage: response.data.number,
+            totalPages: response.data.totalPages,
+            totalElements: response.data.totalElements,
+            pageSize: response.data.size,
+          });
+        } else {
+          // Trường hợp lỗi hoặc không có phân trang
+          setThongBaoList([]);
+          setNotificationPagination((prev) => ({
+            ...prev,
+            currentPage: 0,
+            totalPages: 0,
+            totalElements: 0,
+          }));
+        }
+
+        console.log("Thông báo trang", page + 1, ":", response.data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setThongBaoList([]);
+          setNotificationPagination((prev) => ({
+            ...prev,
+            currentPage: 0,
+            totalPages: 0,
+            totalElements: 0,
+          }));
+        } else {
+          // alert("Có lỗi xảy ra khi tải danh sách thông báo!"); // Tắt để tránh spam alert
+        }
+      } finally {
+        setIsLoadingNotifications(false);
+      }
+    },
+    [notificationPagination.pageSize]
+  );
+
+  // Hàm xử lý chuyển trang cho Thông báo
+  const handleNotificationPageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < notificationPagination.totalPages) {
+      // Xác định lại các tham số lọc trước khi fetch
+      let unread: boolean | null = null;
+      let read: boolean | null = null;
+      if (notificationFilter !== null) {
+        if (notificationFilter === false) unread = true; // Lọc chưa đọc
+        if (notificationFilter === true) read = true; // Lọc đã đọc
+      }
+      fetchThongBaoList(newPage, unread, read);
+      setExpandedNotification(null); // Đóng chi tiết khi chuyển trang
+    }
+  };
+
+  // Hàm xử lý thay đổi bộ lọc
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    let filterValue: boolean | null = null;
+    let unread: boolean | null = null;
+    let read: boolean | null = null;
+
+    if (value === "unread") {
+      filterValue = false;
+      unread = true;
+    } else if (value === "read") {
+      filterValue = true;
+      read = true;
+    }
+
+    setNotificationFilter(filterValue);
+    // Fetch lại trang đầu tiên (0) với filter mới
+    fetchThongBaoList(0, unread, read);
+    setExpandedNotification(null);
+  };
+
+  // Hàm tạo số trang hiển thị cho Thông báo (giống như đơn hàng)
+  const getNotificationPageNumbers = () => {
+    const { currentPage, totalPages } = notificationPagination;
+    const pages: number[] = [];
+    const maxDisplayPages = 5; // Hiển thị tối đa 5 số trang
+
+    if (totalPages <= maxDisplayPages) {
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Logic hiển thị thông minh (giống hàm getPageNumbers đã có)
+      if (currentPage < 2) {
+        for (let i = 0; i < 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 3) {
+        for (let i = totalPages - 5; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+    return pages;
+  };
+
+  // Hàm xử lý click vào Thông báo
+  const handleNotificationClick = async (notification: ThongBaoMuonSachDTO) => {
+    // 1. Mở/đóng chi tiết
+    const isExpanded = expandedNotification === notification.id;
+    if (isExpanded) {
+      setExpandedNotification(null);
+    } else {
+      setExpandedNotification(notification.id);
+    }
+
+    // 2. Đánh dấu đã đọc (nếu chưa đọc)
+    if (!notification.trangThaiDaDoc) {
+      try {
+        // Gọi API đánh dấu đã đọc
+        await axios.put(`/api/thongbao/${notification.id}/mark-read`);
+
+        // Cập nhật state cục bộ để đổi trạng thái đã đọc ngay lập tức
+        setThongBaoList((prevList) =>
+          prevList.map((n) =>
+            n.id === notification.id ? { ...n, trangThaiDaDoc: true } : n
+          )
+        );
+
+        // Nếu đang ở trạng thái lọc "chưa đọc", refetch lại list sau một chút
+        // để thông báo đã đọc được loại bỏ khỏi danh sách
+        if (notificationFilter === false && !isExpanded) {
+          // Chỉ refetch nếu không mở chi tiết (click lần 1)
+          setTimeout(() => {
+            // Đợi một chút cho backend kịp lưu
+            // Phải xác định lại tham số lọc (chưa đọc)
+            fetchThongBaoList(notificationPagination.currentPage, true, false);
+          }, 100);
+        }
+      } catch (error) {
+        console.error("Error marking as read:", error);
+        alert("Không thể đánh dấu đã đọc. Vui lòng thử lại!");
+      }
+    }
+  };
+
+  // Hàm format thời gian (ví dụ: 5 phút trước)
+  const formatTimeAgo = (dateTimeString: string) => {
+    const now = new Date();
+    const past = new Date(dateTimeString);
+    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return "Vừa xong";
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    } else if (diffInSeconds < 86400) {
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    } else {
+      // Hiển thị ngày nếu quá 24h
+      return formatDate(dateTimeString);
+    }
+  };
+
+  // Hàm lấy thông tin icon và màu sắc
+  const getNotificationTypeInfo = (type: string) => {
+    switch (type) {
+      case "DADUYET":
+        return {
+          text: "Yêu cầu được duyệt",
+          icon: "fas fa-check-circle",
+          class: styles["status-completed"], // Màu xanh lá
+          iconClass: styles["notification-type-daduyet"], // Class cho icon nền lớn
+        };
+      case "SAPTOIHAN":
+        return {
+          text: "Sắp tới hạn trả",
+          icon: "fas fa-exclamation-triangle",
+          class: styles["status-processing"], // Màu vàng
+          iconClass: styles["notification-type-saptoihan"],
+        };
+      case "QUAHAN":
+        return {
+          text: "Quá hạn trả",
+          icon: "fas fa-clock",
+          class: styles["status-cancelled"], // Màu đỏ
+          iconClass: styles["notification-type-quahan"],
+        };
+      case "DATRASACH":
+        return {
+          text: "Đã trả sách",
+          icon: "fas fa-book-reader",
+          class: styles["status-completed"], // Màu xanh lá
+          iconClass: styles["notification-type-datrasach"],
+        };
+      default:
+        return {
+          text: "Thông báo chung",
+          icon: "fas fa-info-circle",
+          class: styles["status-unknown"],
+          iconClass: styles["notification-type-default"],
+        };
+    }
+  };
+
   // Hàm xử lý chuyển trang cho sách đã mượn
   const handleBorrowedBooksPageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < borrowedBooksPagination.totalPages) {
@@ -426,6 +678,22 @@ function Profile() {
       fetchDonHangList(0); // Load trang đầu tiên
     }
   }, [activeMenu, fetchDonHangList]); // THÊM dependency
+
+  // Load sách đã mượn và Thông báo khi activeMenu thay đổi
+  useEffect(() => {
+    if (activeMenu === "sachDaMuon") {
+      fetchSachDaMuon(0);
+    } else if (activeMenu === "thongBao") {
+      // --- THÊM ĐIỀU KIỆN MỚI ---
+      let unread: boolean | null = null;
+      let read: boolean | null = null;
+      if (notificationFilter !== null) {
+        if (notificationFilter === false) unread = true; // Lọc chưa đọc
+        if (notificationFilter === true) read = true; // Lọc đã đọc
+      }
+      fetchThongBaoList(0, unread, read);
+    }
+  }, [activeMenu, fetchSachDaMuon, fetchThongBaoList, notificationFilter]);
 
   // Load sách đã mượn khi activeMenu thay đổi thành "sachDaMuon"
   useEffect(() => {
@@ -1358,7 +1626,303 @@ function Profile() {
         );
 
       case "thongBao":
-        return <h2>Thông báo (Chức năng chưa phát triển)</h2>;
+        return (
+          <div className={styles["form-section"]}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Thông báo của tôi</h2>
+              {notificationPagination.totalElements > 0 && (
+                <span className="text-muted">
+                  Tổng: {notificationPagination.totalElements} thông báo
+                </span>
+              )}
+            </div>
+
+            {/* Filter và Search */}
+            <div className="d-flex justify-content-end mb-4">
+              <select
+                className={`form-select ${styles["form-select-sm"]}`}
+                style={{ width: "150px" }}
+                onChange={handleFilterChange}
+                value={
+                  notificationFilter === false
+                    ? "unread"
+                    : notificationFilter === true
+                    ? "read"
+                    : "all"
+                }
+              >
+                <option value="all">Tất cả</option>
+                <option value="unread">Chưa đọc</option>
+                <option value="read">Đã đọc</option>
+              </select>
+            </div>
+
+            {isLoadingNotifications ? (
+              <div className="text-center p-4">
+                <i className="fas fa-spinner fa-spin me-2"></i>
+                Đang tải danh sách thông báo...
+              </div>
+            ) : thongBaoList.length === 0 ? (
+              <div className={styles["empty-orders"]}>
+                <div className="text-center p-5">
+                  <i
+                    className="fas fa-bell mb-3"
+                    style={{ fontSize: "3rem", color: "#ccc" }}
+                  ></i>
+                  <h4>Không có thông báo nào</h4>
+                  <p className="text-muted">
+                    Các thông báo mới sẽ xuất hiện ở đây.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Danh sách Thông báo */}
+                <div className={styles["orders-container"]}>
+                  {thongBaoList.map((thongBao) => {
+                    const typeInfo = getNotificationTypeInfo(
+                      thongBao.loaiThongBao
+                    );
+                    const isExpanded = expandedNotification === thongBao.id;
+
+                    return (
+                      <div
+                        key={thongBao.id}
+                        className={`${styles["order-card"]} ${
+                          !thongBao.trangThaiDaDoc
+                            ? styles["unread-notification"] // Thêm class highlight
+                            : ""
+                        }`}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {/* Header Thông báo */}
+                        <div
+                          className={styles["order-header"]}
+                          onClick={() => handleNotificationClick(thongBao)}
+                        >
+                          <div className={styles["order-info"]}>
+                            {/* Badge loại thông báo */}
+                            <div
+                              className={`${styles["notification-type-badge"]} ${typeInfo.class}`}
+                            >
+                              <i className={`${typeInfo.icon} me-1`}></i>
+                              {typeInfo.text}
+                            </div>
+                            {/* Nội dung tóm tắt */}
+                            <div
+                              className={styles["order-id"]}
+                              style={{
+                                marginTop: "8px",
+                                fontWeight: !thongBao.trangThaiDaDoc
+                                  ? "bold"
+                                  : "normal",
+                                fontSize: "1rem",
+                              }}
+                            >
+                              <div>
+                                {/* Hiển thị nội dung tóm tắt */}
+                                {thongBao.noiDung.length > 100 && !isExpanded
+                                  ? thongBao.noiDung.substring(0, 100) + "..."
+                                  : thongBao.noiDung}
+                              </div>
+                            </div>
+                            {/* Thời gian gửi */}
+                            <div
+                              className={styles["order-date"]}
+                              style={{
+                                marginTop: "4px",
+                                fontSize: "0.85rem",
+                              }}
+                            >
+                              <i className="fas fa-clock me-1"></i>
+                              {formatTimeAgo(thongBao.thoiGianGui)}
+                            </div>
+                          </div>
+
+                          <div className={styles["order-summary"]}>
+                            {/* Hiển thị trạng thái đọc (chỉ khi chưa mở) */}
+                            {!isExpanded && (
+                              <span
+                                className={`badge me-3 ${
+                                  thongBao.trangThaiDaDoc
+                                    ? "bg-success"
+                                    : "bg-danger"
+                                }`}
+                                style={{ fontSize: "0.75rem" }}
+                              >
+                                {thongBao.trangThaiDaDoc
+                                  ? "Đã Đọc"
+                                  : "Chưa Đọc"}
+                              </span>
+                            )}
+                            <div className={`${styles["expand-icon"]} me-3`}>
+                              <i
+                                className={`fas ${
+                                  isExpanded
+                                    ? "fa-chevron-up"
+                                    : "fa-chevron-down"
+                                }`}
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chi tiết thông báo */}
+                        {isExpanded && (
+                          <div className={styles["order-details"]}>
+                            <div className={styles["notification-detail-box"]}>
+                              <div className="text-center mb-3">
+                                {/* Icon nền lớn */}
+                                <div
+                                  className={`${styles["notification-icon-large"]} ${typeInfo.iconClass}`}
+                                >
+                                  <i className={typeInfo.icon}></i>
+                                </div>
+                                <h5 className="mb-1">{typeInfo.text}</h5>
+                              </div>
+
+                              <p className={styles["notification-content"]}>
+                                <strong>Nội dung:</strong> {thongBao.noiDung}
+                              </p>
+
+                              <div className={styles["notification-meta"]}>
+                                <i className="fas fa-calendar"></i>
+                                Thời gian gửi:{" "}
+                                {formatDate(thongBao.thoiGianGui)} (
+                                {new Date(
+                                  thongBao.thoiGianGui
+                                ).toLocaleTimeString("vi-VN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                                )
+                              </div>
+                              {thongBao.maSach && (
+                                <div className={styles["notification-meta"]}>
+                                  <i className="fas fa-book"></i>
+                                  Mã sách: {thongBao.maSach}
+                                </div>
+                              )}
+                              {thongBao.ngayMuon && (
+                                <div className={styles["notification-meta"]}>
+                                  <i className="fas fa-calendar-alt"></i>
+                                  Ngày mượn: {formatDate(thongBao.ngayMuon)}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Trạng thái đọc (ở footer chi tiết) */}
+                            <div className="mt-3 text-end">
+                              <span
+                                className={`badge ${
+                                  thongBao.trangThaiDaDoc
+                                    ? "bg-success"
+                                    : "bg-danger"
+                                }`}
+                              >
+                                {thongBao.trangThaiDaDoc
+                                  ? "Đã Đọc"
+                                  : "Chưa Đọc"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Pagination Controls */}
+                {notificationPagination.totalPages > 1 && (
+                  <div className={styles["pagination-container"]}>
+                    <nav aria-label="Notification pagination">
+                      <ul className={styles["pagination"]}>
+                        {/* Previous Button */}
+                        <li
+                          className={`${styles["page-item"]} ${
+                            notificationPagination.currentPage === 0
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handleNotificationPageChange(
+                                notificationPagination.currentPage - 1
+                              )
+                            }
+                            disabled={notificationPagination.currentPage === 0}
+                            aria-label="Previous"
+                          >
+                            <i className="fas fa-chevron-left"></i>
+                          </button>
+                        </li>
+
+                        {/* Page Numbers */}
+                        {getNotificationPageNumbers().map((pageNum) => (
+                          <li
+                            key={pageNum}
+                            className={`${styles["page-item"]} ${
+                              pageNum === notificationPagination.currentPage
+                                ? styles["active"]
+                                : ""
+                            }`}
+                          >
+                            <button
+                              className={styles["page-link"]}
+                              onClick={() =>
+                                handleNotificationPageChange(pageNum)
+                              }
+                            >
+                              {pageNum + 1}
+                            </button>
+                          </li>
+                        ))}
+
+                        {/* Next Button */}
+                        <li
+                          className={`${styles["page-item"]} ${
+                            notificationPagination.currentPage >=
+                            notificationPagination.totalPages - 1
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handleNotificationPageChange(
+                                notificationPagination.currentPage + 1
+                              )
+                            }
+                            disabled={
+                              notificationPagination.currentPage >=
+                              notificationPagination.totalPages - 1
+                            }
+                            aria-label="Next"
+                          >
+                            <i className="fas fa-chevron-right"></i>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+
+                    {/* Page Info */}
+                    <div className={styles["pagination-info"]}>
+                      Trang {notificationPagination.currentPage + 1} /{" "}
+                      {notificationPagination.totalPages}{" "}
+                      <span className="text-muted ms-2">
+                        (Hiển thị {thongBaoList.length} /{" "}
+                        {notificationPagination.totalElements} thông báo)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
       case "sachDaMuon":
         return (
           <div className={styles["form-section"]}>

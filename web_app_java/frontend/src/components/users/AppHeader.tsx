@@ -127,7 +127,17 @@ const Header = () => {
       console.log("Fetching notifications for current user");
       const res = await axios.get(`/api/thongbao/current-user`);
       console.log("Notifications received:", res.data);
-      setNotifications(res.data || []);
+
+      // Kiểm tra nếu response có cấu trúc phân trang
+      if (res.data && res.data.content && Array.isArray(res.data.content)) {
+        setNotifications(res.data.content);
+      } else if (Array.isArray(res.data)) {
+        // Nếu trả về trực tiếp là mảng
+        setNotifications(res.data);
+      } else {
+        // Nếu không có dữ liệu hoặc cấu trúc khác
+        setNotifications([]);
+      }
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setNotifications([]);

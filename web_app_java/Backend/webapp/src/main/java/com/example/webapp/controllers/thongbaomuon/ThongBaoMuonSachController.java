@@ -4,9 +4,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.webapp.dto.ThongBaoMuonSachDTO;
 import com.example.webapp.services.ThongBaoMuonSachService;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import com.example.webapp.security.JwtUtil;
@@ -75,17 +78,55 @@ public class ThongBaoMuonSachController {
     }
 
     @GetMapping("/current-user")
-    public List<ThongBaoMuonSachDTO> getThongBaoForCurrentUser(HttpServletRequest request) {
-        System.out.println("Getting notifications for current user");
+    public ResponseEntity<Map<String, Object>> getThongBaoForCurrentUser(
+        HttpServletRequest request,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "thoiGianGui,desc") String sort,
+        @RequestParam(required = false) Boolean unreadOnly,
+        @RequestParam(required = false) Boolean readOnly
+    ) {
+        System.out.println("Getting notifications for current user with pagination");
         
-        // Lấy email từ JWT token trong header
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
                 String email = JwtUtil.getUsernameFromToken(token);
                 System.out.println("Current user email: " + email);
-                return thongBaoMuonSachService.getByEmail(email);
+                
+                List<ThongBaoMuonSachDTO> allNotifications = thongBaoMuonSachService.getByEmail(email);
+                
+                // Filter theo trạng thái đọc nếu có
+                if (unreadOnly != null && unreadOnly) {
+                    allNotifications = allNotifications.stream()
+                        .filter(n -> !n.getTrangThaiDaDoc())
+                        .collect(Collectors.toList());
+                } else if (readOnly != null && readOnly) {
+                    allNotifications = allNotifications.stream()
+                        .filter(ThongBaoMuonSachDTO::getTrangThaiDaDoc)
+                        .collect(Collectors.toList());
+                }
+                
+                // Tính toán phân trang
+                int totalElements = allNotifications.size();
+                int totalPages = (int) Math.ceil((double) totalElements / size);
+                int start = page * size;
+                int end = Math.min(start + size, totalElements);
+                
+                List<ThongBaoMuonSachDTO> pageContent = allNotifications.subList(start, end);
+                
+                // Tạo response theo format Spring Data Page
+                Map<String, Object> response = new HashMap<>();
+                response.put("content", pageContent);
+                response.put("totalElements", totalElements);
+                response.put("totalPages", totalPages);
+                response.put("number", page);
+                response.put("size", size);
+                response.put("first", page == 0);
+                response.put("last", page >= totalPages - 1);
+                
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 System.out.println("Error extracting email from token: " + e.getMessage());
                 throw new RuntimeException("Invalid token");

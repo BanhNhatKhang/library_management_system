@@ -897,3 +897,190 @@
     background-position: -200% 0;
   }
 }
+
+/* Notification specific styles */
+.unread-notification {
+  border-left: 4px solid #3b82f6 !important;
+  background-color: #f8fafc !important;
+}
+
+.unread-notification .order-header {
+  background-color: #f8fafc;
+}
+
+.unread-notification .order-header:hover {
+  background-color: #f1f5f9;
+}
+
+.notification-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.notification-content {
+  line-height: 1.6;
+  color: #374151;
+}
+
+.notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.notification-meta i {
+  width: 14px;
+  text-align: center;
+}
+
+/* Custom badge for new notifications */
+.badge.bg-danger {
+  background-color: #ef4444 !important;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* Notification detail box styling */
+.notification-detail-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.notification-icon-large {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 12px;
+}
+
+/* Styles cho thông báo chưa đọc */
+.notification-unread {
+  border-left: 4px solid #3b82f6 !important;
+  background-color: #f8fafc;
+}
+
+/* Styles cho loại thông báo mượn sách */
+.notification-type-daduyet {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.notification-type-quahan {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.notification-type-saptoihan {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fed7aa;
+}
+
+.notification-type-datrasach {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.notification-type-default {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+/* Styles cho nội dung thông báo */
+.notification-content {
+  padding: 16px;
+}
+
+.notification-body {
+  margin-bottom: 16px;
+}
+
+.notification-body p {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Filter dropdown styling */
+.form-select.form-select-sm {
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  border-color: #d1d5db;
+  width: 120px;
+}
+
+.form-select.form-select-sm:focus {
+  border-color: #043747;
+  box-shadow: 0 0 0 2px rgba(4, 55, 71, 0.1);
+}
+
+/* Badge cho số thông báo chưa đọc */
+.badge.bg-danger {
+  background-color: #ef4444 !important;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* Responsive cho thông báo */
+@media (max-width: 768px) {
+  .notification-content {
+    padding: 12px;
+  }
+
+  .notification-body p {
+    font-size: 14px;
+  }
+
+  .form-select.form-select-sm {
+    width: 100px;
+    font-size: 0.8rem;
+  }
+
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .order-summary {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Animation cho expanding notifications */
+.order-details {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
