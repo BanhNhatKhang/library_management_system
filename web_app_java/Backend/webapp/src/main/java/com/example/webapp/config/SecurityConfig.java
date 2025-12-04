@@ -79,12 +79,21 @@ public class SecurityConfig {
                 .requestMatchers("/api/docgia/doimatkhau/**").hasRole("DOCGIA") 
                 .requestMatchers("/api/giohang/**").hasRole("DOCGIA")
                 
-                // SỬA: DÙNG HTTP METHOD để tách rõ ràng
+            
+                .requestMatchers(HttpMethod.GET, "/api/docgia/theodoimuon/**").hasRole("DOCGIA")
+                
+                // Cho phép độc giả tạo yêu cầu mượn sách
+                .requestMatchers(HttpMethod.POST, "/api/theodoimuonsach").hasRole("DOCGIA")
+                // .requestMatchers(HttpMethod.GET, "/api/theodoimuonsach/**").hasRole("DOCGIA")
+
                 // DOCGIA order access (chỉ GET own orders)
                 .requestMatchers(HttpMethod.GET, "/api/docgia/donhang/**").hasRole("DOCGIA")
                 .requestMatchers(HttpMethod.GET, "/api/chitietdonhang/donhang/**").hasRole("DOCGIA")
                 .requestMatchers(HttpMethod.POST, "/api/donhang/thanhtoan").hasRole("DOCGIA")
                 
+                // ADMIN theodoimuonsach access
+                .requestMatchers("/api/theodoimuonsach/admin/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+
                 // ADMIN order management (tất cả HTTP methods)
                 .requestMatchers(HttpMethod.GET, "/api/donhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers(HttpMethod.POST, "/api/donhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
@@ -94,7 +103,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/chitietdonhang/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/admin/**", "/api/sach/**", "/api/theloai/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/nhaxuatban/**", "/api/uudai/**", "/api/nhanvien/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
-                .requestMatchers("/api/thongbao/**", "/api/theodoimuonsach/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers("/api/thongbao/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/docgia/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
 
                 .requestMatchers("/api/user/me").authenticated()

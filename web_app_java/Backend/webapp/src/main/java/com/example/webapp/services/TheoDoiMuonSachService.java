@@ -9,6 +9,8 @@ import com.example.webapp.repository.NhanVienRepository;
 import com.example.webapp.repository.SachRepository;
 import com.example.webapp.repository.TheoDoiMuonSachRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -37,15 +39,56 @@ public class TheoDoiMuonSachService {
     }
 
     public List<TheoDoiMuonSachDTO> getByMaDocGia(String maDocGia) {
-        return theoDoiMuonSachRepository.findByDocGia_MaDocGia(maDocGia).stream().map(this::toDTO).collect(Collectors.toList());
+        List<TheoDoiMuonSach> theoDoiList = theoDoiMuonSachRepository.findByDocGia_MaDocGia(maDocGia);
+        return theoDoiList.stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
     public Optional<TheoDoiMuonSach> findById(TheoDoiMuonSachId id) {
         return theoDoiMuonSachRepository.findById(id);
     }
 
-    public Optional<TheoDoiMuonSachDTO> getById(TheoDoiMuonSachId id) {
-        return theoDoiMuonSachRepository.findById(id).map(this::toDTO);
+    public TheoDoiMuonSach update(TheoDoiMuonSach theoDoiMuonSach) {
+        return theoDoiMuonSachRepository.save(theoDoiMuonSach);
+    }
+
+    public TheoDoiMuonSachDTO convertToDTO(TheoDoiMuonSach theoDoiMuonSach) {
+        if (theoDoiMuonSach == null) {
+            return null;
+        }
+
+        TheoDoiMuonSachDTO dto = new TheoDoiMuonSachDTO();
+        dto.setMaDocGia(theoDoiMuonSach.getId().getMaDocGia());
+        dto.setMaSach(theoDoiMuonSach.getId().getMaSach());
+        dto.setNgayMuon(theoDoiMuonSach.getId().getNgayMuon());
+        dto.setNgayTra(theoDoiMuonSach.getNgayTra());
+        dto.setTrangThaiMuon(theoDoiMuonSach.getTrangThaiMuon().name());
+        
+        // SỬA: Gọi private method để map nested objects
+        if (theoDoiMuonSach.getDocGia() != null) {
+            DocGiaDTO docGiaDTO = toDocGiaDTO(theoDoiMuonSach.getDocGia());
+            dto.setDocGia(docGiaDTO);
+            System.out.println("convertToDTO - DocGia mapped: " + (docGiaDTO != null ? docGiaDTO.getMaDocGia() : "null"));
+        } else {
+            System.out.println("convertToDTO - DocGia is null in entity");
+        }
+        
+        if (theoDoiMuonSach.getSach() != null) {
+            SachDTO sachDTO = toSachDTO(theoDoiMuonSach.getSach());
+            dto.setSach(sachDTO);
+            System.out.println("convertToDTO - Sach mapped: " + (sachDTO != null ? sachDTO.getMaSach() : "null"));
+        } else {
+            System.out.println("convertToDTO - Sach is null in entity");
+        }
+        
+        // Handle NhanVien
+        if (theoDoiMuonSach.getNhanVien() != null) {
+            dto.setMaNhanVien(theoDoiMuonSach.getNhanVien().getMaNhanVien());
+            dto.setTenNhanVien(theoDoiMuonSach.getNhanVien().getHoTenNV());
+        }
+        
+        return dto;
     }
 
     public List<TheoDoiMuonSachDTO> getByMaSach(String maSach) {
@@ -161,6 +204,11 @@ public class TheoDoiMuonSachService {
         theoDoiMuonSachRepository.deleteById(id);
     }
 
+    public Page<TheoDoiMuonSachDTO> getByMaDocGiaPaginated(String maDocGia, Pageable pageable) {
+        Page<TheoDoiMuonSach> theoDoiPage = theoDoiMuonSachRepository.findByDocGia_MaDocGia(maDocGia, pageable);
+        return theoDoiPage.map(this::toDTO);
+    }
+
     private TheoDoiMuonSachDTO toDTO(TheoDoiMuonSach theoDoiMuonSach) {
         TheoDoiMuonSachDTO theoDoiMuonSachDTO = new TheoDoiMuonSachDTO();
         
@@ -173,29 +221,37 @@ public class TheoDoiMuonSachService {
 
         if (theoDoiMuonSach.getNhanVien() != null) {
             theoDoiMuonSachDTO.setMaNhanVien(theoDoiMuonSach.getNhanVien().getMaNhanVien()); 
+            String tenNhanVien = theoDoiMuonSach.getNhanVien().getHoTenNV();
+            theoDoiMuonSachDTO.setTenNhanVien(tenNhanVien);
         }
         
+        // SỬA: Đảm bảo docGia và sach được set với proper mapping
         if (theoDoiMuonSach.getDocGia() != null) {
-            theoDoiMuonSachDTO.setDocGia(toDocGiaDTO(theoDoiMuonSach.getDocGia())); 
+            DocGiaDTO docGiaDTO = toDocGiaDTO(theoDoiMuonSach.getDocGia());
+            theoDoiMuonSachDTO.setDocGia(docGiaDTO); 
+            System.out.println("DocGia DTO created: " + docGiaDTO.getMaDocGia() + " - " + docGiaDTO.getTen()); // Debug log
+        } else {
+            System.out.println("DocGia is null!"); // Debug log
         }
+        
         if (theoDoiMuonSach.getSach() != null) {
-            theoDoiMuonSachDTO.setSach(toSachDTO(theoDoiMuonSach.getSach())); 
+            SachDTO sachDTO = toSachDTO(theoDoiMuonSach.getSach());
+            theoDoiMuonSachDTO.setSach(sachDTO); 
+            System.out.println("Sach DTO created: " + sachDTO.getMaSach() + " - " + sachDTO.getTenSach()); // Debug log
+        } else {
+            System.out.println("Sach is null!"); // Debug log
         }
 
         return theoDoiMuonSachDTO;
     }
 
-    @SuppressWarnings("unused") // tắt cảnh báo 
-    private TheoDoiMuonSach toEntity(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
-        TheoDoiMuonSach theoDoiMuonSach = new TheoDoiMuonSach();
-        TheoDoiMuonSachId id = new TheoDoiMuonSachId(theoDoiMuonSachDTO.getMaDocGia(), theoDoiMuonSachDTO.getMaSach(), theoDoiMuonSachDTO.getNgayMuon());
-        theoDoiMuonSach.setId(id);
-        theoDoiMuonSach.setNgayTra(theoDoiMuonSachDTO.getNgayTra());
-        theoDoiMuonSach.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(theoDoiMuonSachDTO.getTrangThaiMuon()));
-        return theoDoiMuonSach;
-    }
-
+    // SỬA: Fix toDocGiaDTO method với đầy đủ field mapping
     private DocGiaDTO toDocGiaDTO(DocGia docGia) {
+        if (docGia == null) {
+            System.out.println("DocGia entity is null in toDocGiaDTO");
+            return null;
+        }
+
         DocGiaDTO dto = new DocGiaDTO();
         dto.setMaDocGia(docGia.getMaDocGia());
         dto.setHoLot(docGia.getHoLot()); 
@@ -204,16 +260,72 @@ public class TheoDoiMuonSachService {
         dto.setEmail(docGia.getEmail());
         dto.setDiaChi(docGia.getDiaChi());
         dto.setNgaySinh(docGia.getNgaySinh());
+        
+        // SỬA: Convert enum to String cho gioiTinh
+        if (docGia.getGioiTinh() != null) {
+            dto.setGioiTinh(docGia.getGioiTinh().name());
+        }
+        if (docGia.getVaiTro() != null) {
+            dto.setVaiTro(docGia.getVaiTro().name());
+        }
+        if (docGia.getTrangThai() != null) {
+            dto.setTrangThai(docGia.getTrangThai().name());
+        }
+        
+        // SỬA: Thêm debug để kiểm tra dữ liệu
+        System.out.println("Mapping DocGia: " + docGia.getMaDocGia() + 
+                          ", Ten: " + docGia.getTen() + 
+                          ", Email: " + docGia.getEmail() + 
+                          ", DienThoai: " + docGia.getDienThoai());
+        
         return dto;
     }
 
+    // SỬA: toSachDTO method với type conversion đúng
     private SachDTO toSachDTO(Sach sach) {
+        if (sach == null) {
+            System.out.println("Sach entity is null in toSachDTO");
+            return null;
+        }
+
         SachDTO dto = new SachDTO();
         dto.setMaSach(sach.getMaSach());
         dto.setTenSach(sach.getTenSach()); 
         dto.setTacGia(sach.getTacGia());
-        dto.setTheLoais(sach.getTheLoais().stream().map(TheLoai::getTenTheLoai).toList());
+        dto.setAnhBia(sach.getAnhBia());
+        dto.setSoQuyen(sach.getSoQuyen());
+        dto.setDonGia(sach.getDonGia());
+        dto.setSoLuong(sach.getSoLuong());
+        
+        // SỬA: LocalDate → LocalDate (no conversion needed)
+        dto.setNamXuatBan(sach.getNamXuatBan());
+        
+        dto.setMoTa(sach.getMoTa());
+        
+        // SỬA: Double → Double (no conversion needed)
+        dto.setDiemDanhGia(sach.getDiemDanhGia());
+        dto.setGiamGia(sach.getGiamGia());
+        
+        // SỬA: Xử lý theLoais safely
+        if (sach.getTheLoais() != null && !sach.getTheLoais().isEmpty()) {
+            dto.setTheLoais(sach.getTheLoais().stream()
+                .map(TheLoai::getTenTheLoai)
+                .toList());
+        } else {
+            dto.setTheLoais(List.of()); // Empty list thay vì null
+        }
+        
+        // SỬA: Xử lý nhaXuatBan safely  
+        if (sach.getNhaXuatBan() != null) {
+            dto.setNhaXuatBan(sach.getNhaXuatBan().getTenNhaXuatBan());
+        }
+        
+        // SỬA: Thêm debug để kiểm tra dữ liệu
+        System.out.println("Mapping Sach: " + sach.getMaSach() + 
+                          ", TenSach: " + sach.getTenSach() + 
+                          ", TacGia: " + sach.getTacGia() + 
+                          ", TheLoais count: " + (sach.getTheLoais() != null ? sach.getTheLoais().size() : 0));
+        
         return dto;
     }
-
 }

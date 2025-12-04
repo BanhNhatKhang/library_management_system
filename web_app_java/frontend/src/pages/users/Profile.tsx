@@ -102,6 +102,29 @@ interface Pagination {
   pageSize: number;
 }
 
+// Thêm interface mới cho sách đã mượn
+interface TheoDoiMuonSach {
+  maDocGia: string;
+  maSach: string;
+  ngayMuon: string;
+  ngayTra: string;
+  trangThaiMuon: "CHODUYET" | "DADUYET" | "TUCHOI" | "DATRA" | "DANGMUON";
+  maNhanVien?: string;
+  tenNhanVien?: string; // Thêm field mới
+  docGia?: {
+    maDocGia: string;
+    hoLot: string;
+    ten: string;
+    email: string;
+  };
+  sach?: {
+    maSach: string;
+    tenSach: string;
+    tacGia: string;
+    anhBia?: string;
+  };
+}
+
 function Profile() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [editableData, setEditableData] = useState<UserProfile | null>(null);
@@ -113,6 +136,9 @@ function Profile() {
       nhapLaiMatKhauMoi: "",
     });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [selectedBorrowedBook, setSelectedBorrowedBook] = useState<
+    string | null
+  >(null);
 
   // Xóa isEditing state vì không cần nữa
   // const [isEditing, setIsEditing] = useState(false);
@@ -141,6 +167,19 @@ function Profile() {
     totalElements: 0,
     pageSize: 5, // Hiển thị 5 đơn hàng mỗi trang
   });
+
+  // Thêm states mới cho sách đã mượn
+  const [sachDaMuonList, setSachDaMuonList] = useState<TheoDoiMuonSach[]>([]);
+  const [isLoadingBorrowedBooks, setIsLoadingBorrowedBooks] = useState(false);
+
+  // Thêm states cho phân trang sách đã mượn
+  const [borrowedBooksPagination, setBorrowedBooksPagination] =
+    useState<Pagination>({
+      currentPage: 0,
+      totalPages: 0,
+      totalElements: 0,
+      pageSize: 5,
+    });
 
   const today = new Date().getFullYear();
 
@@ -262,6 +301,101 @@ function Profile() {
     [pagination.pageSize]
   );
 
+  // Thêm hàm format ngày (đã có trong code khác)
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("vi-VN");
+  };
+
+  // Cập nhật hàm lấy danh sách sách đã mượn với phân trang
+  const fetchSachDaMuon = React.useCallback(
+    async (page = 0) => {
+      setIsLoadingBorrowedBooks(true);
+      try {
+        const response = await axios.get("/api/docgia/theodoimuon/me", {
+          params: {
+            page: page,
+            size: borrowedBooksPagination.pageSize,
+            sort: "id.ngayMuon,desc",
+          },
+        });
+
+        if (response.data.content) {
+          setSachDaMuonList(response.data.content);
+          setBorrowedBooksPagination({
+            currentPage: response.data.number,
+            totalPages: response.data.totalPages,
+            totalElements: response.data.totalElements,
+            pageSize: response.data.size,
+          });
+        } else {
+          setSachDaMuonList(response.data);
+          setBorrowedBooksPagination((prev) => ({
+            ...prev,
+            currentPage: 0,
+            totalPages: 1,
+            totalElements: response.data.length,
+          }));
+        }
+
+        console.log("Sách đã mượn trang", page + 1, ":", response.data);
+      } catch (error) {
+        console.error("Error fetching borrowed books:", error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 404) {
+            setSachDaMuonList([]);
+            setBorrowedBooksPagination((prev) => ({
+              ...prev,
+              currentPage: 0,
+              totalPages: 0,
+              totalElements: 0,
+            }));
+          } else {
+            alert("Có lỗi xảy ra khi tải danh sách sách đã mượn!");
+          }
+        }
+      } finally {
+        setIsLoadingBorrowedBooks(false);
+      }
+    },
+    [borrowedBooksPagination.pageSize]
+  );
+
+  // Hàm xử lý chuyển trang cho sách đã mượn
+  const handleBorrowedBooksPageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < borrowedBooksPagination.totalPages) {
+      fetchSachDaMuon(newPage);
+    }
+  };
+
+  // Hàm tạo số trang hiển thị cho sách đã mượn
+  const getBorrowedBooksPageNumbers = () => {
+    const { currentPage, totalPages } = borrowedBooksPagination;
+    const pages: number[] = [];
+    const maxDisplayPages = 5;
+
+    if (totalPages <= maxDisplayPages) {
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage < 2) {
+        for (let i = 0; i < 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 3) {
+        for (let i = totalPages - 5; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+
+    return pages;
+  };
+
   // Load thống kê khi component mount - SỬA useEffect
   useEffect(() => {
     setIsLoading(true);
@@ -292,6 +426,13 @@ function Profile() {
       fetchDonHangList(0); // Load trang đầu tiên
     }
   }, [activeMenu, fetchDonHangList]); // THÊM dependency
+
+  // Load sách đã mượn khi activeMenu thay đổi thành "sachDaMuon"
+  useEffect(() => {
+    if (activeMenu === "sachDaMuon") {
+      fetchSachDaMuon(0);
+    }
+  }, [activeMenu, fetchSachDaMuon]);
 
   // Hàm xử lý thay đổi input
   const handleInputChange = (
@@ -483,6 +624,62 @@ function Profile() {
       default:
         return styles["status-unknown"];
     }
+  };
+
+  // Hàm format trạng thái mượn sách
+  const getBorrowStatusText = (status: string) => {
+    switch (status) {
+      case "CHODUYET":
+        return "Chờ duyệt";
+      case "DADUYET":
+        return "Đã duyệt";
+      case "TUCHOI":
+        return "Từ chối";
+      case "DATRA":
+        return "Đã trả";
+      case "DANGMUON":
+        return "Đang mượn";
+      default:
+        return "Không xác định";
+    }
+  };
+
+  // Hàm get class CSS cho trạng thái mượn
+  const getBorrowStatusClass = (status: string) => {
+    switch (status) {
+      case "CHODUYET":
+        return styles["borrow-status-choduyet"]; // Màu vàng
+      case "DADUYET":
+        return styles["borrow-status-daduyet"]; // Màu xanh lá
+      case "TUCHOI":
+        return styles["borrow-status-tuchoi"]; // Màu đỏ
+      case "DATRA":
+        return styles["borrow-status-datra"]; // Màu xanh lá
+      case "DANGMUON":
+        return styles["borrow-status-dangmuon"]; // Màu xanh lá
+      default:
+        return styles["borrow-status-unknown"];
+    }
+  };
+
+  // Hàm xử lý khi click vào sách đã mượn
+  const handleBorrowedBookClick = (key: string) => {
+    if (selectedBorrowedBook === key) {
+      // Nếu đang mở thì đóng lại
+      setSelectedBorrowedBook(null);
+    } else {
+      // Mở chi tiết sách đã mượn
+      setSelectedBorrowedBook(key);
+    }
+  };
+
+  // Hàm tính ngày quá hạn
+  const calculateOverdueDays = (dueDate: string) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = today.getTime() - due.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
   };
 
   // Hàm xử lý chuyển trang
@@ -1163,7 +1360,455 @@ function Profile() {
       case "thongBao":
         return <h2>Thông báo (Chức năng chưa phát triển)</h2>;
       case "sachDaMuon":
-        return <h2>Sách đã mượn (Chức năng chưa phát triển)</h2>;
+        return (
+          <div className={styles["form-section"]}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Sách đã mượn</h2>
+              {borrowedBooksPagination.totalElements > 0 && (
+                <span className="text-muted">
+                  Tổng: {borrowedBooksPagination.totalElements} phiếu mượn
+                </span>
+              )}
+            </div>
+
+            {isLoadingBorrowedBooks ? (
+              <div className="text-center p-4">
+                <i className="fas fa-spinner fa-spin me-2"></i>
+                Đang tải danh sách sách đã mượn...
+              </div>
+            ) : sachDaMuonList.length === 0 ? (
+              <div className={styles["empty-orders"]}>
+                <div className="text-center p-5">
+                  <i
+                    className="fas fa-book mb-3"
+                    style={{ fontSize: "3rem", color: "#ccc" }}
+                  ></i>
+                  <h4>Chưa có sách nào được mượn</h4>
+                  <p className="text-muted">
+                    Bạn chưa mượn sách nào. Hãy tìm kiếm và mượn sách yêu thích!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Danh sách sách đã mượn */}
+                <div className={styles["orders-container"]}>
+                  {sachDaMuonList.map((phieuMuon) => {
+                    const borrowKey = `${phieuMuon.maSach}-${phieuMuon.ngayMuon}`;
+                    const overdueDays = calculateOverdueDays(phieuMuon.ngayTra);
+                    const isOverdue =
+                      overdueDays > 0 &&
+                      (phieuMuon.trangThaiMuon === "DANGMUON" ||
+                        phieuMuon.trangThaiMuon === "DADUYET");
+
+                    return (
+                      <div key={borrowKey} className={styles["order-card"]}>
+                        {/* Header sách đã mượn */}
+                        <div
+                          className={styles["order-header"]}
+                          onClick={() => handleBorrowedBookClick(borrowKey)}
+                        >
+                          <div className={styles["order-info"]}>
+                            <div className={styles["order-id"]}>
+                              <strong>
+                                {phieuMuon.sach?.tenSach ||
+                                  "Tên sách không xác định"}
+                              </strong>
+                            </div>
+                            <div className={styles["order-date"]}>
+                              Ngày mượn: {formatDate(phieuMuon.ngayMuon)} • Hạn
+                              trả: {formatDate(phieuMuon.ngayTra)}
+                              {isOverdue && (
+                                <span
+                                  style={{
+                                    color: "#dc3545",
+                                    marginLeft: "8px",
+                                  }}
+                                >
+                                  (Quá hạn {overdueDays} ngày)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className={styles["order-summary"]}>
+                            <div
+                              className={styles["order-total"]}
+                              style={{ fontSize: "14px", color: "#6b7280" }}
+                            >
+                              {phieuMuon.sach?.tacGia ||
+                                "Tác giả không xác định"}
+                            </div>
+                            <div
+                              className={`${
+                                styles["order-status"]
+                              } ${getBorrowStatusClass(
+                                phieuMuon.trangThaiMuon
+                              )}`}
+                            >
+                              {getBorrowStatusText(phieuMuon.trangThaiMuon)}
+                            </div>
+                            <div className={styles["expand-icon"]}>
+                              <i
+                                className={`fas ${
+                                  selectedBorrowedBook === borrowKey
+                                    ? "fa-chevron-up"
+                                    : "fa-chevron-down"
+                                }`}
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chi tiết sách đã mượn */}
+                        {selectedBorrowedBook === borrowKey && (
+                          <div className={styles["order-details"]}>
+                            <h5 className="mb-3">Chi tiết sách:</h5>
+                            <div className={styles["order-item"]}>
+                              {/* Ảnh sách */}
+                              <div
+                                className={styles["item-image"]}
+                                style={{ marginLeft: "12px" }}
+                              >
+                                {phieuMuon.sach?.anhBia ? (
+                                  <>
+                                    <img
+                                      src={`/api/uploads/${phieuMuon.sach.anhBia}`}
+                                      alt={
+                                        phieuMuon.sach.tenSach ||
+                                        "Sách không xác định"
+                                      }
+                                      loading="lazy"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        console.log(
+                                          "❌ Image load error for borrowed book:",
+                                          phieuMuon.sach?.anhBia
+                                        );
+                                        console.log("❌ Full URL:", target.src);
+
+                                        if (
+                                          target.src.includes("/api/uploads/")
+                                        ) {
+                                          console.log(
+                                            "❌ Trying direct uploads path..."
+                                          );
+                                          target.src = `/uploads/${phieuMuon.sach?.anhBia}`;
+                                        } else {
+                                          target.style.display = "none";
+                                          const parent = target.parentElement;
+                                          if (parent) {
+                                            const placeholder =
+                                              parent.querySelector(
+                                                ".placeholder"
+                                              ) as HTMLElement;
+                                            if (placeholder) {
+                                              placeholder.style.display =
+                                                "flex";
+                                            }
+                                          }
+                                        }
+                                      }}
+                                      onLoad={() => {
+                                        console.log(
+                                          "✅ Borrowed book image loaded successfully:",
+                                          phieuMuon.sach?.anhBia
+                                        );
+                                      }}
+                                    />
+                                    <div
+                                      className="placeholder"
+                                      style={{
+                                        display: "none",
+                                        background: "#f3f4f6",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        width: "100%",
+                                        height: "100%",
+                                        fontSize: "12px",
+                                        color: "#9ca3af",
+                                        flexDirection: "column",
+                                        gap: "8px",
+                                      }}
+                                    >
+                                      <i
+                                        className="fas fa-book"
+                                        style={{ fontSize: "24px" }}
+                                      ></i>
+                                      <span>Không có ảnh</span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div
+                                    className="placeholder"
+                                    style={{
+                                      display: "flex",
+                                      background: "#f3f4f6",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      width: "100%",
+                                      height: "100%",
+                                      fontSize: "12px",
+                                      color: "#9ca3af",
+                                      flexDirection: "column",
+                                      gap: "8px",
+                                    }}
+                                  >
+                                    <i
+                                      className="fas fa-book"
+                                      style={{ fontSize: "24px" }}
+                                    ></i>
+                                    <span>Không có ảnh</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Thông tin chi tiết */}
+                              <div className={styles["item-details"]}>
+                                <h6
+                                  style={{
+                                    color: "#043747",
+                                    marginBottom: "8px",
+                                  }}
+                                >
+                                  {phieuMuon.sach?.tenSach ||
+                                    "Tên sách không xác định"}
+                                </h6>
+                                <p className="text-muted mb-1">
+                                  <i className="fas fa-user me-1"></i>
+                                  <span>
+                                    Tác giả:{" "}
+                                    <strong>
+                                      {phieuMuon.sach?.tacGia ||
+                                        "Chưa xác định"}
+                                    </strong>
+                                  </span>
+                                </p>
+                                <p className="mb-1">
+                                  <i className="fas fa-calendar me-1"></i>
+                                  <span>
+                                    Ngày mượn:{" "}
+                                    <strong>
+                                      {formatDate(phieuMuon.ngayMuon)}
+                                    </strong>
+                                  </span>
+                                </p>
+                                <p className="mb-1">
+                                  <i className="fas fa-calendar-check me-1"></i>
+                                  <span>
+                                    Hạn trả:{" "}
+                                    <strong>
+                                      {formatDate(phieuMuon.ngayTra)}
+                                    </strong>
+                                  </span>
+                                </p>
+                                {phieuMuon.tenNhanVien && (
+                                  <p className="mb-0">
+                                    <i className="fas fa-user-tie me-1"></i>
+                                    <span>
+                                      Nhân viên duyệt:{" "}
+                                      <strong>{phieuMuon.tenNhanVien}</strong>
+                                    </span>
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Trạng thái và cảnh báo */}
+                              <div
+                                className={styles["item-total"]}
+                                style={{
+                                  marginRight: "12px",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "flex-end",
+                                  gap: "8px",
+                                }}
+                              >
+                                <div className="text-end">
+                                  <div className="text-muted small">
+                                    Trạng thái
+                                  </div>
+                                  <div
+                                    className={`fw-bold ${
+                                      styles["borrow-status"]
+                                    } ${getBorrowStatusClass(
+                                      phieuMuon.trangThaiMuon
+                                    )}`}
+                                  >
+                                    {getBorrowStatusText(
+                                      phieuMuon.trangThaiMuon
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Cảnh báo quá hạn */}
+                                {isOverdue && (
+                                  <div
+                                    className={styles["overdue-warning"]}
+                                    style={{
+                                      background: "#fef2f2",
+                                      border: "1px solid #fecaca",
+                                      borderRadius: "4px",
+                                      padding: "8px 12px",
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    <div className={styles["overdue-text"]}>
+                                      <i className="fas fa-exclamation-triangle me-1"></i>
+                                      Quá hạn {overdueDays} ngày
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Pagination Controls cho sách đã mượn */}
+                {borrowedBooksPagination.totalPages > 1 && (
+                  <div className={styles["pagination-container"]}>
+                    <nav aria-label="Borrowed books pagination">
+                      <ul className={styles["pagination"]}>
+                        {/* Previous Button */}
+                        <li
+                          className={`${styles["page-item"]} ${
+                            borrowedBooksPagination.currentPage === 0
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handleBorrowedBooksPageChange(
+                                borrowedBooksPagination.currentPage - 1
+                              )
+                            }
+                            disabled={borrowedBooksPagination.currentPage === 0}
+                            aria-label="Previous"
+                          >
+                            <i className="fas fa-chevron-left"></i>
+                          </button>
+                        </li>
+
+                        {/* First page if not visible */}
+                        {borrowedBooksPagination.currentPage > 2 && (
+                          <>
+                            <li className={styles["page-item"]}>
+                              <button
+                                className={styles["page-link"]}
+                                onClick={() => handleBorrowedBooksPageChange(0)}
+                              >
+                                1
+                              </button>
+                            </li>
+                            {borrowedBooksPagination.currentPage > 3 && (
+                              <li
+                                className={`${styles["page-item"]} ${styles["disabled"]}`}
+                              >
+                                <span className={styles["page-link"]}>...</span>
+                              </li>
+                            )}
+                          </>
+                        )}
+
+                        {/* Page Numbers */}
+                        {getBorrowedBooksPageNumbers().map((pageNum) => (
+                          <li
+                            key={pageNum}
+                            className={`${styles["page-item"]} ${
+                              pageNum === borrowedBooksPagination.currentPage
+                                ? styles["active"]
+                                : ""
+                            }`}
+                          >
+                            <button
+                              className={styles["page-link"]}
+                              onClick={() =>
+                                handleBorrowedBooksPageChange(pageNum)
+                              }
+                            >
+                              {pageNum + 1}
+                            </button>
+                          </li>
+                        ))}
+
+                        {/* Last page if not visible */}
+                        {borrowedBooksPagination.currentPage <
+                          borrowedBooksPagination.totalPages - 3 && (
+                          <>
+                            {borrowedBooksPagination.currentPage <
+                              borrowedBooksPagination.totalPages - 4 && (
+                              <li
+                                className={`${styles["page-item"]} ${styles["disabled"]}`}
+                              >
+                                <span className={styles["page-link"]}>...</span>
+                              </li>
+                            )}
+                            <li className={styles["page-item"]}>
+                              <button
+                                className={styles["page-link"]}
+                                onClick={() =>
+                                  handleBorrowedBooksPageChange(
+                                    borrowedBooksPagination.totalPages - 1
+                                  )
+                                }
+                              >
+                                {borrowedBooksPagination.totalPages}
+                              </button>
+                            </li>
+                          </>
+                        )}
+
+                        {/* Next Button */}
+                        <li
+                          className={`${styles["page-item"]} ${
+                            borrowedBooksPagination.currentPage >=
+                            borrowedBooksPagination.totalPages - 1
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handleBorrowedBooksPageChange(
+                                borrowedBooksPagination.currentPage + 1
+                              )
+                            }
+                            disabled={
+                              borrowedBooksPagination.currentPage >=
+                              borrowedBooksPagination.totalPages - 1
+                            }
+                            aria-label="Next"
+                          >
+                            <i className="fas fa-chevron-right"></i>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+
+                    {/* Page Info */}
+                    <div className={styles["pagination-info"]}>
+                      Trang {borrowedBooksPagination.currentPage + 1} /{" "}
+                      {borrowedBooksPagination.totalPages}{" "}
+                      <span className="text-muted ms-2">
+                        (Hiển thị {sachDaMuonList.length} /{" "}
+                        {borrowedBooksPagination.totalElements} phiếu mượn)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+
       default:
         return <h2>Chọn một mục từ menu bên trái.</h2>;
     }

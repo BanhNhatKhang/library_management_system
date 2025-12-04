@@ -9,6 +9,7 @@ public class TheoDoiMuonSachDTO {
     private LocalDate ngayTra;
     private String trangThaiMuon;
     private String maNhanVien;
+    private String tenNhanVien;
 
     private DocGiaDTO docGia;
     private SachDTO sach;
@@ -38,4 +39,8 @@ public class TheoDoiMuonSachDTO {
 
     public String getMaNhanVien() { return maNhanVien; }
     public void setMaNhanVien(String maNhanVien) { this.maNhanVien = maNhanVien; }
+
+    public String getTenNhanVien() { return tenNhanVien; }
+    public void setTenNhanVien(String tenNhanVien) { this.tenNhanVien = tenNhanVien; }
+
 }

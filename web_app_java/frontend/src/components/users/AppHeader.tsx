@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../css/users/AppHeader.module.css";
 import axios from "../../../axiosConfig";
@@ -227,6 +227,22 @@ const Header = () => {
     ? getSubcategoriesWithBooks(activeCategoryId)
     : [];
 
+  // Nếu muốn thêm delay, bạn có thể sử dụng useRef và setTimeout:
+  const notificationTimeoutRef = useRef<number | null>(null);
+
+  const handleNotificationMouseEnter = () => {
+    if (notificationTimeoutRef.current) {
+      clearTimeout(notificationTimeoutRef.current);
+    }
+    setIsNotificationsOpen(true);
+  };
+
+  const handleNotificationMouseLeave = () => {
+    notificationTimeoutRef.current = setTimeout(() => {
+      setIsNotificationsOpen(false);
+    }, 200); // 200ms delay
+  };
+
   return (
     <header className={styles["app-header"]}>
       <div className="container-fluid px-4">
@@ -353,7 +369,8 @@ const Header = () => {
                   {/* Notification icon với dropdown */}
                   <div
                     className={styles["notification-icon-container"]}
-                    onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                    onMouseEnter={handleNotificationMouseEnter}
+                    onMouseLeave={handleNotificationMouseLeave}
                   >
                     <button className={styles["notification-btn"]}>
                       <i className="fas fa-bell"></i>
@@ -367,7 +384,11 @@ const Header = () => {
 
                     {/* Notification dropdown */}
                     {isNotificationsOpen && (
-                      <div className={styles["notification-dropdown"]}>
+                      <div
+                        className={styles["notification-dropdown"]}
+                        onMouseEnter={() => setIsNotificationsOpen(true)}
+                        onMouseLeave={() => setIsNotificationsOpen(false)}
+                      >
                         <div className={styles["notification-header"]}>
                           <h3>Thông báo</h3>
                         </div>

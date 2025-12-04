@@ -16,6 +16,8 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 @Service
 public class DonHangService {
@@ -32,7 +34,10 @@ public class DonHangService {
     private GioHangRepository gioHangRepository;
 
     public List<DonHangDTO> getAllDonHang() {
-        return donHangRepository.findAll().stream().map(this::toDTO).toList();
+        return donHangRepository.findAllActive() // Thay vì findAll()
+            .stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
     public Optional<DonHangDTO> getDonHangById(String maDonHang) {
@@ -40,12 +45,14 @@ public class DonHangService {
     }
 
     public List<DonHangDTO> getDonHangByMaDocGia(String maDocGia) {
-        return donHangRepository.findByDocGia_MaDocGia(maDocGia).stream().map(this::toDTO).toList();
+        return donHangRepository.findActiveByDocGia_MaDocGia(maDocGia) // Thay vì findByDocGia_MaDocGia
+            .stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
     public Page<DonHangDTO> getDonHangByMaDocGiaPaginated(String maDocGia, Pageable pageable) {
-        Page<DonHang> donHangPage = donHangRepository.findByDocGia_MaDocGia(maDocGia, pageable);
-        
+        Page<DonHang> donHangPage = donHangRepository.findActiveByDocGia_MaDocGia(maDocGia, pageable);
         return donHangPage.map(this::toDTO);
     }
 
@@ -182,8 +189,19 @@ public class DonHangService {
         return donHangRepository.save(existing);     
     }
 
+    @Transactional
     public void deleteDonHang(String maDonHang) {
-        donHangRepository.deleteById(maDonHang);
+        DonHang donHang = donHangRepository.findById(maDonHang)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + maDonHang));
+        
+        // Kiểm tra điều kiện có thể hủy không
+        if (donHang.getTrangThai() == DonHang.TrangThaiDonHang.DAGIAO) {
+            throw new RuntimeException("Không thể xóa đơn hàng đã giao thành công");
+        }
+        
+        // Soft delete: chuyển sang trạng thái DAHUY
+        donHang.setTrangThai(DonHang.TrangThaiDonHang.DAHUY);
+        donHangRepository.save(donHang);
     }
 
     public DonHangDTO toDTO(DonHang donHang) {

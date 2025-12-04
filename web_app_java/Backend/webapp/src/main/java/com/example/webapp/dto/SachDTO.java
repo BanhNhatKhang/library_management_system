@@ -7,56 +7,58 @@ import java.util.List;
 public class SachDTO {
     private String maSach;
     private String tenSach;
-    private int soQuyen;
+    private Integer soQuyen;
     private BigDecimal donGia;
-    private int soLuong;
-    private LocalDate namXuatBan;
+    private Integer soLuong;
+    private LocalDate namXuatBan; // SỬA: Đổi từ Integer sang LocalDate
     private String tacGia;
     private String moTa;
     private String anhBia;
-    private Double diemDanhGia;
-    private Double giamGia;
-    private String nhaXuatBan;
+    private Double diemDanhGia; // SỬA: Đổi từ BigDecimal sang Double
+    private Double giamGia; // SỬA: Đổi từ BigDecimal sang Double
+    private Object nhaXuatBan; // Hoặc NhaXuatBanDTO nếu có
     private List<String> theLoais;
 
-    public String getMaSach() {return maSach;}
-    public void setMaSach(String maSach) {this.maSach = maSach;}
+    // Constructors
+    public SachDTO() {}
 
-    public String getTenSach() {return tenSach;}
-    public void setTenSach(String tenSach) {this.tenSach = tenSach;}
+    // Getters and Setters
+    public String getMaSach() { return maSach; }
+    public void setMaSach(String maSach) { this.maSach = maSach; }
 
-    public int getSoQuyen() {return soQuyen;}
-    public void setSoQuyen(int soQuyen) {this.soQuyen = soQuyen;}
+    public String getTenSach() { return tenSach; }
+    public void setTenSach(String tenSach) { this.tenSach = tenSach; }
 
-    public BigDecimal getDonGia() {return donGia;}
-    public void setDonGia(BigDecimal donGia) {this.donGia = donGia;}
+    public Integer getSoQuyen() { return soQuyen; }
+    public void setSoQuyen(Integer soQuyen) { this.soQuyen = soQuyen; }
 
-    public int getSoLuong() {return soLuong;}
-    public void setSoLuong(int soLuong) {this.soLuong = soLuong;}
+    public BigDecimal getDonGia() { return donGia; }
+    public void setDonGia(BigDecimal donGia) { this.donGia = donGia; }
 
-    public LocalDate getNamXuatBan() {return namXuatBan;}
-    public void setNamXuatBan(LocalDate namXuatBan) {this.namXuatBan = namXuatBan;}
+    public Integer getSoLuong() { return soLuong; }
+    public void setSoLuong(Integer soLuong) { this.soLuong = soLuong; }
 
-    public String getTacGia() {return tacGia;}
-    public void setTacGia(String tacGia) {this.tacGia = tacGia;}
+    public LocalDate getNamXuatBan() { return namXuatBan; }
+    public void setNamXuatBan(LocalDate namXuatBan) { this.namXuatBan = namXuatBan; }
 
-    public String getMoTa() {return moTa;}
-    public void setMoTa(String moTa) {this.moTa = moTa;}
+    public String getTacGia() { return tacGia; }
+    public void setTacGia(String tacGia) { this.tacGia = tacGia; }
 
-    public String getAnhBia() {return anhBia;}
-    public void setAnhBia(String anhBia) {this.anhBia = anhBia;}
+    public String getMoTa() { return moTa; }
+    public void setMoTa(String moTa) { this.moTa = moTa; }
 
-    public Double getDiemDanhGia() {return diemDanhGia;}
-    public void setDiemDanhGia(Double diemDanhGia) {this.diemDanhGia = diemDanhGia;}      
+    public String getAnhBia() { return anhBia; }
+    public void setAnhBia(String anhBia) { this.anhBia = anhBia; }
 
-    public Double getGiamGia() {return giamGia;}
-    public void setGiamGia(Double giamGia) {this.giamGia = giamGia;}   
+    public Double getDiemDanhGia() { return diemDanhGia; }
+    public void setDiemDanhGia(Double diemDanhGia) { this.diemDanhGia = diemDanhGia; }
 
-    public String getNhaXuatBan() {return nhaXuatBan;}
-    public void setNhaXuatBan(String nhaXuatBan) { this.nhaXuatBan = nhaXuatBan; }
+    public Double getGiamGia() { return giamGia; }
+    public void setGiamGia(Double giamGia) { this.giamGia = giamGia; }
 
-    public List<String> getTheLoais() {return theLoais;}
-    public void setTheLoais(List<String> theLoais) {
-        this.theLoais = theLoais;
-    }
+    public Object getNhaXuatBan() { return nhaXuatBan; }
+    public void setNhaXuatBan(Object nhaXuatBan) { this.nhaXuatBan = nhaXuatBan; }
+
+    public List<String> getTheLoais() { return theLoais; }
+    public void setTheLoais(List<String> theLoais) { this.theLoais = theLoais; }
 }

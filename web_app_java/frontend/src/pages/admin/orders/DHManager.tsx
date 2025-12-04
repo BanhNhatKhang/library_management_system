@@ -8,7 +8,7 @@ interface DonHang {
   maDocGia: string;
   ngayDat: string;
   tongTien: number;
-  trangThai: "DANGXULY" | "DAGIAO" | "DAHUY" | "GIAOTHATBAI"; // SỬA: match với enum backend
+  trangThai: "DANGXULY" | "DAGIAO" | "DAHUY" | "GIAOTHATBAI";
 }
 
 type DHSortKey = "maDonHang" | "maDocGia" | "ngayDat";
@@ -17,7 +17,7 @@ type SortOrder = "asc" | "desc";
 const sortIcon = (order: SortOrder | null) =>
   order === "asc" ? "▲" : order === "desc" ? "▼" : "⇅";
 
-// Thêm helper functions để hiển thị trạng thái
+// Helper functions để hiển thị trạng thái
 const getStatusText = (status: string) => {
   switch (status) {
     case "DANGXULY":
@@ -62,7 +62,7 @@ const DHManager: React.FC = () => {
     axios
       .get("/api/donhang")
       .then((res) => {
-        console.log("Donhang response:", res.data); // Debug log
+        console.log("Donhang response:", res.data);
         setList(res.data || []);
       })
       .catch((error) => {
@@ -77,14 +77,14 @@ const DHManager: React.FC = () => {
   }, []);
 
   const handleDelete = async (ma: string) => {
-    if (!window.confirm("Bạn có chắc muốn xóa đơn hàng này?")) return;
+    if (!window.confirm(`Bạn có chắc muốn hủy đơn hàng ${ma}?`)) return;
     try {
       await axios.delete(`/api/donhang/${ma}`);
       setList((prev) => prev.filter((p) => p.maDonHang !== ma));
-      alert("Xóa thành công");
+      alert("Đã hủy đơn hàng thành công!");
     } catch (err) {
       console.error(err);
-      alert("Xóa thất bại");
+      alert("Không thể hủy đơn hàng!");
     }
   };
 

@@ -17,7 +17,8 @@ interface Sach {
   maSach: string;
   tenSach: string;
   tacGia: string;
-  theLoai: string;
+  theLoais?: string[];
+  anhBia?: string;
 }
 
 interface MuonSach {
@@ -38,38 +39,69 @@ const MuonDetails: React.FC = () => {
   }>();
   const [muonSach, setMuonSach] = useState<MuonSach | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMuonSachDetails = async () => {
       try {
+        console.log("Fetching details for:", { maDocGia, maSach, ngayMuon });
+
         const response = await axios.get(
           `/api/theodoimuonsach/item?maDocGia=${maDocGia}&maSach=${maSach}&ngayMuon=${ngayMuon}`
         );
+
+        console.log("API Response:", response.data);
         setMuonSach(response.data);
       } catch (error) {
         console.error("Error fetching loan details:", error);
+        setError("Không thể tải thông tin phiếu mượn");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMuonSachDetails();
+    if (maDocGia && maSach && ngayMuon) {
+      fetchMuonSachDetails();
+    }
   }, [maDocGia, maSach, ngayMuon]);
 
   if (loading) {
-    return <div>⏳ Đang tải...</div>;
+    return (
+      <div className={styles["muon-details"]}>
+        <Link to="/admin/muontra" className={styles["back-link"]}>
+          ← Quay lại danh sách
+        </Link>
+        <div className={styles["loading"]}>⏳ Đang tải...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles["muon-details"]}>
+        <Link to="/admin/muontra" className={styles["back-link"]}>
+          ← Quay lại danh sách
+        </Link>
+        <div className={styles["error"]}>❌ {error}</div>
+      </div>
+    );
   }
 
   if (!muonSach) {
     return (
-      <div className="p-3">
-        <Link to="/admin/muontra" className="btn btn-secondary mb-3">
+      <div className={styles["muon-details"]}>
+        <Link to="/admin/muontra" className={styles["back-link"]}>
           ← Quay lại danh sách
         </Link>
-        <div>Không tìm thấy thông tin phiếu mượn.</div>
+        <div className={styles["not-found"]}>
+          📋 Không tìm thấy thông tin phiếu mượn.
+        </div>
       </div>
     );
   }
+
+  const docGia = muonSach.docGia;
+  const sach = muonSach.sach;
 
   return (
     <div className={styles["muon-details"]}>
@@ -85,28 +117,32 @@ const MuonDetails: React.FC = () => {
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Mã độc giả: </span>
           <span className={styles["info-value"]}>
-            {muonSach.docGia.maDocGia}
+            {docGia?.maDocGia || muonSach.maDocGia || "N/A"}
           </span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Họ và tên: </span>
           <span className={styles["info-value"]}>
-            {muonSach.docGia.hoLot} {muonSach.docGia.ten}
+            {docGia
+              ? `${docGia.hoLot || ""} ${docGia.ten || ""}`.trim()
+              : "N/A"}
           </span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Điện thoại: </span>
           <span className={styles["info-value"]}>
-            {muonSach.docGia.dienThoai}
+            {docGia?.dienThoai || "N/A"}
           </span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Email: </span>
-          <span className={styles["info-value"]}>{muonSach.docGia.email}</span>
+          <span className={styles["info-value"]}>{docGia?.email || "N/A"}</span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Địa chỉ: </span>
-          <span className={styles["info-value"]}>{muonSach.docGia.diaChi}</span>
+          <span className={styles["info-value"]}>
+            {docGia?.diaChi || "N/A"}
+          </span>
         </p>
       </div>
 
@@ -114,19 +150,23 @@ const MuonDetails: React.FC = () => {
         <h3>Thông tin sách</h3>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Mã sách: </span>
-          <span className={styles["info-value"]}>{muonSach.sach.maSach}</span>
+          <span className={styles["info-value"]}>
+            {sach?.maSach || muonSach.maSach || "N/A"}
+          </span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Tên sách: </span>
-          <span className={styles["info-value"]}>{muonSach.sach.tenSach}</span>
+          <span className={styles["info-value"]}>{sach?.tenSach || "N/A"}</span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Tác giả: </span>
-          <span className={styles["info-value"]}>{muonSach.sach.tacGia}</span>
+          <span className={styles["info-value"]}>{sach?.tacGia || "N/A"}</span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Thể loại: </span>
-          <span className={styles["info-value"]}>{muonSach.sach.theLoai}</span>
+          <span className={styles["info-value"]}>
+            {sach?.theLoais?.join(", ") || "N/A"}
+          </span>
         </p>
       </div>
 
@@ -135,7 +175,9 @@ const MuonDetails: React.FC = () => {
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Ngày mượn: </span>
           <span className={styles["info-value"]}>
-            {new Date(muonSach.ngayMuon).toLocaleDateString("vi-VN")}
+            {muonSach.ngayMuon
+              ? new Date(muonSach.ngayMuon).toLocaleDateString("vi-VN")
+              : "N/A"}
           </span>
         </p>
         <p className={styles["info-item"]}>
@@ -143,13 +185,28 @@ const MuonDetails: React.FC = () => {
           <span className={styles["info-value"]}>
             {muonSach.ngayTra
               ? new Date(muonSach.ngayTra).toLocaleDateString("vi-VN")
-              : "Chưa trả"}
+              : "Chưa có ngày trả"}
           </span>
         </p>
         <p className={styles["info-item"]}>
           <span className={styles["info-label"]}>Trạng thái: </span>
-          <span className={styles["info-value"]}>{muonSach.trangThaiMuon}</span>
+          <span
+            className={`${styles["info-value"]} ${styles["status"]} ${
+              styles[muonSach.trangThaiMuon?.toLowerCase() || ""]
+            }`}
+          >
+            {muonSach.trangThaiMuon || "N/A"}
+          </span>
         </p>
+      </div>
+
+      <div className={styles["action-section"]}>
+        <Link
+          to={`/admin/muon/edit/${maDocGia}/${maSach}/${ngayMuon}`}
+          className={styles["edit-btn"]}
+        >
+          ✏️ Chỉnh sửa phiếu mượn
+        </Link>
       </div>
     </div>
   );

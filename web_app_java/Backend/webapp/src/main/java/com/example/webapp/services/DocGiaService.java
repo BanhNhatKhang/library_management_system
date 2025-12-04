@@ -87,7 +87,12 @@ public class DocGiaService {
         existingDocGia.setEmail(docGiaDTO.getEmail());
         existingDocGia.setDienThoai(docGiaDTO.getDienThoai());
         existingDocGia.setDiaChi(docGiaDTO.getDiaChi());
-        existingDocGia.setGioiTinh(docGiaDTO.getGioiTinh());
+        
+        // SỬA: Convert String to enum
+        if (docGiaDTO.getGioiTinh() != null) {
+            existingDocGia.setGioiTinh(DocGia.GioiTinh.valueOf(docGiaDTO.getGioiTinh()));
+        }
+        
         existingDocGia.setNgaySinh(docGiaDTO.getNgaySinh());
         
         DocGia savedDocGia = docGiaRepository.save(existingDocGia);
@@ -207,11 +212,25 @@ public class DocGiaService {
         docGiaDTO.setMaDocGia(docGia.getMaDocGia());
         docGiaDTO.setHoLot(docGia.getHoLot());
         docGiaDTO.setTen(docGia.getTen());
-        docGiaDTO.setGioiTinh(docGia.getGioiTinh());
+        
+        // SỬA: Convert enum to String
+        if (docGia.getGioiTinh() != null) {
+            docGiaDTO.setGioiTinh(docGia.getGioiTinh().name());
+        }
+        
         docGiaDTO.setDiaChi(docGia.getDiaChi());
         docGiaDTO.setNgaySinh(docGia.getNgaySinh());
         docGiaDTO.setDienThoai(docGia.getDienThoai());
         docGiaDTO.setEmail(docGia.getEmail());
+        
+        // Thêm vaiTro và trangThai nếu cần
+        if (docGia.getVaiTro() != null) {
+            docGiaDTO.setVaiTro(docGia.getVaiTro().name());
+        }
+        if (docGia.getTrangThai() != null) {
+            docGiaDTO.setTrangThai(docGia.getTrangThai().name());
+        }
+        
         return docGiaDTO;
     }
 
@@ -220,11 +239,22 @@ public class DocGiaService {
         docGia.setMaDocGia(docGiaDTO.getMaDocGia());
         docGia.setHoLot(docGiaDTO.getHoLot());
         docGia.setTen(docGiaDTO.getTen());
-        docGia.setGioiTinh(docGiaDTO.getGioiTinh());
+        
+        // SỬA: Convert String to enum safely
+        if (docGiaDTO.getGioiTinh() != null) {
+            try {
+                docGia.setGioiTinh(DocGia.GioiTinh.valueOf(docGiaDTO.getGioiTinh()));
+            } catch (IllegalArgumentException e) {
+                // Handle invalid enum value
+                docGia.setGioiTinh(DocGia.GioiTinh.NAM); // Default value
+            }
+        }
+        
         docGia.setDiaChi(docGiaDTO.getDiaChi());
         docGia.setNgaySinh(docGiaDTO.getNgaySinh());
         docGia.setDienThoai(docGiaDTO.getDienThoai());
         docGia.setEmail(docGiaDTO.getEmail());
+        
         return docGia;
     }
 

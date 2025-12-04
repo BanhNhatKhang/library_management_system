@@ -731,6 +731,80 @@
   color: #9ca3af !important;
 }
 
+/* Thêm styles cho trạng thái mượn sách */
+.status-info {
+  background-color: #dbeafe;
+  color: #2563eb;
+  border: 1px solid #93c5fd;
+}
+
+.status-warning {
+  background-color: #fef3c7;
+  color: #f59e0b;
+  border: 1px solid #fed7aa;
+}
+
+/* Cập nhật style cho borrowed book cards */
+.borrowed-book-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: white;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.borrowed-book-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Style cho overdue warning */
+.overdue-warning {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border-radius: 4px;
+}
+
+.overdue-text {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Cập nhật styles cho trạng thái mượn sách - chỉ hiển thị text */
+.borrow-status {
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.borrow-status-choduyet {
+  color: #f59e0b; /* Màu vàng */
+}
+
+.borrow-status-daduyet {
+  color: #10b981; /* Màu xanh lá */
+}
+
+.borrow-status-dangmuon {
+  color: #10b981; /* Màu xanh lá */
+}
+
+.borrow-status-datra {
+  color: #10b981; /* Màu xanh lá */
+}
+
+.borrow-status-tuchoi {
+  color: #ef4444; /* Màu đỏ */
+}
+
+.borrow-status-unknown {
+  color: #6b7280; /* Màu xám */
+}
+
 /* Responsive pagination */
 @media (max-width: 768px) {
   .pagination {
@@ -783,6 +857,8 @@
   .order-item {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
     text-align: left;
   }
 

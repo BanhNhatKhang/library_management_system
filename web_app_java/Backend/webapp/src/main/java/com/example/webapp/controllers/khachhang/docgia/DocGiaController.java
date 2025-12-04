@@ -6,6 +6,7 @@ import com.example.webapp.models.DocGia;
 import org.springframework.http.ResponseEntity;
 import com.example.webapp.dto.*;
 import com.example.webapp.services.DocGiaService;
+import com.example.webapp.services.TheoDoiMuonSachService;
 
 import java.security.Principal;
 import java.util.List;
@@ -21,6 +22,9 @@ public class DocGiaController {
 
     @Autowired
     private DocGiaService docGiaService;
+
+    @Autowired
+    private TheoDoiMuonSachService theoDoiMuonSachService;
 
     @GetMapping
     public List<DocGiaDTO> getAllDocGia() {
@@ -97,6 +101,45 @@ public class DocGiaController {
     public String deleteDocGia(@PathVariable String maDocGia) {
         docGiaService.deleteDocGia(maDocGia);
         return "Độc giả với mã " + maDocGia + " đã được xóa thành công";
+    }
+
+    @GetMapping("/theodoimuon/me")
+    public ResponseEntity<Page<TheoDoiMuonSachDTO>> getMyBorrowedBooksPaginated(
+            Principal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id.ngayMuon") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        
+        try {
+            // Sử dụng method đã có sẵn trong DocGiaService
+            DocGiaDTO docGiaDTO = docGiaService.getDocGiaByPrincipal(principal);
+            if (docGiaDTO == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Tạo Pageable với sort direction
+            Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? 
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // Lấy danh sách sách đã mượn có phân trang
+            Page<TheoDoiMuonSachDTO> borrowedBooks = theoDoiMuonSachService
+                .getByMaDocGiaPaginated(docGiaDTO.getMaDocGia(), pageable);
+
+            return ResponseEntity.ok(borrowedBooks);
+        } catch (Exception e) {
+            System.err.println("Error in getMyBorrowedBooksPaginated: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Giữ nguyên method cũ cho trường hợp không phân trang
+    @GetMapping("/theodoimuon/me/all")
+    public List<TheoDoiMuonSachDTO> getMySachDaMuon(Principal principal) {
+        DocGiaDTO docGia = docGiaService.getDocGiaByPrincipal(principal);
+        return theoDoiMuonSachService.getByMaDocGia(docGia.getMaDocGia());
     }
 
 }
