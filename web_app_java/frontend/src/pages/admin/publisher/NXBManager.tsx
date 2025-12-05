@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
 import styles from "../../../css/admins/publisher/NXBManager.module.css";
 
@@ -230,41 +230,46 @@ const NXBManager = () => {
                   <td>{nxb.tenNhaXuatBan}</td>
                   <td>{nxb.diaChi}</td>
                   <td>
-                    <Link
-                      to={`/admin/nxb/${nxb.maNhaXuatBan}`}
-                      title="Xem chi tiết"
-                      className="btn btn-sm btn-outline-info me-2"
-                      style={{ marginRight: 8 }}
-                    >
-                      <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link
-                      to={`/admin/nxb/edit/${nxb.maNhaXuatBan}`}
-                      className="btn btn-sm btn-outline-secondary me-2"
-                      title="Sửa"
-                      style={{ marginRight: 8 }}
-                    >
-                      <i className="fas fa-edit"></i>
-                    </Link>
-
-                    {/* Thay icon thùng rác bằng lock/unlock theo trạng thái */}
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      title={
-                        nxb.trangThai === "DAKHOA"
-                          ? "Mở khóa"
-                          : "Khóa nhà xuất bản"
-                      }
-                      onClick={() => handleToggleClick(nxb)}
-                    >
-                      <i
-                        className={
-                          nxb.trangThai === "MOKHOA"
-                            ? "fas fa-unlock" // theo yêu cầu: unlock nếu MOKHOA
-                            : "fas fa-lock" // lock nếu DAKHOA
+                    <div className="btn-group">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-info" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/nxb/${nxb.maNhaXuatBan}`)
                         }
-                      ></i>
-                    </button>
+                        title="Xem chi tiết"
+                      >
+                        <i className="fa fa-eye" />
+                      </button>
+                      {/* Thay đổi nút 'Chỉnh sửa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/nxb/edit/${nxb.maNhaXuatBan}`)
+                        }
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        title={
+                          nxb.trangThai === "DAKHOA"
+                            ? "Mở khóa"
+                            : "Khóa nhà xuất bản"
+                        }
+                        onClick={() => handleToggleClick(nxb)}
+                      >
+                        <i
+                          className={
+                            nxb.trangThai === "MOKHOA"
+                              ? "fas fa-unlock" // theo yêu cầu: unlock nếu MOKHOA
+                              : "fas fa-lock" // lock nếu DAKHOA
+                          }
+                        ></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -272,23 +277,38 @@ const NXBManager = () => {
           </table>
 
           {totalPages > 1 && (
-            <div className={styles["pagination"]}>
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Trước
-              </button>
-              <span>
-                Trang {currentPage} / {totalPages}
-              </span>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Sau
-              </button>
-            </div>
+            <nav aria-label="Phân trang nhà xuất bản">
+              <ul className={styles["pagination"]}>
+                <li>
+                  <button
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &laquo; Trước
+                  </button>
+                </li>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (pageNum) => (
+                    <li key={pageNum}>
+                      <button
+                        onClick={() => setCurrentPage(pageNum)}
+                        disabled={pageNum === currentPage}
+                      >
+                        {pageNum}
+                      </button>
+                    </li>
+                  )
+                )}
+                <li>
+                  <button
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
           )}
         </>
       )}

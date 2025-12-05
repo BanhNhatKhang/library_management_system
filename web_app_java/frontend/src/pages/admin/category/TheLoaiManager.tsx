@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../../../../axiosConfig";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "../../../css/admins/category/TheLoaiManager.module.css";
 
 interface TheLoai {
@@ -110,12 +110,51 @@ const TheLoaiManager = () => {
   });
 
   // Phân trang
-  const rowsPerPage = 8;
+  const rowsPerPage = 9; // Hiển thị cứng 9 dòng mỗi trang
   const totalPages = Math.max(1, Math.ceil(sortedList.length / rowsPerPage));
   const paginatedList = sortedList.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push("...");
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
 
   // Xử lý khi click icon sắp xếp
   const handleSort = (key: SortKey) => {
@@ -227,29 +266,40 @@ const TheLoaiManager = () => {
                   <td>{theLoai.maTheLoai}</td>
                   <td>{theLoai.tenTheLoai}</td>
                   <td>
-                    <Link
-                      to={`/admin/theloai/${theLoai.maTheLoai}`}
-                      title="Xem chi tiết"
-                      className="btn btn-sm btn-outline-info me-2"
-                      style={{ marginRight: 8 }}
-                    >
-                      <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link
-                      to={`/admin/theloai/edit/${theLoai.maTheLoai}`}
-                      className="btn btn-sm btn-outline-secondary me-2"
-                      title="Sửa"
-                      style={{ marginRight: 8 }}
-                    >
-                      <i className="fas fa-edit"></i>
-                    </Link>
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      title="Xóa"
-                      onClick={() => handleDeleteClick(theLoai)}
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
+                    <div className="btn-group">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-info" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/theloai/${theLoai.maTheLoai}`)
+                        }
+                        title="Xem chi tiết"
+                      >
+                        <i className="fa fa-eye" />
+                      </button>
+
+                      {/* Thay đổi nút 'Chỉnh sửa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/theloai/edit/${theLoai.maTheLoai}`)
+                        }
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+
+                      {/* Thay đổi nút 'Xóa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger" // SỬA: Dùng class Bootstrap
+                        title="Xóa"
+                        onClick={() => handleDeleteClick(theLoai)}
+                      >
+                        <i className="fa fa-trash" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -257,23 +307,40 @@ const TheLoaiManager = () => {
           </table>
 
           {totalPages > 1 && (
-            <div className={styles["pagination"]}>
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Trước
-              </button>
-              <span>
-                Trang {currentPage} / {totalPages}
-              </span>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Sau
-              </button>
-            </div>
+            <nav aria-label="Phân trang thể loại">
+              <ul className={styles["pagination"]}>
+                <li>
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &laquo; Trước
+                  </button>
+                </li>
+                {getPageNumbers().map((pageNum, index) => (
+                  <li key={index}>
+                    {pageNum === "..." ? (
+                      <span>...</span>
+                    ) : (
+                      <button
+                        onClick={() => handlePageChange(pageNum as number)}
+                        disabled={pageNum === currentPage}
+                      >
+                        {pageNum}
+                      </button>
+                    )}
+                  </li>
+                ))}
+                <li>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
           )}
         </>
       )}

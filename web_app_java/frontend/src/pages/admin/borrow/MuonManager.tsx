@@ -533,20 +533,17 @@ const MuonManager: React.FC = () => {
           + Thêm yêu cầu mượn
         </button>
 
-        <div className={styles["controls-group"]}>
-          <div className={styles["search-box"]}>
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo mã, tên độc giả, tên sách..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className={styles["filter-select"]}
+            style={{
+              padding: "8px 10px",
+              borderRadius: 6,
+              border: "1px solid #ddd",
+              background: "#fff",
+              cursor: "pointer",
+            }}
           >
             <option value="ALL">Tất cả trạng thái</option>
             <option value="CHODUYET">Chờ duyệt</option>
@@ -555,6 +552,18 @@ const MuonManager: React.FC = () => {
             <option value="DANGMUON">Đang mượn</option>
             <option value="DATRA">Đã trả</option>
           </select>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo mã, tên độc giả, tên sách..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 6,
+              border: "1px solid #ddd",
+              minWidth: 260,
+            }}
+          />
         </div>
       </div>
 
@@ -624,11 +633,6 @@ const MuonManager: React.FC = () => {
 
       {/* Statistics with pagination info */}
       <div className={styles["stats-summary"]}>
-        <div>
-          Hiển thị {startIndex + 1} - {Math.min(endIndex, totalItems)} trong
-          tổng số {totalItems} phiếu mượn
-          {filterStatus !== "ALL" && ` (Lọc: ${filterStatus})`}
-        </div>
         <div className={styles["pending-info"]}>
           Tổng phiếu chờ duyệt: {totalPendingCount}
         </div>
@@ -834,75 +838,51 @@ const MuonManager: React.FC = () => {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className={styles["pagination-container"]}>
-              <div className={styles["pagination-info"]}>
-                Trang {currentPage} / {totalPages}
-              </div>
-
-              <div className={styles["pagination-controls"]}>
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className={styles["pagination-btn"]}
-                  title="Trang đầu"
+            <nav aria-label="Phân trang mượn sách">
+              <ul className="pagination justify-content-center">
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
-                  <i className="fas fa-angle-double-left"></i>
-                </button>
-
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={styles["pagination-btn"]}
-                  title="Trang trước"
-                >
-                  <i className="fas fa-angle-left"></i>
-                </button>
-
-                {Array.from({ length: Math.min(9, totalPages) }, (_, index) => {
-                  let pageNumber;
-
-                  if (totalPages <= 9) {
-                    pageNumber = index + 1;
-                  } else if (currentPage <= 5) {
-                    pageNumber = index + 1;
-                  } else if (currentPage >= totalPages - 4) {
-                    pageNumber = totalPages - 8 + index;
-                  } else {
-                    pageNumber = currentPage - 4 + index;
-                  }
-
-                  return (
-                    <button
-                      key={pageNumber}
-                      onClick={() => handlePageChange(pageNumber)}
-                      className={`${styles["pagination-btn"]} ${
-                        currentPage === pageNumber ? styles["active"] : ""
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &laquo; Trước
+                  </button>
+                </li>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (pageNum) => (
+                    <li
+                      key={pageNum}
+                      className={`page-item ${
+                        currentPage === pageNum ? "active" : ""
                       }`}
                     >
-                      {pageNumber}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={styles["pagination-btn"]}
-                  title="Trang sau"
+                      <button
+                        className="page-link"
+                        onClick={() => handlePageChange(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    </li>
+                  )
+                )}
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
                 >
-                  <i className="fas fa-angle-right"></i>
-                </button>
-
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className={styles["pagination-btn"]}
-                  title="Trang cuối"
-                >
-                  <i className="fas fa-angle-double-right"></i>
-                </button>
-              </div>
-            </div>
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
           )}
         </>
       )}

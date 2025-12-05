@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../../../../axiosConfig";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "../../../css/admins/books/SachManager.module.css";
 
 interface Sach {
@@ -270,29 +270,39 @@ const SachManager = () => {
                   <td>{sach.theLoais?.join(", ")}</td>
                   <td>{sach.soLuong}</td>
                   <td>
-                    <Link
-                      to={`/admin/sach/${sach.maSach}`}
-                      title="Xem chi tiết"
-                      className="btn btn-sm btn-outline-info me-2"
-                      style={{ marginRight: 8 }}
-                    >
-                      <i className="fas fa-eye"></i>
-                    </Link>
-                    <Link
-                      to={`/admin/sach/edit/${sach.maSach}`}
-                      className="btn btn-sm btn-outline-secondary me-2"
-                      title="Sửa"
-                      style={{ marginRight: 8 }}
-                    >
-                      <i className="fas fa-edit"></i>
-                    </Link>
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      title="Xóa"
-                      onClick={() => handleDeleteClick(sach)}
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
+                    <div className="btn-group">
+                      {/* Thay đổi nút 'Xem chi tiết' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-info" // SỬA: Dùng class Bootstrap
+                        onClick={() => navigate(`/admin/sach/${sach.maSach}`)}
+                        title="Xem chi tiết"
+                      >
+                        <i className="fa fa-eye" />
+                      </button>
+
+                      {/* Thay đổi nút 'Chỉnh sửa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/sach/edit/${sach.maSach}`)
+                        }
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+
+                      {/* Thay đổi nút 'Xóa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger" // SỬA: Dùng class Bootstrap
+                        title="Xóa"
+                        onClick={() => handleDeleteClick(sach)}
+                      >
+                        <i className="fa fa-trash" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -300,23 +310,38 @@ const SachManager = () => {
           </table>
 
           {totalPages > 1 && (
-            <div className={styles["pagination"]}>
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Trước
-              </button>
-              <span>
-                Trang {currentPage} / {totalPages}
-              </span>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Sau
-              </button>
-            </div>
+            <nav aria-label="Phân trang sách">
+              <ul className={styles["pagination"]}>
+                <li>
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    &laquo; Trước
+                  </button>
+                </li>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (pageNum) => (
+                    <li key={pageNum}>
+                      <button
+                        onClick={() => setCurrentPage(pageNum)}
+                        disabled={pageNum === currentPage}
+                      >
+                        {pageNum}
+                      </button>
+                    </li>
+                  )
+                )}
+                <li>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
+                    Sau &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
           )}
         </>
       )}

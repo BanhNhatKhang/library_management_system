@@ -5,65 +5,131 @@
 }
 
 .nxb-manager h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
+/* Nút thêm mới */
 .add-btn {
-  margin-bottom: 1rem;
   background: #2563eb;
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 1rem;
 }
 
+.add-btn:hover {
+  background: #1e40af;
+}
+
+/* Ô tìm kiếm và bộ lọc */
+input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-box input:focus,
+select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* Ô tìm kiếm */
+.nxb-manager input[type="text"] {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.nxb-manager input[type="text"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+/* Bảng */
 .nxb-table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
+  font-family: inherit;
 }
 
 .nxb-table th,
 .nxb-table td {
   border: 1px solid #e5e7eb;
-  padding: 0.75rem;
+  padding: 0.6rem;
   text-align: left;
+  color: #1f2937;
+  font-size: 0.95rem;
 }
 
 .nxb-table th {
-  background: #f3f4f6;
+  background: #e9ecef;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.edit-btn,
-.delete-btn {
+.nxb-table td:last-child {
+  text-align: center;
+}
+
+/* Nút hành động */
+.btn-group .btn {
   background: none;
   border: none;
   cursor: pointer;
+  margin: 0 4px;
+  font-size: 1rem;
+  transition: transform 0.15s;
+}
+
+.btn-group .btn:hover {
+  transform: scale(1.15);
+}
+
+.btn-group .btn-outline-info {
   color: #2563eb;
-  font-size: 1em;
-  margin-right: 8px;
 }
 
-.delete-btn {
-  color: #ef4444;
-}
-
-.edit-btn:hover {
+.btn-group .btn-outline-secondary {
   color: #fbbf24;
 }
 
-.delete-btn:hover {
-  color: #b91c1c;
+.btn-group .btn-outline-danger {
+  color: #ef4444;
 }
 
+/* Trạng thái rỗng */
+.nxb-table .text-center {
+  padding: 2rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin: 1.5rem 0 0 0;
+  margin: 1.5rem 0 0;
 }
 
 .pagination button {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
 import styles from "../../../css/admins/staff/NVManager.module.css";
 
@@ -120,6 +120,54 @@ const NVManager: React.FC = () => {
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9; // Hiển thị cứng 9 dòng mỗi trang
+
+  const totalItems = sorted.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = sorted.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push("...");
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
+
   return (
     <div className={styles["nv-manager"]}>
       <h2>Quản lý nhân viên</h2>
@@ -144,91 +192,141 @@ const NVManager: React.FC = () => {
       {loading ? (
         <div>⏳ Đang tải...</div>
       ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("maNhanVien")}
-              >
-                Mã{" "}
-                {sortKey === "maNhanVien"
-                  ? sortIcon(sortOrder)
-                  : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("hoTen")}
-              >
-                Họ tên{" "}
-                {sortKey === "hoTen" ? sortIcon(sortOrder) : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("dienThoai")}
-              >
-                Điện thoại{" "}
-                {sortKey === "dienThoai" ? sortIcon(sortOrder) : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("email")}
-              >
-                Email{" "}
-                {sortKey === "email" ? sortIcon(sortOrder) : sortIcon(null)}
-              </th>
-              <th>Trạng thái</th>
-              <th className="text-end">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((nv) => (
-              <tr key={nv.maNhanVien}>
-                <td>{nv.maNhanVien}</td>
-                <td>{nv.hoTen}</td>
-                <td>{nv.dienThoai}</td>
-                <td>{nv.email}</td>
-                <td>
-                  <span
-                    className={`badge ${getTrangThaiClass(nv.trangThai)}`}
-                    title={nv.trangThai}
-                  >
-                    {getTrangThaiDisplay(nv.trangThai)}
-                  </span>
-                </td>
-                <td className="text-end">
-                  <Link
-                    to={`/admin/nhanvien/${nv.maNhanVien}`}
-                    className="btn btn-sm btn-outline-info me-2"
-                  >
-                    <i className="fa fa-eye" />
-                  </Link>
-                  <button
-                    className="btn btn-sm btn-outline-secondary me-2"
-                    onClick={() =>
-                      navigate(`/admin/nhanvien/edit/${nv.maNhanVien}`)
-                    }
-                  >
-                    <i className="fa fa-edit" />
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={() => handleDelete(nv.maNhanVien)}
-                  >
-                    <i className="fa fa-trash" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {sorted.length === 0 && (
+        <>
+          <table className="table table-striped">
+            <thead>
               <tr>
-                <td colSpan={6} className={styles["text-center"]}>
-                  Không tìm thấy kết quả
-                </td>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("maNhanVien")}
+                >
+                  Mã{" "}
+                  {sortKey === "maNhanVien"
+                    ? sortIcon(sortOrder)
+                    : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("hoTen")}
+                >
+                  Họ tên{" "}
+                  {sortKey === "hoTen" ? sortIcon(sortOrder) : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("dienThoai")}
+                >
+                  Điện thoại{" "}
+                  {sortKey === "dienThoai"
+                    ? sortIcon(sortOrder)
+                    : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("email")}
+                >
+                  Email{" "}
+                  {sortKey === "email" ? sortIcon(sortOrder) : sortIcon(null)}
+                </th>
+                <th>Trạng thái</th>
+                <th className="text-end">Hành động</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentItems.map((nv) => (
+                <tr key={nv.maNhanVien}>
+                  <td>{nv.maNhanVien}</td>
+                  <td>{nv.hoTen}</td>
+                  <td>{nv.dienThoai}</td>
+                  <td>{nv.email}</td>
+                  <td>
+                    <span
+                      className={`badge ${getTrangThaiClass(nv.trangThai)}`}
+                      title={nv.trangThai}
+                    >
+                      {getTrangThaiDisplay(nv.trangThai)}
+                    </span>
+                  </td>
+                  <td className="text-end">
+                    <div className="btn-group">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-info" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/nhanvien/${nv.maNhanVien}`)
+                        }
+                        title="Xem chi tiết"
+                      >
+                        <i className="fa fa-eye" />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/nhanvien/edit/${nv.maNhanVien}`)
+                        }
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(nv.maNhanVien)}
+                      >
+                        <i className="fa fa-trash" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {currentItems.length === 0 && (
+                <tr>
+                  <td colSpan={6} className={styles["text-center"]}>
+                    Không tìm thấy kết quả
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Phân trang */}
+          {totalPages > 1 && (
+            <nav aria-label="Phân trang nhân viên">
+              <ul className={styles["pagination"]}>
+                <li>
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &laquo; Trước
+                  </button>
+                </li>
+                {getPageNumbers().map((pageNum, index) => (
+                  <li key={index}>
+                    {pageNum === "..." ? (
+                      <span>...</span>
+                    ) : (
+                      <button
+                        onClick={() => handlePageChange(pageNum as number)}
+                        disabled={pageNum === currentPage}
+                      >
+                        {pageNum}
+                      </button>
+                    )}
+                  </li>
+                ))}
+                <li>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );

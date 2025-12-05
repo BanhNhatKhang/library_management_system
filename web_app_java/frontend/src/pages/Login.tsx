@@ -17,7 +17,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { setRole } = useAuth();
+  const { setRole, setName } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +42,8 @@ const Login = () => {
       ) {
         setRole(data.role);
         localStorage.setItem("role", data.role);
+        localStorage.setItem("name", data.name);
+        setName(data.name); // Thêm dòng này
         navigate("/admin/dashboard");
       } else {
         setRole("DOCGIA");

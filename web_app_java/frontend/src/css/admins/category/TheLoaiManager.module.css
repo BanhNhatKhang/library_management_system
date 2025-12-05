@@ -5,19 +5,60 @@
 }
 
 .theloai-manager h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
+/* Nút thêm mới */
 .add-btn {
-  margin-bottom: 1rem;
   background: #2563eb;
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
+.add-btn:hover {
+  background: #1e40af;
+}
+
+/* Header */
+.theloai-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.theloai-manager-header .search-box {
+  width: 300px;
+}
+
+/* Ô tìm kiếm và bộ lọc */
+.search-box input,
+select {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-box input:focus,
+select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Bảng */
 .theloai-table {
   width: 100%;
   border-collapse: collapse;
@@ -27,43 +68,63 @@
 .theloai-table th,
 .theloai-table td {
   border: 1px solid #e5e7eb;
-  padding: 0.75rem;
+  padding: 0.6rem;
   text-align: left;
+  color: #1f2937;
+  font-size: 0.95rem;
 }
 
 .theloai-table th {
-  background: #f3f4f6;
+  background: #e9ecef;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.edit-btn,
-.delete-btn {
+/* Cột hành động */
+.theloai-table td:last-child {
+  text-align: center;
+}
+
+/* Nút hành động */
+.btn-group .btn {
   background: none;
   border: none;
   cursor: pointer;
+  margin: 0 4px;
+  font-size: 1rem;
+  transition: transform 0.15s;
+}
+
+.btn-group .btn:hover {
+  transform: scale(1.15);
+}
+
+.btn-group .btn-outline-info {
   color: #2563eb;
-  font-size: 1em;
-  margin-right: 8px;
 }
 
-.delete-btn {
-  color: #ef4444;
-}
-
-.edit-btn:hover {
+.btn-group .btn-outline-secondary {
   color: #fbbf24;
 }
 
-.delete-btn:hover {
-  color: #b91c1c;
+.btn-group .btn-outline-danger {
+  color: #ef4444;
 }
 
+/* Trạng thái rỗng */
+.theloai-table .text-center {
+  padding: 2rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin: 1.5rem 0 0 0;
+  margin: 1.5rem 0 0;
 }
 
 .pagination button {
@@ -195,4 +256,20 @@
 .confirm-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Responsive nhỏ */
+@media (max-width: 768px) {
+  .theloai-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .theloai-manager-header .search-box {
+    width: 100%;
+  }
+  .theloai-table th,
+  .theloai-table td {
+    font-size: 0.9rem;
+  }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../../../../axiosConfig"; // SỬA: Import api thay vì axios
 import styles from "../../../css/admins/promotion/UDManager.module.css";
 
@@ -43,6 +43,10 @@ const UDManager: React.FC = () => {
   // sort state
   const [sortKey, setSortKey] = useState<UDSortKey>("maUuDai");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  // pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9; // Hiển thị cứng 9 dòng mỗi trang
 
   useEffect(() => {
     api // SỬA: Đổi từ axios thành api
@@ -210,6 +214,52 @@ const UDManager: React.FC = () => {
     return new Date(ngayKetThuc) < new Date();
   };
 
+  // pagination logic
+  const totalItems = sorted.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = sorted.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push("...");
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
+
   return (
     <div className={styles["ud-manager"]}>
       <h2>Quản lý ưu đãi</h2>
@@ -234,112 +284,178 @@ const UDManager: React.FC = () => {
       {loading ? (
         <div>⏳ Đang tải...</div>
       ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("maUuDai")}
-              >
-                Mã ưu đãi{" "}
-                {sortKey === "maUuDai" ? sortIcon(sortOrder) : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("tenUuDai")}
-              >
-                Tên ưu đãi{" "}
-                {sortKey === "tenUuDai" ? sortIcon(sortOrder) : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("phanTramGiam")}
-              >
-                Giảm (%){" "}
-                {sortKey === "phanTramGiam"
-                  ? sortIcon(sortOrder)
-                  : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("ngayBatDau")}
-              >
-                Ngày bắt đầu{" "}
-                {sortKey === "ngayBatDau"
-                  ? sortIcon(sortOrder)
-                  : sortIcon(null)}
-              </th>
-              <th
-                style={{ cursor: "pointer" }}
-                onClick={() => handleSort("ngayKetThuc")}
-              >
-                Ngày kết thúc{" "}
-                {sortKey === "ngayKetThuc"
-                  ? sortIcon(sortOrder)
-                  : sortIcon(null)}
-              </th>
-              <th>Trạng thái</th>
-              <th className="text-end">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((d) => (
-              <tr key={d.maUuDai}>
-                <td>{d.maUuDai}</td>
-                <td>{d.tenUuDai}</td>
-                <td>{d.phanTramGiam}%</td>
-                <td>{formatDate(d.ngayBatDau)}</td>
-                <td>{formatDate(d.ngayKetThuc)}</td>
-                <td>
-                  {/* THÊM: Hiển thị trạng thái */}
-                  <span
-                    className={`badge ${
-                      isExpired(d.ngayKetThuc) ? "bg-secondary" : "bg-success"
-                    }`}
-                  >
-                    {isExpired(d.ngayKetThuc) ? "Hết hạn" : "Hoạt động"}
-                  </span>
-                </td>
-                <td className="text-end">
-                  <Link
-                    to={`/admin/uudai/${d.maUuDai}`}
-                    className="btn btn-sm btn-outline-info me-2"
-                  >
-                    <i className="fa fa-eye" />
-                  </Link>
-                  <button
-                    className="btn btn-sm btn-outline-secondary me-2"
-                    onClick={() => navigate(`/admin/uudai/edit/${d.maUuDai}`)}
-                  >
-                    <i className="fa fa-edit" />
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={() => handleDelete(d.maUuDai, d.tenUuDai)}
-                    title={
-                      isExpired(d.ngayKetThuc)
-                        ? "Xóa ưu đãi"
-                        : "Xóa/Vô hiệu hóa ưu đãi"
-                    }
-                  >
-                    <i
-                      className={
-                        isExpired(d.ngayKetThuc) ? "fa fa-trash" : "fa fa-times"
-                      }
-                    />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {sorted.length === 0 && (
+        <>
+          <table className="table table-striped">
+            <thead>
               <tr>
-                <td colSpan={7} className="text-center">
-                  Không tìm thấy kết quả
-                </td>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("maUuDai")}
+                >
+                  Mã ưu đãi{" "}
+                  {sortKey === "maUuDai" ? sortIcon(sortOrder) : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("tenUuDai")}
+                >
+                  Tên ưu đãi{" "}
+                  {sortKey === "tenUuDai"
+                    ? sortIcon(sortOrder)
+                    : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("phanTramGiam")}
+                >
+                  Giảm (%){" "}
+                  {sortKey === "phanTramGiam"
+                    ? sortIcon(sortOrder)
+                    : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("ngayBatDau")}
+                >
+                  Ngày bắt đầu{" "}
+                  {sortKey === "ngayBatDau"
+                    ? sortIcon(sortOrder)
+                    : sortIcon(null)}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSort("ngayKetThuc")}
+                >
+                  Ngày kết thúc{" "}
+                  {sortKey === "ngayKetThuc"
+                    ? sortIcon(sortOrder)
+                    : sortIcon(null)}
+                </th>
+                <th>Trạng thái</th>
+                <th className="text-end">Hành động</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentItems.map((d) => (
+                <tr key={d.maUuDai}>
+                  <td>{d.maUuDai}</td>
+                  <td>{d.tenUuDai}</td>
+                  <td>{d.phanTramGiam}%</td>
+                  <td>{formatDate(d.ngayBatDau)}</td>
+                  <td>{formatDate(d.ngayKetThuc)}</td>
+                  <td>
+                    {/* THÊM: Hiển thị trạng thái */}
+                    <span
+                      className={`badge ${
+                        isExpired(d.ngayKetThuc) ? "bg-secondary" : "bg-success"
+                      }`}
+                    >
+                      {isExpired(d.ngayKetThuc) ? "Hết hạn" : "Hoạt động"}
+                    </span>
+                  </td>
+                  <td className="text-end">
+                    <div className="btn-group">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-info" // SỬA: Dùng class Bootstrap
+                        onClick={() => navigate(`/admin/uudai/${d.maUuDai}`)}
+                        title="Xem chi tiết"
+                      >
+                        <i className="fa fa-eye" />
+                      </button>
+                      {/* Thay đổi nút 'Chỉnh sửa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary" // SỬA: Dùng class Bootstrap
+                        onClick={() =>
+                          navigate(`/admin/uudai/edit/${d.maUuDai}`)
+                        }
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(d.maUuDai, d.tenUuDai)}
+                        title={
+                          isExpired(d.ngayKetThuc)
+                            ? "Xóa ưu đãi"
+                            : "Xóa/Vô hiệu hóa ưu đãi"
+                        }
+                      >
+                        <i
+                          className={
+                            isExpired(d.ngayKetThuc)
+                              ? "fa fa-trash"
+                              : "fa fa-times"
+                          }
+                        />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {currentItems.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-center">
+                    Không tìm thấy kết quả
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* PHÂN TRANG */}
+          {totalPages > 1 && (
+            <nav aria-label="Phân trang ưu đãi">
+              <ul className="pagination justify-content-center">
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &laquo; Trước
+                  </button>
+                </li>
+                {getPageNumbers().map((pageNum, index) => (
+                  <li
+                    key={index}
+                    className={`page-item ${
+                      pageNum === currentPage ? "active" : ""
+                    } ${pageNum === "..." ? "disabled" : ""}`}
+                  >
+                    {pageNum === "..." ? (
+                      <span className="page-link">...</span>
+                    ) : (
+                      <button
+                        className="page-link"
+                        onClick={() => handlePageChange(pageNum as number)}
+                      >
+                        {pageNum}
+                      </button>
+                    )}
+                  </li>
+                ))}
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );

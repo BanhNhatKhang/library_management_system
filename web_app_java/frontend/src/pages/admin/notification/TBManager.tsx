@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "../../../../axiosConfig";
 import styles from "../../../css/admins/notification/TBManager.module.css";
 
@@ -32,7 +32,7 @@ const TBManager: React.FC = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(9); // Hiển thị cứng 9 dòng mỗi trang
 
   useEffect(() => {
     axios
@@ -128,13 +128,6 @@ const TBManager: React.FC = () => {
     }
   };
 
-  const handleItemsPerPageChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  };
-
   // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pageNumbers = [];
@@ -179,7 +172,6 @@ const TBManager: React.FC = () => {
         >
           + Tạo Thông báo mới
         </button>
-
         <div className={styles["search-box"]}>
           <input
             type="text"
@@ -187,27 +179,6 @@ const TBManager: React.FC = () => {
             value={q}
             onChange={(e) => handleSearch(e.target.value)}
           />
-        </div>
-      </div>
-
-      {/* Items per page selector */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <span className="me-2">Hiển thị:</span>
-          <select
-            value={itemsPerPage}
-            onChange={handleItemsPerPageChange}
-            className="form-select form-select-sm d-inline-block w-auto"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-          </select>
-          <span className="ms-2">mục mỗi trang</span>
-        </div>
-
-        <div className="text-muted">
-          Hiển thị {startIndex + 1} - {Math.min(endIndex, totalItems)} của{" "}
-          {totalItems} kết quả
         </div>
       </div>
 
@@ -276,24 +247,32 @@ const TBManager: React.FC = () => {
                     </span>
                   </td>
                   <td className="text-end">
-                    <Link
-                      to={`/admin/thongbao/${d.id}`}
-                      className="btn btn-sm btn-outline-info me-2"
-                    >
-                      <i className="fa fa-eye" />
-                    </Link>
-                    <button
-                      className="btn btn-sm btn-outline-secondary me-2"
-                      onClick={() => navigate(`/admin/thongbao/edit/${d.id}`)}
-                    >
-                      <i className="fa fa-edit" />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      onClick={() => handleDelete(d.id)}
-                    >
-                      <i className="fa fa-trash" />
-                    </button>
+                    <div className="btn-group" role="group">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-info" // SỬA: Dùng class Bootstrap
+                        onClick={() => navigate(`/admin/thongbao/${d.id}`)}
+                        title="Xem chi tiết"
+                      >
+                        <i className="fa fa-eye" />
+                      </button>
+                      {/* Thay đổi nút 'Chỉnh sửa' */}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary" // SỬA: Dùng class Bootstrap
+                        onClick={() => navigate(`/admin/thongbao/edit/${d.id}`)}
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fa fa-edit" />
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        title="Xóa"
+                        onClick={() => handleDelete(d.id)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

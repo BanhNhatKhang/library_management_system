@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import styles from "../../css/admins/SidebarAdmin.module.css";
+import { useAuth } from "../../context/AuthContext";
 
 const SidebarAdmin = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { name, logout } = useAuth();
 
   const handleLogout = () => {
     if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("role");
-      localStorage.removeItem("userName");
-      navigate("/dangnhap");
+      logout();
+      navigate("/login");
     }
   };
 
@@ -26,7 +26,10 @@ const SidebarAdmin = () => {
         tabIndex={0}
       >
         <div className={styles["sidebar-header"]}>
-          <h2>Admin</h2>
+          <h2>
+            {" "}
+            Xin chào, <br /> {name}!
+          </h2>
           <button
             className={styles["collapse-btn"]}
             onClick={() => setIsCollapsed((prev) => !prev)}
@@ -186,7 +189,32 @@ const SidebarAdmin = () => {
               </Link>
             </li> */}
             <li>
-              <button onClick={handleLogout} className={styles["logout-btn"]}>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className={styles["logout-btn"]}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  color: "#cbd5e1",
+                  padding: "0.75rem 1rem",
+                  background: "none",
+                  border: "none",
+                  width: "100%",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  transition: "background 0.2s, color 0.2s",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "#374151";
+                  e.currentTarget.style.color = "#fff";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "none";
+                  e.currentTarget.style.color = "#cbd5e1";
+                }}
+              >
                 <i className="fas fa-sign-out-alt"></i>
                 <span>Đăng Xuất</span>
               </button>
