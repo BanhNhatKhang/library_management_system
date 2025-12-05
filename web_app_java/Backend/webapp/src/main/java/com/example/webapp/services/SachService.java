@@ -45,6 +45,8 @@ public class SachService {
     private TheLoaiRepository theLoaiRepository;
     @Autowired
     private TheoDoiMuonSachRepository theoDoiMuonSachRepository;
+    @Autowired
+    private ChiTietDonHangRepository chiTietDonHangRepository;
 
     private static final String UPLOAD_DIR = "uploads";
 
@@ -119,16 +121,46 @@ public class SachService {
     }
 
     public List<SachDTO> getSachByNhaXuatBan(String maNhaXuatBan) {
-    try {
-        // Lấy tất cả sách theo nhà xuất bản
-        return sachRepository.findByNhaXuatBan_MaNhaXuatBan(maNhaXuatBan)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    } catch (Exception e) {
-        throw new RuntimeException("Lỗi khi lấy sách theo nhà xuất bản: " + e.getMessage());
+        try {
+            // Lấy tất cả sách theo nhà xuất bản
+            return sachRepository.findByNhaXuatBan_MaNhaXuatBan(maNhaXuatBan)
+                    .stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy sách theo nhà xuất bản: " + e.getMessage());
+        }
     }
-}
+
+    public int getAvailableBooksCount(String maSach) {
+        // 1. Lấy thông tin sách
+        Optional<Sach> sachOpt = sachRepository.findById(maSach);
+        if (sachOpt.isEmpty()) {
+            throw new RuntimeException("Sách không tồn tại");
+        }
+        
+        Sach sach = sachOpt.get();
+        int soQuyenBan = sach.getSoLuong(); // Số quyển bán
+        int tongSoQuyen = sach.getSoQuyen(); // Tổng số quyển
+        
+        // 2. Tính số sách có thể mượn = Tổng số quyển - Số quyển bán
+        int soSachCoTheMuon = tongSoQuyen - soQuyenBan;
+        
+        // 3. Đếm số phiếu mượn đang hoạt động (CHODUYET, DADUYET, DANGMUON)
+        List<TheoDoiMuonSach.TrangThaiMuon> activeStates = List.of(
+            TheoDoiMuonSach.TrangThaiMuon.CHODUYET,
+            TheoDoiMuonSach.TrangThaiMuon.DADUYET,
+            TheoDoiMuonSach.TrangThaiMuon.DANGMUON
+        );
+        
+        long soPhieuMuonDangHoatDong = theoDoiMuonSachRepository
+            .countBySach_MaSachAndTrangThaiMuonIn(maSach, activeStates);
+        
+        // 4. Số sách mượn còn lại = Số sách có thể mượn - Số phiếu mượn đang hoạt động
+        int soSachMuonConLai = soSachCoTheMuon - (int) soPhieuMuonDangHoatDong;
+        
+        return Math.max(0, soSachMuonConLai); // Đảm bảo không âm
+    }
 
     public List<SachDTO> getSachGoiY(String maSach) {
         return getAllSach();
@@ -331,7 +363,7 @@ public class SachService {
             // Chuyển tên thể loại thành tên thư mục (loại bỏ dấu, chuyển thành chữ thường)
             folderName = removeDiacritics(theLoai.getTenTheLoai())
                 .toLowerCase()
-                .replaceAll("\\s+", "");
+                .replaceAll("\s+", "");
         }
 
         // Tạo thư mục nếu chưa tồn tại
@@ -385,6 +417,31 @@ public class SachService {
                 .replaceAll("[Đ]", "D");
     }
 
+    public int getAvailableStockCount(String maSach) {
+        // 1. Lấy thông tin sách
+        Optional<Sach> sachOpt = sachRepository.findById(maSach);
+        if (sachOpt.isEmpty()) {
+            throw new RuntimeException("Sách không tồn tại");
+        }
+        
+        Sach sach = sachOpt.get();
+        int soLuongGoc = sach.getSoLuong(); // Số lượng gốc của sách
+        
+        // 2. Tính tổng số lượng sách đã bán (thuộc đơn hàng DAGIAO, DANGXULY)
+        List<DonHang.TrangThaiDonHang> soldStates = List.of(
+            DonHang.TrangThaiDonHang.DAGIAO,
+            DonHang.TrangThaiDonHang.DANGXULY
+        );
+        
+        int soLuongDaBan = chiTietDonHangRepository
+            .sumSoLuongBySachAndDonHangTrangThaiIn(maSach, soldStates);
+        
+        // 3. Số lượng có thể mua = Số lượng gốc - Số lượng đã bán
+        int soLuongCoTheMua = soLuongGoc - soLuongDaBan;
+        
+        return Math.max(0, soLuongCoTheMua); // Đảm bảo không âm
+    }
+
     public SachDTO toDTO(Sach sach) {
         SachDTO dto = new SachDTO();
         dto.setMaSach(sach.getMaSach());
@@ -398,6 +455,9 @@ public class SachService {
         dto.setAnhBia(sach.getAnhBia());
         dto.setDiemDanhGia(sach.getDiemDanhGia());
         dto.setGiamGia(sach.getGiamGia());
+
+        dto.setSoSachMuonConLai(getAvailableBooksCount(sach.getMaSach()));
+        dto.setSoLuongCoTheMua(getAvailableStockCount(sach.getMaSach()));
         
         if (sach.getNhaXuatBan() != null) {
             dto.setNhaXuatBan(sach.getNhaXuatBan().getTenNhaXuatBan());

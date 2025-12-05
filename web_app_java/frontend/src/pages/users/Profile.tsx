@@ -24,6 +24,39 @@ interface ChangePasswordData {
   nhapLaiMatKhauMoi: string;
 }
 
+interface PhatDocGia {
+  maPhat: number;
+  maDocGia: string;
+  maSach: string;
+  tenSach: string;
+  soTienPhat: number;
+  soNgayQuaHan: number;
+  ngayTaoPhat: string;
+  trangThaiPhat: "CHUATHANHTOAN" | "DATHANHTOAN" | "MIENGIAM";
+  ngayThanhToan?: string;
+  ghiChu?: string;
+  theoDoiMuonSach?: {
+    ngayMuon: string;
+    ngayTra: string;
+    sach: {
+      tenSach: string;
+      tacGia: string;
+      anhBia?: string;
+    };
+  };
+}
+
+interface FineStatusInfo {
+  totalUnpaidFines: number;
+  formattedAmount: string;
+  maDocGia: string;
+  trangThaiTaiKhoan: string;
+  coTheHoatDong: boolean;
+  isAccountLocked: boolean;
+  hasUnpaidFines: boolean;
+  soLuongPhatChuaThanhToan: number;
+}
+
 // Định nghĩa cấu trúc menu
 const menuItems = [
   {
@@ -69,6 +102,13 @@ const menuItems = [
     key: "sachDaMuon",
     label: "Sách đã mượn",
     icon: "fas fa-book",
+    isTitle: false,
+    isIndented: false,
+  },
+  {
+    key: "thongTinPhat",
+    label: "Thông tin phạt",
+    icon: "fas fa-money-bill-wave",
     isTitle: false,
     isIndented: false,
   },
@@ -151,6 +191,20 @@ function Profile() {
     string | null
   >(null);
 
+  const [phatList, setPhatList] = useState<PhatDocGia[]>([]);
+  const [isLoadingFines, setIsLoadingFines] = useState(false);
+  const [selectedFine, setSelectedFine] = useState<number | null>(null);
+  const [fineStatusInfo, setFineStatusInfo] = useState<FineStatusInfo | null>(
+    null
+  );
+
+  const [finesPagination, setFinesPagination] = useState<Pagination>({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    pageSize: 5,
+  });
+
   const [thongBaoList, setThongBaoList] = useState<ThongBaoMuonSachDTO[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const [notificationPagination, setNotificationPagination] =
@@ -217,6 +271,8 @@ function Profile() {
     const tabParam = searchParams.get("tab");
     if (tabParam === "orders") {
       setActiveMenu("donHangCuaToi");
+    } else if (tabParam === "fines") {
+      setActiveMenu("thongTinPhat");
     }
   }, [searchParams]);
 
@@ -283,6 +339,166 @@ function Profile() {
       // Nếu lỗi, giữ achievement mặc định
     }
   }, [calculateAchievements]);
+
+  const fetchPhatList = React.useCallback(
+    async (page = 0) => {
+      setIsLoadingFines(true);
+      try {
+        const response = await axios.get("/api/phat/docgia/me", {
+          params: {
+            page: page,
+            size: finesPagination.pageSize,
+            sort: "ngayTaoPhat,desc",
+          },
+        });
+
+        if (response.data.content) {
+          setPhatList(response.data.content);
+          setFinesPagination({
+            currentPage: response.data.number,
+            totalPages: response.data.totalPages,
+            totalElements: response.data.totalElements,
+            pageSize: response.data.size,
+          });
+        } else {
+          setPhatList(Array.isArray(response.data) ? response.data : []);
+          setFinesPagination((prev) => ({
+            ...prev,
+            currentPage: 0,
+            totalPages: 1,
+            totalElements: Array.isArray(response.data)
+              ? response.data.length
+              : 0,
+          }));
+        }
+
+        console.log("Danh sách phạt trang", page + 1, ":", response.data);
+      } catch (error) {
+        console.error("Error fetching fines:", error);
+        setPhatList([]);
+        setFinesPagination((prev) => ({
+          ...prev,
+          currentPage: 0,
+          totalPages: 0,
+          totalElements: 0,
+        }));
+      } finally {
+        setIsLoadingFines(false);
+      }
+    },
+    [finesPagination.pageSize]
+  );
+
+  // Thêm function để fetch thông tin tổng hợp phạt
+  const fetchFineStatusInfo = React.useCallback(async () => {
+    try {
+      const response = await axios.get("/api/phat/docgia/me/status");
+      setFineStatusInfo(response.data);
+    } catch (error) {
+      console.error("Error fetching fine status:", error);
+      setFineStatusInfo(null);
+    }
+  }, []);
+
+  // Thêm function để thanh toán phạt
+  const handlePayFine = async (maPhat: number) => {
+    if (!confirm("Bạn có chắc chắn muốn thanh toán phạt này?")) {
+      return;
+    }
+
+    try {
+      setIsLoadingFines(true);
+      const response = await axios.post(`/api/phat/thanhtoan/${maPhat}`);
+
+      if (response.data.success) {
+        alert("Thanh toán phạt thành công!");
+        // Refresh danh sách phạt và thông tin tổng hợp
+        fetchPhatList(finesPagination.currentPage);
+        fetchFineStatusInfo();
+      } else {
+        alert(response.data.message || "Có lỗi xảy ra khi thanh toán");
+      }
+    } catch (error) {
+      console.error("Error paying fine:", error);
+      if (axios.isAxiosError(error)) {
+        alert(
+          error.response?.data?.message || "Có lỗi xảy ra khi thanh toán phạt"
+        );
+      } else {
+        alert("Có lỗi xảy ra khi thanh toán phạt");
+      }
+    } finally {
+      setIsLoadingFines(false);
+    }
+  };
+
+  // Thêm function để xử lý click vào phạt
+  const handleFineClick = (maPhat: number) => {
+    setSelectedFine(selectedFine === maPhat ? null : maPhat);
+  };
+
+  // Thêm function để xử lý chuyển trang phạt
+  const handleFinesPageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < finesPagination.totalPages) {
+      fetchPhatList(newPage);
+      setSelectedFine(null);
+    }
+  };
+
+  // Thêm function để tạo số trang cho phạt
+  const getFinesPageNumbers = () => {
+    const { currentPage, totalPages } = finesPagination;
+    const pages: number[] = [];
+    const maxDisplayPages = 5;
+
+    if (totalPages <= maxDisplayPages) {
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage < 2) {
+        for (let i = 0; i < 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 3) {
+        for (let i = totalPages - 5; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+    return pages;
+  };
+
+  // Thêm helper functions cho phạt
+  const getFineStatusText = (status: string) => {
+    switch (status) {
+      case "CHUATHANHTOAN":
+        return "Chưa thanh toán";
+      case "DATHANHTOAN":
+        return "Đã thanh toán";
+      case "MIENGIAM":
+        return "Được miễn giảm";
+      default:
+        return "Không xác định";
+    }
+  };
+
+  const getFineStatusClass = (status: string) => {
+    switch (status) {
+      case "CHUATHANHTOAN":
+        return styles["status-cancelled"]; // Đỏ
+      case "DATHANHTOAN":
+        return styles["status-completed"]; // Xanh lá
+      case "MIENGIAM":
+        return styles["status-processing"]; // Vàng
+      default:
+        return styles["status-unknown"];
+    }
+  };
 
   // Cập nhật hàm lấy danh sách đơn hàng với phân trang - SỬA ĐỂ DÙNG useCallback
   const fetchDonHangList = React.useCallback(
@@ -687,6 +903,13 @@ function Profile() {
       fetchDonHangList(0); // Load trang đầu tiên
     }
   }, [activeMenu, fetchDonHangList]); // THÊM dependency
+
+  useEffect(() => {
+    if (activeMenu === "thongTinPhat") {
+      fetchPhatList(0);
+      fetchFineStatusInfo();
+    }
+  }, [activeMenu, fetchPhatList, fetchFineStatusInfo]);
 
   // Load sách đã mượn và Thông báo khi activeMenu thay đổi
   useEffect(() => {
@@ -2373,6 +2596,403 @@ function Profile() {
                       <span className="text-muted ms-2">
                         (Hiển thị {sachDaMuonList.length} /{" "}
                         {borrowedBooksPagination.totalElements} phiếu mượn)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      case "thongTinPhat":
+        return (
+          <div className={styles["form-section"]}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="mb-0">Thông tin phạt</h2>
+              {finesPagination.totalElements > 0 && (
+                <span className="text-muted">
+                  Tổng: {finesPagination.totalElements} lần phạt
+                </span>
+              )}
+            </div>
+
+            {/* Thông tin tổng hợp phạt */}
+            {fineStatusInfo && (
+              <div
+                className={styles["fine-status-summary"]}
+                style={{
+                  background: fineStatusInfo.hasUnpaidFines
+                    ? "#fef2f2"
+                    : "#f0fdf4",
+                  border: `1px solid ${
+                    fineStatusInfo.hasUnpaidFines ? "#fecaca" : "#bbf7d0"
+                  }`,
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginBottom: "24px",
+                }}
+              >
+                <div className="row">
+                  <div className="col-md-6">
+                    <h5
+                      style={{
+                        color: fineStatusInfo.hasUnpaidFines
+                          ? "#dc2626"
+                          : "#059669",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      <i
+                        className={`fas ${
+                          fineStatusInfo.hasUnpaidFines
+                            ? "fa-exclamation-triangle"
+                            : "fa-check-circle"
+                        } me-2`}
+                      ></i>
+                      Tổng tiền phạt chưa thanh toán
+                    </h5>
+                    <p
+                      className="mb-0"
+                      style={{
+                        fontSize: "1.5rem",
+                        fontWeight: "bold",
+                        color: fineStatusInfo.hasUnpaidFines
+                          ? "#dc2626"
+                          : "#059669",
+                      }}
+                    >
+                      {fineStatusInfo.formattedAmount}
+                    </p>
+                  </div>
+                  <div className="col-md-6">
+                    <h6 style={{ marginBottom: "8px" }}>
+                      Trạng thái tài khoản:
+                    </h6>
+
+                    {/* Hiển thị trạng thái tài khoản */}
+                    {fineStatusInfo.isAccountLocked ? (
+                      // Tài khoản đã bị khóa
+                      <span
+                        className="badge bg-danger"
+                        style={{ fontSize: "1rem", padding: "8px 12px" }}
+                      >
+                        Tài khoản bị tạm khóa
+                      </span>
+                    ) : fineStatusInfo.hasUnpaidFines ? (
+                      // Có phạt chưa thanh toán nhưng chưa bị khóa
+                      <span
+                        className="badge bg-warning"
+                        style={{
+                          fontSize: "1rem",
+                          padding: "8px 12px",
+                          color: "#000",
+                        }}
+                      >
+                        Hoạt động bình thường
+                      </span>
+                    ) : (
+                      // Không có phạt
+                      <span
+                        className="badge bg-success"
+                        style={{ fontSize: "1rem", padding: "8px 12px" }}
+                      >
+                        Hoạt động bình thường
+                      </span>
+                    )}
+
+                    {/* Thông báo cảnh báo */}
+                    {fineStatusInfo.isAccountLocked ? (
+                      <p
+                        className="text-danger mt-2 mb-0"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        <i className="fas fa-lock me-1"></i>
+                        Vui lòng thanh toán hết phạt để mở khóa tài khoản
+                      </p>
+                    ) : fineStatusInfo.hasUnpaidFines ? (
+                      <p
+                        className="text-warning mt-2 mb-0"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        <i className="fas fa-info-circle me-1"></i>
+                        Nếu chưa nộp phạt và trả sách sau 7 ngày sẽ tiến hành
+                        khóa tài khoản
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isLoadingFines ? (
+              <div className="text-center p-4">
+                <i className="fas fa-spinner fa-spin me-2"></i>
+                Đang tải danh sách phạt...
+              </div>
+            ) : phatList.length === 0 ? (
+              <div className={styles["empty-orders"]}>
+                <div className="text-center p-5">
+                  <i
+                    className="fas fa-hand-holding-usd mb-3"
+                    style={{ fontSize: "3rem", color: "#10b981" }}
+                  ></i>
+                  <h4 style={{ color: "#059669" }}>
+                    Chúc mừng! Bạn không có phạt nào
+                  </h4>
+                  <p className="text-muted">
+                    Hãy tiếp tục trả sách đúng hạn để tránh bị phạt nhé!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Danh sách phạt */}
+                <div className={styles["orders-container"]}>
+                  {phatList.map((phat) => (
+                    <div
+                      key={phat.maPhat}
+                      className={`${styles["order-card"]} ${
+                        phat.trangThaiPhat === "CHUATHANHTOAN"
+                          ? styles["unpaid-fine"]
+                          : ""
+                      }`}
+                    >
+                      {/* Header phạt */}
+                      <div
+                        className={styles["order-header"]}
+                        onClick={() => handleFineClick(phat.maPhat)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <div className={styles["order-info"]}>
+                          <div className={styles["order-id"]}>
+                            <strong>Phạt #{phat.maPhat}</strong>
+                          </div>
+                          <div className={styles["order-date"]}>
+                            Ngày phạt: {formatDate(phat.ngayTaoPhat)} • Quá hạn:{" "}
+                            {phat.soNgayQuaHan} ngày
+                          </div>
+                          <div className="mt-1">
+                            <span
+                              style={{ fontSize: "0.9rem", color: "#6b7280" }}
+                            >
+                              Sách: {phat.tenSach || "Không xác định"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className={styles["order-summary"]}>
+                          <div className={styles["order-total"]}>
+                            {formatCurrency(phat.soTienPhat)}
+                          </div>
+                          <div
+                            className={`${
+                              styles["order-status"]
+                            } ${getFineStatusClass(phat.trangThaiPhat)}`}
+                          >
+                            {getFineStatusText(phat.trangThaiPhat)}
+                          </div>
+                          <div className={styles["expand-icon"]}>
+                            <i
+                              className={`fas ${
+                                selectedFine === phat.maPhat
+                                  ? "fa-chevron-up"
+                                  : "fa-chevron-down"
+                              }`}
+                            ></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chi tiết phạt */}
+                      {selectedFine === phat.maPhat && (
+                        <div className={styles["order-details"]}>
+                          <h5 className="mb-3">Chi tiết phạt:</h5>
+
+                          <div className={styles["fine-detail-info"]}>
+                            <div className="row">
+                              <div className="col-md-6">
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-book me-2"></i>
+                                  <span>
+                                    <strong>Sách:</strong>{" "}
+                                    {phat.theoDoiMuonSach?.sach?.tenSach ||
+                                      phat.tenSach ||
+                                      "Không xác định"}
+                                  </span>
+                                </div>
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-user me-2"></i>
+                                  <span>
+                                    <strong>Tác giả:</strong>{" "}
+                                    {phat.theoDoiMuonSach?.sach?.tacGia ||
+                                      "Không xác định"}
+                                  </span>
+                                </div>
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-calendar me-2"></i>
+                                  <span>
+                                    <strong>Ngày mượn:</strong>{" "}
+                                    {phat.theoDoiMuonSach?.ngayMuon
+                                      ? formatDate(
+                                          phat.theoDoiMuonSach.ngayMuon
+                                        )
+                                      : "Không xác định"}
+                                  </span>
+                                </div>
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-calendar-times me-2"></i>
+                                  <span>
+                                    <strong>Hạn trả:</strong>{" "}
+                                    {phat.theoDoiMuonSach?.ngayTra
+                                      ? formatDate(phat.theoDoiMuonSach.ngayTra)
+                                      : "Không xác định"}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-clock me-2"></i>
+                                  <span>
+                                    <strong>Số ngày quá hạn:</strong>{" "}
+                                    {phat.soNgayQuaHan} ngày
+                                  </span>
+                                </div>
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-money-bill-wave me-2"></i>
+                                  <span>
+                                    <strong>Tiền phạt:</strong>{" "}
+                                    {formatCurrency(phat.soTienPhat)}
+                                  </span>
+                                </div>
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-calendar-check me-2"></i>
+                                  <span>
+                                    <strong>Ngày tạo phạt:</strong>{" "}
+                                    {formatDate(phat.ngayTaoPhat)}
+                                  </span>
+                                </div>
+                                {phat.ngayThanhToan && (
+                                  <div className={styles["fine-info-item"]}>
+                                    <i className="fas fa-calendar-check me-2"></i>
+                                    <span>
+                                      <strong>Ngày thanh toán:</strong>{" "}
+                                      {formatDate(phat.ngayThanhToan)}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {phat.ghiChu && (
+                              <div className="mt-3">
+                                <div className={styles["fine-info-item"]}>
+                                  <i className="fas fa-sticky-note me-2"></i>
+                                  <span>
+                                    <strong>Ghi chú:</strong> {phat.ghiChu}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Nút thanh toán */}
+                          {phat.trangThaiPhat === "CHUATHANHTOAN" && (
+                            <div className="mt-3 text-end">
+                              <button
+                                className="btn btn-primary"
+                                onClick={() => handlePayFine(phat.maPhat)}
+                                disabled={isLoadingFines}
+                              >
+                                <i className="fas fa-credit-card me-2"></i>
+                                {isLoadingFines
+                                  ? "Đang xử lý..."
+                                  : `Thanh toán ${formatCurrency(
+                                      phat.soTienPhat
+                                    )}`}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination cho phạt */}
+                {finesPagination.totalPages > 1 && (
+                  <div className={styles["pagination-container"]}>
+                    <nav aria-label="Fines pagination">
+                      <ul className={styles["pagination"]}>
+                        <li
+                          className={`${styles["page-item"]} ${
+                            finesPagination.currentPage === 0
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handleFinesPageChange(
+                                finesPagination.currentPage - 1
+                              )
+                            }
+                            disabled={finesPagination.currentPage === 0}
+                          >
+                            <i className="fas fa-chevron-left"></i>
+                          </button>
+                        </li>
+
+                        {getFinesPageNumbers().map((pageNum) => (
+                          <li
+                            key={pageNum}
+                            className={`${styles["page-item"]} ${
+                              pageNum === finesPagination.currentPage
+                                ? styles["active"]
+                                : ""
+                            }`}
+                          >
+                            <button
+                              className={styles["page-link"]}
+                              onClick={() => handleFinesPageChange(pageNum)}
+                            >
+                              {pageNum + 1}
+                            </button>
+                          </li>
+                        ))}
+
+                        <li
+                          className={`${styles["page-item"]} ${
+                            finesPagination.currentPage >=
+                            finesPagination.totalPages - 1
+                              ? styles["disabled"]
+                              : ""
+                          }`}
+                        >
+                          <button
+                            className={styles["page-link"]}
+                            onClick={() =>
+                              handleFinesPageChange(
+                                finesPagination.currentPage + 1
+                              )
+                            }
+                            disabled={
+                              finesPagination.currentPage >=
+                              finesPagination.totalPages - 1
+                            }
+                          >
+                            <i className="fas fa-chevron-right"></i>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+
+                    <div className={styles["pagination-info"]}>
+                      Trang {finesPagination.currentPage + 1} /{" "}
+                      {finesPagination.totalPages}{" "}
+                      <span className="text-muted ms-2">
+                        (Hiển thị {phatList.length} /{" "}
+                        {finesPagination.totalElements} phạt)
                       </span>
                     </div>
                   </div>

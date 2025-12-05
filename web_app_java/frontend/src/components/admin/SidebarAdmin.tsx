@@ -172,7 +172,7 @@ const SidebarAdmin = () => {
                 <span>Quản Lý Thông Báo</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/admin/ai"
                 className={
@@ -184,7 +184,7 @@ const SidebarAdmin = () => {
                 <i className="fas fa-robot"></i>
                 <span>Quản Lý AI</span>
               </Link>
-            </li>
+            </li> */}
             <li>
               <button onClick={handleLogout} className={styles["logout-btn"]}>
                 <i className="fas fa-sign-out-alt"></i>

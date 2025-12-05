@@ -92,6 +92,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/thongbao/docgia/**").hasRole("DOCGIA")
                 .requestMatchers(HttpMethod.PUT, "/api/thongbao/*/mark-read").hasRole("DOCGIA")
 
+                // DOCGIA phạt management 
+                .requestMatchers(HttpMethod.GET, "/api/phat/docgia/me").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.GET, "/api/phat/docgia/me/total").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.GET, "/api/phat/docgia/me/status").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.POST, "/api/phat/thanhtoan/*").hasRole("DOCGIA")
+
                 // DOCGIA ưu đãi management - SỬA: Thêm các endpoint này
                 .requestMatchers("/api/uudai/save/**").hasRole("DOCGIA")
                 .requestMatchers("/api/uudai/saved").hasRole("DOCGIA") 
@@ -118,6 +124,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/thongbao/auto/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/thongbao/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")        
                 .requestMatchers("/api/docgia/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
+                .requestMatchers(HttpMethod.GET, "/api/phat/docgia/{maDocGia}").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers(HttpMethod.GET, "/api/sach/nxb/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "NHANVIEN", "THUTHU", "QUANLY")
                 .requestMatchers("/api/user/me").authenticated()

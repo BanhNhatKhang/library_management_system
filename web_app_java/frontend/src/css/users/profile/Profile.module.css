@@ -1084,3 +1084,57 @@
     max-height: 1000px;
   }
 }
+
+/* Thêm CSS cho phạt */
+.fine-status-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.unpaid-fine {
+  border-left: 4px solid #dc2626 !important;
+  background: #fefefe;
+}
+
+.fine-detail-info {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.fine-info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.fine-info-item i {
+  color: #6b7280;
+  width: 16px;
+  text-align: center;
+}
+
+/* Styles cho status phạt */
+.fine-status-unpaid {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.fine-status-paid {
+  background-color: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
+}
+
+.fine-status-exempted {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fed7aa;
+}

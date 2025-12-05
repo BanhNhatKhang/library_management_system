@@ -18,6 +18,8 @@ public interface TheoDoiMuonSachRepository extends JpaRepository<TheoDoiMuonSach
     // Thêm phương thức phân trang
     Page<TheoDoiMuonSach> findByDocGia_MaDocGia(String maDocGia, Pageable pageable);
     
+    long countBySach_MaSachAndTrangThaiMuonIn(String maSach, List<TheoDoiMuonSach.TrangThaiMuon> trangThaiList);
+
     List<TheoDoiMuonSach> findByTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon trangThaiMuon);
     boolean existsBySach_MaSachAndTrangThaiMuonIn(String maSach, List<TrangThaiMuon> trangThais);
     List<TheoDoiMuonSach> findByIdNgayMuonBetween(LocalDate start, LocalDate end);

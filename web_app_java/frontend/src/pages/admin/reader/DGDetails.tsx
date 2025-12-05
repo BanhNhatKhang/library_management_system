@@ -30,15 +30,32 @@ interface DonHangItem {
   trangThai?: string;
 }
 
+// Thêm interface cho phạt
+interface Fine {
+  maPhat: number;
+  maSach: string;
+  tenSach?: string;
+  soTienPhat: number;
+  soNgayQuaHan: number;
+  ngayTaoPhat: string;
+  trangThaiPhat: string;
+  ngayThanhToan?: string;
+  ghiChu?: string;
+}
+
 const DGDetails: React.FC = () => {
   const { maDocGia } = useParams<{ maDocGia: string }>();
   const [docGia, setDocGia] = useState<DocGia | null>(null);
   const [muonList, setMuonList] = useState<TheoDoi[]>([]);
   const [donHangList, setDonHangList] = useState<DonHangItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState<"info" | "sach-muon" | "don-hang">(
-    "info"
-  );
+  const [active, setActive] = useState<
+    "info" | "sach-muon" | "don-hang" | "phat"
+  >("info");
+
+  // Thêm state cho phạt
+  const [fineList, setFineList] = useState<Fine[]>([]);
+  const [loadingFines, setLoadingFines] = useState(false);
 
   // THÊM: States cho phân trang
   const [currentPageMuon, setCurrentPageMuon] = useState(1);
@@ -79,6 +96,17 @@ const DGDetails: React.FC = () => {
         });
     }
   }, [docGia]);
+
+  // Thêm useEffect để load phạt
+  useEffect(() => {
+    if (!maDocGia) return;
+    setLoadingFines(true);
+    axios
+      .get(`/api/phat/docgia/${maDocGia}`) // Nếu chưa có endpoint này, dùng /api/phat/docgia/me khi là tài khoản độc giả
+      .then((r) => setFineList(r.data || []))
+      .catch(() => setFineList([]))
+      .finally(() => setLoadingFines(false));
+  }, [maDocGia]);
 
   // THÊM: Tính toán phân trang cho sách mượn
   const totalPagesMuon = Math.ceil(muonList.length / itemsPerPage);
@@ -282,6 +310,15 @@ const DGDetails: React.FC = () => {
         >
           🧾 Đơn hàng ({donHangList.length})
         </button>
+        {/* Thêm tab phạt */}
+        <button
+          className={`${styles["tab-button"]} ${
+            active === "phat" ? styles["active"] : ""
+          }`}
+          onClick={() => setActive("phat")}
+        >
+          💸 Phạt ({fineList.length})
+        </button>
       </div>
 
       <div className={styles["tab-content"]}>
@@ -475,6 +512,72 @@ const DGDetails: React.FC = () => {
                   totalItems={donHangList.length}
                 />
               </>
+            )}
+          </div>
+        )}
+
+        {/* Tab phạt */}
+        {active === "phat" && (
+          <div className={styles["tab-panel"]}>
+            {loadingFines ? (
+              <div>⏳ Đang tải danh sách phạt...</div>
+            ) : fineList.length === 0 ? (
+              <div className={styles["no-data"]}>💸 Không có phạt nào</div>
+            ) : (
+              <div className={styles["table-container"]}>
+                <table className={styles["data-table"]}>
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Mã sách</th>
+                      <th>Tên sách</th>
+                      <th>Ngày phạt</th>
+                      <th>Số ngày quá hạn</th>
+                      <th>Số tiền phạt</th>
+                      <th>Trạng thái</th>
+                      <th>Ghi chú</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fineList.map((f, idx) => (
+                      <tr key={f.maPhat}>
+                        <td>{idx + 1}</td>
+                        <td>{f.maSach}</td>
+                        <td>{f.tenSach || "—"}</td>
+                        <td>
+                          {f.ngayTaoPhat
+                            ? new Date(f.ngayTaoPhat).toLocaleDateString(
+                                "vi-VN"
+                              )
+                            : "—"}
+                        </td>
+                        <td>{f.soNgayQuaHan}</td>
+                        <td>{f.soTienPhat.toLocaleString("vi-VN")} đ</td>
+                        <td>
+                          <span
+                            style={{
+                              color:
+                                f.trangThaiPhat === "CHUATHANHTOAN"
+                                  ? "#dc2626"
+                                  : f.trangThaiPhat === "DATHANHTOAN"
+                                  ? "#059669"
+                                  : "#d97706",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {f.trangThaiPhat === "CHUATHANHTOAN"
+                              ? "Chưa thanh toán"
+                              : f.trangThaiPhat === "DATHANHTOAN"
+                              ? "Đã thanh toán"
+                              : "Miễn giảm"}
+                          </span>
+                        </td>
+                        <td>{f.ghiChu || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         )}

@@ -10,8 +10,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -287,6 +289,28 @@ public class ThongBaoMuonSachService {
         return count;
     }
 
+    public void createSapToiHanNotification(TheoDoiMuonSach theoDoiMuonSach) {
+        String noiDung = String.format(
+            "Sách '%s' sẽ đến hạn trả vào ngày %s. Vui lòng chuẩn bị trả sách đúng hạn.",
+            theoDoiMuonSach.getSach().getTenSach(),
+            theoDoiMuonSach.getNgayTra().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        );
+
+        ThongBaoMuonSach thongBao = new ThongBaoMuonSach(
+            theoDoiMuonSach,
+            noiDung,
+            LocalDateTime.now(),
+            ThongBaoMuonSach.LoaiThongBao.SAPTOIHAN,
+            false
+        );
+
+        thongBaoMuonSachRepository.save(thongBao);
+    }
+
+    public List<ThongBaoMuonSach> getThongBaoByDocGia(String maDocGia) {
+        return thongBaoMuonSachRepository.findByTheoDoiMuonSach_DocGia_MaDocGiaOrderByThoiGianGuiDesc(maDocGia);
+    }
+
     private int guiThongBaoQuaHan(String noiDungMau) {
         LocalDate now = LocalDate.now();
         
@@ -343,6 +367,46 @@ public class ThongBaoMuonSachService {
             }
         }
         return count;
+    }
+
+    public void createQuaHanNotification(TheoDoiMuonSach theoDoiMuonSach, int soNgayQuaHan, BigDecimal soTienPhat) {
+        String noiDung = String.format(
+            "Bạn đã quá hạn trả sách '%s' %d ngày. " +
+            "Số tiền phạt: %,.0f VND. " +
+            "Vui lòng trả sách và thanh toán phạt sớm nhất có thể.",
+            theoDoiMuonSach.getSach().getTenSach(),
+            soNgayQuaHan,
+            soTienPhat.doubleValue()
+        );
+
+        ThongBaoMuonSach thongBao = new ThongBaoMuonSach(
+            theoDoiMuonSach,
+            noiDung,
+            LocalDateTime.now(),
+            ThongBaoMuonSach.LoaiThongBao.QUAHAN,
+            false
+        );
+
+        thongBaoMuonSachRepository.save(thongBao);
+    }
+
+    public void createAccountLockNotification(TheoDoiMuonSach theoDoiMuonSach, int soNgayQuaHan) {
+        String noiDung = String.format(
+            "Tài khoản của bạn đã bị tạm khóa do quá hạn trả sách '%s' %d ngày. " +
+            "Vui lòng liên hệ thư viện để trả sách và thanh toán phạt để mở khóa tài khoản.",
+            theoDoiMuonSach.getSach().getTenSach(),
+            soNgayQuaHan
+        );
+
+        ThongBaoMuonSach thongBao = new ThongBaoMuonSach(
+            theoDoiMuonSach,
+            noiDung,
+            LocalDateTime.now(),
+            ThongBaoMuonSach.LoaiThongBao.QUAHAN, // Có thể tạo enum mới KHOATAIKHOAN
+            false
+        );
+
+        thongBaoMuonSachRepository.save(thongBao);
     }
 
     public void markAsRead(Long id) {

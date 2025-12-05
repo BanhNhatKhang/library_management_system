@@ -67,6 +67,26 @@ public class SachController {
         return sachService.getSachGoiY(maSach);
     }
 
+    @GetMapping("/{maSach}/available")
+    public ResponseEntity<Integer> getAvailableBooks(@PathVariable String maSach) {
+        try {
+            int availableBooks = sachService.getAvailableBooksCount(maSach);
+            return ResponseEntity.ok(availableBooks);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{maSach}/available-stock")
+    public ResponseEntity<Integer> getAvailableStock(@PathVariable String maSach) {
+        try {
+            int availableStock = sachService.getAvailableStockCount(maSach);
+            return ResponseEntity.ok(availableStock);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/theloai/{maTheLoai}")
     public List<SachDTO> getSachByMaTheLoai(@PathVariable String maTheLoai) {
         return sachService.getSachByMaTheLoai(maTheLoai);

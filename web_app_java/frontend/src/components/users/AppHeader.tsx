@@ -55,6 +55,12 @@ interface Notification {
   trangThaiDaDoc: boolean;
 }
 
+interface FineInfo {
+  totalUnpaidFines: number;
+  formattedAmount: string;
+  maDocGia: string;
+}
+
 const mainCategories: HeaderCategory[] = [
   {
     id: "domestic",
@@ -81,6 +87,7 @@ const Header = () => {
 
   const [categoriesWithBooks, setCategoriesWithBooks] = useState<HomeDTO[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [fineInfo, setFineInfo] = useState<FineInfo | null>(null);
 
   const [cartCount, setCartCount] = useState<number>(0);
 
@@ -121,8 +128,8 @@ const Header = () => {
     };
   }, [fetchCartCount]);
 
-  // Giữ lại chỉ function fetchNotifications này
-  const fetchNotifications = async () => {
+  // Wrap fetchNotifications với useCallback
+  const fetchNotifications = useCallback(async () => {
     try {
       console.log("Fetching notifications for current user");
       const res = await axios.get(`/api/thongbao/current-user`);
@@ -142,7 +149,22 @@ const Header = () => {
       console.error("Error fetching notifications:", error);
       setNotifications([]);
     }
-  };
+  }, []); // Empty dependency array vì không phụ thuộc vào state/props nào
+
+  const fetchFineInfo = useCallback(async () => {
+    if (!isLoggedIn || !isDocGia) {
+      setFineInfo(null);
+      return;
+    }
+
+    try {
+      const response = await axios.get("/api/phat/docgia/me/total");
+      setFineInfo(response.data);
+    } catch (error) {
+      console.error("Error fetching fine info:", error);
+      setFineInfo(null);
+    }
+  }, [isLoggedIn, isDocGia]);
 
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
@@ -157,6 +179,7 @@ const Header = () => {
 
       // Lấy thông báo cho user đã đăng nhập - không cần truyền tham số
       fetchNotifications();
+      fetchFineInfo();
     } else {
       setIsLoggedIn(false);
       setUserName("Tài Khoản");
@@ -171,7 +194,7 @@ const Header = () => {
         setCategoriesWithBooks(res.data);
       })
       .catch(() => setCategoriesWithBooks([]));
-  }, []);
+  }, [fetchNotifications, fetchFineInfo]); // Bây giờ dependencies sẽ stable
 
   // Đếm số thông báo chưa đọc
   const unreadCount = notifications.filter((n) => !n.trangThaiDaDoc).length;
@@ -274,7 +297,7 @@ const Header = () => {
   const LoggedInUserDropdown = () => (
     <div
       className={`${styles["user-dropdown"]} ${styles["logged-in-dropdown"]}`}
-      style={{ width: "200px" }}
+      style={{ width: "220px" }}
     >
       {/* Tên người dùng đầy đủ */}
       <Link
@@ -290,10 +313,35 @@ const Header = () => {
         <i className="fas fa-user-gear me-2"></i>
         {fullName}
       </Link>
+
+      {/* Hiển thị thông tin phạt nếu có */}
+      {fineInfo && fineInfo.totalUnpaidFines > 0 && (
+        <div
+          className={styles["dropdown-item"]}
+          style={{
+            borderBottom: "1px solid #e5e7eb",
+            marginBottom: "8px",
+            paddingBottom: "8px",
+            backgroundColor: "#fef2f2",
+            color: "#dc2626",
+            fontWeight: "bold",
+          }}
+        >
+          <i className="fas fa-exclamation-triangle me-2"></i>
+          Phạt: {fineInfo.formattedAmount}
+        </div>
+      )}
+
       <Link to="/profile?tab=orders" className={styles["dropdown-item"]}>
         <i className="fas fa-receipt me-2"></i>
         Đơn hàng của tôi
       </Link>
+
+      <Link to="/profile?tab=fines" className={styles["dropdown-item"]}>
+        <i className="fas fa-money-bill-wave me-2"></i>
+        Thông tin phạt
+      </Link>
+
       <Link to="/" onClick={handleLogout} className={styles["dropdown-item"]}>
         <i className="fas fa-sign-out-alt me-2"></i>
         Thoát tài khoản

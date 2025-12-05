@@ -34,6 +34,9 @@ public class TheoDoiMuonSachService {
     @Autowired
     private NhanVienRepository nhanVienRepository;
 
+    @Autowired
+    private SachService sachService; // SỬA: Thêm dependency SachService
+
     public List<TheoDoiMuonSachDTO> getAll() {
         return theoDoiMuonSachRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
@@ -67,19 +70,15 @@ public class TheoDoiMuonSachService {
         
         // SỬA: Gọi private method để map nested objects
         if (theoDoiMuonSach.getDocGia() != null) {
-            DocGiaDTO docGiaDTO = toDocGiaDTO(theoDoiMuonSach.getDocGia());
-            dto.setDocGia(docGiaDTO);
-            System.out.println("convertToDTO - DocGia mapped: " + (docGiaDTO != null ? docGiaDTO.getMaDocGia() : "null"));
+            dto.setDocGia(toDocGiaDTO(theoDoiMuonSach.getDocGia()));
         } else {
-            System.out.println("convertToDTO - DocGia is null in entity");
+            dto.setDocGia(null);
         }
         
         if (theoDoiMuonSach.getSach() != null) {
-            SachDTO sachDTO = toSachDTO(theoDoiMuonSach.getSach());
-            dto.setSach(sachDTO);
-            System.out.println("convertToDTO - Sach mapped: " + (sachDTO != null ? sachDTO.getMaSach() : "null"));
+            dto.setSach(toSachDTO(theoDoiMuonSach.getSach()));
         } else {
-            System.out.println("convertToDTO - Sach is null in entity");
+            dto.setSach(null);
         }
         
         // Handle NhanVien
@@ -100,31 +99,37 @@ public class TheoDoiMuonSachService {
 
     // Thêm method kiểm tra trạng thái mượn
     public String checkBorrowStatus(String docGiaIdentifier, String maSach) {
-        // 1. Xử lý Mã Độc Giả (MaDocGia / Email)
-        DocGia docGia;
+        // 1. Kiểm tra số sách mượn còn lại trước
+        int soSachMuonConLai = sachService.getAvailableBooksCount(maSach);
+        if (soSachMuonConLai <= 0) {
+            return "Sách đã được mượn hết, vui lòng quay lại sau.";
+        }
+        
+        // 2. Xử lý Mã Độc Giả (MaDocGia / Email)
+        DocGia docGia = null;
         
         if (docGiaIdentifier != null && docGiaIdentifier.startsWith("DG")) {
-            // Trường hợp là Mã DocGia: Tìm theo ID
-            docGia = docGiaRepository.findById(docGiaIdentifier)
-                .orElse(null);
+            // SỬA: Sửa lỗi type mismatch
+            Optional<DocGia> docGiaOpt = docGiaRepository.findByMaDocGia(docGiaIdentifier);
+            docGia = docGiaOpt.orElse(null);
         } else {
-            // Trường hợp là Email (Subject): Tìm theo Email
+            // SỬA: Sửa lỗi type mismatch - findByEmail trả về DocGia, không phải Optional
             docGia = docGiaRepository.findByEmail(docGiaIdentifier);
         }
         
         if (docGia == null) {
-            return null; // Không tìm thấy độc giả, cho phép mượn
+            return "Không tìm thấy thông tin Độc Giả.";
         }
         
         String maDocGiaThucTe = docGia.getMaDocGia();
         
-        // 2. Kiểm tra sách có tồn tại không
-        Sach sach = sachRepository.findById(maSach).orElse(null);
-        if (sach == null) {
-            return "Sách không tồn tại";
+        // 3. Kiểm tra sách có tồn tại không
+        Optional<Sach> sachOpt = sachRepository.findById(maSach);
+        if (sachOpt.isEmpty()) {
+            return "Sách không tồn tại.";
         }
         
-        // 3. Tìm phiếu mượn có trạng thái "đang hoạt động" (không được mượn tiếp)
+        // 4. Tìm phiếu mượn có trạng thái "đang hoạt động" (không được mượn tiếp)
         List<TheoDoiMuonSach.TrangThaiMuon> activeStates = List.of(
             TheoDoiMuonSach.TrangThaiMuon.CHODUYET,
             TheoDoiMuonSach.TrangThaiMuon.DADUYET, 
@@ -135,9 +140,9 @@ public class TheoDoiMuonSachService {
             .findByDocGiaAndSachAndTrangThaiMuonIn(maDocGiaThucTe, maSach, activeStates);
             
         if (!activeRecords.isEmpty()) {
-            TheoDoiMuonSach latestRecord = activeRecords.get(0); // Lấy bản ghi mới nhất
+            TheoDoiMuonSach latestRecord = activeRecords.get(0);
             String trangThaiText = getTrangThaiText(latestRecord.getTrangThaiMuon());
-            return "Sách \"" + sach.getTenSach() + "\" đang được " + trangThaiText + ", không thể đăng ký mượn";
+            return "Bạn đã có phiếu mượn sách này với trạng thái: " + trangThaiText;
         }
         
         return null; // Cho phép mượn
@@ -146,33 +151,41 @@ public class TheoDoiMuonSachService {
     // Helper method để chuyển enum thành text hiển thị
     private String getTrangThaiText(TheoDoiMuonSach.TrangThaiMuon trangThai) {
         switch (trangThai) {
-            case CHODUYET: return "chờ duyệt";
-            case DADUYET: return "đã duyệt";
-            case DANGMUON: return "đang mượn";
-            case TUCHOI: return "từ chối";
-            case DATRA: return "đã trả";
-            default: return "xử lý";
+            case CHODUYET:
+                return "Chờ duyệt";
+            case DADUYET:
+                return "Đã duyệt";
+            case DANGMUON:
+                return "Đang mượn";
+            case TUCHOI:
+                return "Từ chối";
+            case DATRA:
+                return "Đã trả";
+            default:
+                return "Không xác định";
         }
     }
 
     public TheoDoiMuonSachDTO save(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
-        // 1. Kiểm tra trạng thái mượn trước khi lưu
+        // 1. Kiểm tra trạng thái mượn trước khi lưu (bao gồm cả số sách còn lại)
         String checkResult = checkBorrowStatus(theoDoiMuonSachDTO.getMaDocGia(), theoDoiMuonSachDTO.getMaSach());
         if (checkResult != null) {
             throw new RuntimeException(checkResult);
         }
         
-        // 2. Xử lý Mã Độc Giả (MaDocGia / Email) - code cũ giữ nguyên
+        // 2. Xử lý Mã Độc Giả (MaDocGia / Email)
         String docGiaIdentifier = theoDoiMuonSachDTO.getMaDocGia();
         DocGia docGia;
 
         if (docGiaIdentifier != null && docGiaIdentifier.startsWith("DG")) {
-            docGia = docGiaRepository.findById(docGiaIdentifier)
-                .orElseThrow(() -> new RuntimeException("Độc giả không tồn tại (ID: " + docGiaIdentifier + ")"));
+            // SỬA: Sửa lỗi orElseThrow - findByMaDocGia trả về Optional
+            docGia = docGiaRepository.findByMaDocGia(docGiaIdentifier)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Độc Giả"));
         } else {
-            docGia = docGiaRepository.findByEmail(docGiaIdentifier); 
+            // SỬA: findByEmail trả về DocGia, không phải Optional
+            docGia = docGiaRepository.findByEmail(docGiaIdentifier);
             if (docGia == null) {
-                throw new RuntimeException("Độc giả không tồn tại (Email: " + docGiaIdentifier + ")");
+                throw new RuntimeException("Không tìm thấy Độc Giả");
             }
         }
 
@@ -182,19 +195,21 @@ public class TheoDoiMuonSachService {
         Sach sach = sachRepository.findById(theoDoiMuonSachDTO.getMaSach())
             .orElseThrow(() -> new RuntimeException("Sách không tồn tại"));
 
-        // 4-6. Code cũ giữ nguyên cho phần còn lại...
+        // 4. Xử lý nhân viên
         NhanVien nhanVien = null; 
         if (theoDoiMuonSachDTO.getMaNhanVien() != null && !theoDoiMuonSachDTO.getMaNhanVien().isEmpty()) {
-             nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
-                 .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
+            nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
+                .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
         }
 
+        // 5. Xử lý ngày mượn
         LocalDate ngayMuon = theoDoiMuonSachDTO.getNgayMuon();
         if (ngayMuon == null) {
-             throw new RuntimeException("Ngày mượn không được để trống!");
+            ngayMuon = LocalDate.now();
         }
         LocalDate ngayTraDuKien = ngayMuon.plus(14, ChronoUnit.DAYS);
         
+        // 6. Tạo ID và kiểm tra trùng lặp
         TheoDoiMuonSachId id = new TheoDoiMuonSachId(
             maDocGiaThucTe, 
             theoDoiMuonSachDTO.getMaSach(), 
@@ -202,9 +217,10 @@ public class TheoDoiMuonSachService {
         );
         
         if (theoDoiMuonSachRepository.findById(id).isPresent()) {
-             throw new RuntimeException("Yêu cầu mượn cho sách này của độc giả vào ngày này đã tồn tại!");
+            throw new RuntimeException("Phiếu mượn đã tồn tại");
         }
 
+        // 7. Tạo entity và lưu
         TheoDoiMuonSach theoDoiMuonSach = new TheoDoiMuonSach();
         theoDoiMuonSach.setId(id);
         theoDoiMuonSach.setDocGia(docGia);
@@ -223,33 +239,34 @@ public class TheoDoiMuonSachService {
     }
 
     public TheoDoiMuonSachDTO update(TheoDoiMuonSachDTO theoDoiMuonSachDTO) {
+        // 1. Tìm entity cần update
         TheoDoiMuonSachId id = new TheoDoiMuonSachId(
             theoDoiMuonSachDTO.getMaDocGia(), 
             theoDoiMuonSachDTO.getMaSach(), 
             theoDoiMuonSachDTO.getNgayMuon()
         );
-
-        // 1. Tìm Entity hiện có
-        TheoDoiMuonSach existingRecord = theoDoiMuonSachRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy bản ghi để cập nhật"));
-
-        // 2. Cập nhật các trường được phép thay đổi từ DTO
         
+        TheoDoiMuonSach existing = theoDoiMuonSachRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu mượn"));
+
+        // 2. Update các field cần thiết
         if (theoDoiMuonSachDTO.getNgayTra() != null) {
-            existingRecord.setNgayTra(theoDoiMuonSachDTO.getNgayTra());
+            existing.setNgayTra(theoDoiMuonSachDTO.getNgayTra());
         }
         
         if (theoDoiMuonSachDTO.getTrangThaiMuon() != null) {
-            existingRecord.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(theoDoiMuonSachDTO.getTrangThaiMuon()));
+            existing.setTrangThaiMuon(TheoDoiMuonSach.TrangThaiMuon.valueOf(theoDoiMuonSachDTO.getTrangThaiMuon()));
         }
-        
-        if (theoDoiMuonSachDTO.getMaNhanVien() != null) {
+
+        // 3. Update nhân viên nếu có
+        if (theoDoiMuonSachDTO.getMaNhanVien() != null && !theoDoiMuonSachDTO.getMaNhanVien().isEmpty()) {
             NhanVien nhanVien = nhanVienRepository.findById(theoDoiMuonSachDTO.getMaNhanVien())
                 .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
-            existingRecord.setNhanVien(nhanVien);
-        } 
-        // 3. Lưu Entity đã cập nhật
-        return toDTO(theoDoiMuonSachRepository.save(existingRecord));
+            existing.setNhanVien(nhanVien);
+        }
+
+        TheoDoiMuonSach updated = theoDoiMuonSachRepository.save(existing);
+        return toDTO(updated);
     }
 
     public void delete(TheoDoiMuonSachId id) {
@@ -257,126 +274,87 @@ public class TheoDoiMuonSachService {
     }
 
     public Page<TheoDoiMuonSachDTO> getByMaDocGiaPaginated(String maDocGia, Pageable pageable) {
-        Page<TheoDoiMuonSach> theoDoiPage = theoDoiMuonSachRepository.findByDocGia_MaDocGia(maDocGia, pageable);
-        return theoDoiPage.map(this::toDTO);
+        Page<TheoDoiMuonSach> page = theoDoiMuonSachRepository.findByDocGia_MaDocGia(maDocGia, pageable);
+        return page.map(this::toDTO);
     }
 
     private TheoDoiMuonSachDTO toDTO(TheoDoiMuonSach theoDoiMuonSach) {
-        TheoDoiMuonSachDTO theoDoiMuonSachDTO = new TheoDoiMuonSachDTO();
+        if (theoDoiMuonSach == null) return null;
         
-        theoDoiMuonSachDTO.setMaDocGia(theoDoiMuonSach.getId().getMaDocGia());
-        theoDoiMuonSachDTO.setMaSach(theoDoiMuonSach.getId().getMaSach());
+        TheoDoiMuonSachDTO dto = new TheoDoiMuonSachDTO();
+        dto.setMaDocGia(theoDoiMuonSach.getId().getMaDocGia());
+        dto.setMaSach(theoDoiMuonSach.getId().getMaSach());
+        dto.setNgayMuon(theoDoiMuonSach.getId().getNgayMuon());
+        dto.setNgayTra(theoDoiMuonSach.getNgayTra());
+        dto.setTrangThaiMuon(theoDoiMuonSach.getTrangThaiMuon().name());
         
-        theoDoiMuonSachDTO.setNgayMuon(theoDoiMuonSach.getId().getNgayMuon());
-        theoDoiMuonSachDTO.setNgayTra(theoDoiMuonSach.getNgayTra());
-        theoDoiMuonSachDTO.setTrangThaiMuon(theoDoiMuonSach.getTrangThaiMuon().name());
-
-        if (theoDoiMuonSach.getNhanVien() != null) {
-            theoDoiMuonSachDTO.setMaNhanVien(theoDoiMuonSach.getNhanVien().getMaNhanVien()); 
-            String tenNhanVien = theoDoiMuonSach.getNhanVien().getHoTenNV();
-            theoDoiMuonSachDTO.setTenNhanVien(tenNhanVien);
-        }
-        
-        // SỬA: Đảm bảo docGia và sach được set với proper mapping
         if (theoDoiMuonSach.getDocGia() != null) {
-            DocGiaDTO docGiaDTO = toDocGiaDTO(theoDoiMuonSach.getDocGia());
-            theoDoiMuonSachDTO.setDocGia(docGiaDTO); 
-            System.out.println("DocGia DTO created: " + docGiaDTO.getMaDocGia() + " - " + docGiaDTO.getTen()); // Debug log
-        } else {
-            System.out.println("DocGia is null!"); // Debug log
+            dto.setDocGia(toDocGiaDTO(theoDoiMuonSach.getDocGia()));
         }
         
         if (theoDoiMuonSach.getSach() != null) {
-            SachDTO sachDTO = toSachDTO(theoDoiMuonSach.getSach());
-            theoDoiMuonSachDTO.setSach(sachDTO); 
-            System.out.println("Sach DTO created: " + sachDTO.getMaSach() + " - " + sachDTO.getTenSach()); // Debug log
-        } else {
-            System.out.println("Sach is null!"); // Debug log
+            dto.setSach(toSachDTO(theoDoiMuonSach.getSach()));
         }
-
-        return theoDoiMuonSachDTO;
+        
+        if (theoDoiMuonSach.getNhanVien() != null) {
+            dto.setMaNhanVien(theoDoiMuonSach.getNhanVien().getMaNhanVien());
+            dto.setTenNhanVien(theoDoiMuonSach.getNhanVien().getHoTenNV());
+        }
+        
+        return dto;
     }
 
     // SỬA: Fix toDocGiaDTO method với đầy đủ field mapping
     private DocGiaDTO toDocGiaDTO(DocGia docGia) {
-        if (docGia == null) {
-            System.out.println("DocGia entity is null in toDocGiaDTO");
-            return null;
-        }
-
+        if (docGia == null) return null;
+        
         DocGiaDTO dto = new DocGiaDTO();
         dto.setMaDocGia(docGia.getMaDocGia());
-        dto.setHoLot(docGia.getHoLot()); 
-        dto.setTen(docGia.getTen());
-        dto.setDienThoai(docGia.getDienThoai());
+        dto.setHoLot(docGia.getHoLot()); // SỬA: Dùng getHoLot() thay vì getTenDocGia()
+        dto.setTen(docGia.getTen()); // SỬA: Thêm method getTen()
         dto.setEmail(docGia.getEmail());
+        dto.setDienThoai(docGia.getDienThoai());
         dto.setDiaChi(docGia.getDiaChi());
         dto.setNgaySinh(docGia.getNgaySinh());
         
-        // SỬA: Convert enum to String cho gioiTinh
+        // SỬA: Convert enum sang String
         if (docGia.getGioiTinh() != null) {
             dto.setGioiTinh(docGia.getGioiTinh().name());
         }
-        if (docGia.getVaiTro() != null) {
-            dto.setVaiTro(docGia.getVaiTro().name());
-        }
-        if (docGia.getTrangThai() != null) {
-            dto.setTrangThai(docGia.getTrangThai().name());
-        }
         
-        // SỬA: Thêm debug để kiểm tra dữ liệu
-        System.out.println("Mapping DocGia: " + docGia.getMaDocGia() + 
-                          ", Ten: " + docGia.getTen() + 
-                          ", Email: " + docGia.getEmail() + 
-                          ", DienThoai: " + docGia.getDienThoai());
+        // SỬA: Thêm ngayDangKy nếu có field này trong DocGia - nếu không có thì bỏ dòng này
+        // dto.setNgayDangKy(docGia.getNgayDangKy());
         
         return dto;
     }
 
     // SỬA: toSachDTO method với type conversion đúng
     private SachDTO toSachDTO(Sach sach) {
-        if (sach == null) {
-            System.out.println("Sach entity is null in toSachDTO");
-            return null;
-        }
-
+        if (sach == null) return null;
+        
         SachDTO dto = new SachDTO();
         dto.setMaSach(sach.getMaSach());
-        dto.setTenSach(sach.getTenSach()); 
-        dto.setTacGia(sach.getTacGia());
-        dto.setAnhBia(sach.getAnhBia());
-        dto.setSoQuyen(sach.getSoQuyen());
+        dto.setTenSach(sach.getTenSach());
         dto.setDonGia(sach.getDonGia());
+        dto.setSoQuyen(sach.getSoQuyen());
         dto.setSoLuong(sach.getSoLuong());
-        
-        // SỬA: LocalDate → LocalDate (no conversion needed)
         dto.setNamXuatBan(sach.getNamXuatBan());
-        
+        dto.setTacGia(sach.getTacGia());
         dto.setMoTa(sach.getMoTa());
-        
-        // SỬA: Double → Double (no conversion needed)
+        dto.setAnhBia(sach.getAnhBia());
         dto.setDiemDanhGia(sach.getDiemDanhGia());
         dto.setGiamGia(sach.getGiamGia());
         
-        // SỬA: Xử lý theLoais safely
-        if (sach.getTheLoais() != null && !sach.getTheLoais().isEmpty()) {
-            dto.setTheLoais(sach.getTheLoais().stream()
-                .map(TheLoai::getTenTheLoai)
-                .toList());
-        } else {
-            dto.setTheLoais(List.of()); // Empty list thay vì null
-        }
-        
-        // SỬA: Xử lý nhaXuatBan safely  
         if (sach.getNhaXuatBan() != null) {
             dto.setNhaXuatBan(sach.getNhaXuatBan().getTenNhaXuatBan());
         }
         
-        // SỬA: Thêm debug để kiểm tra dữ liệu
-        System.out.println("Mapping Sach: " + sach.getMaSach() + 
-                          ", TenSach: " + sach.getTenSach() + 
-                          ", TacGia: " + sach.getTacGia() + 
-                          ", TheLoais count: " + (sach.getTheLoais() != null ? sach.getTheLoais().size() : 0));
+        if (sach.getTheLoais() != null) {
+            List<String> theLoaiNames = sach.getTheLoais().stream()
+                .map(TheLoai::getTenTheLoai)
+                .collect(Collectors.toList());
+            dto.setTheLoais(theLoaiNames);
+        }
         
         return dto;
     }

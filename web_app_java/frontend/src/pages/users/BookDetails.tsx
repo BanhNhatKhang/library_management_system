@@ -42,6 +42,9 @@ interface SachDetailsDTO {
   tenSach: string;
   donGia: number;
   giamGia: number;
+  soQuyen: number;
+  soSachMuonConLai: number;
+  soLuongCoTheMua: number;
   anhBia: string;
   soLuong: number;
   namXuatBan: string;
@@ -136,6 +139,9 @@ export default function BookDetails() {
         donGia: Number(data.donGia),
         giamGia: Number(data.giamGia || 0),
         diemDanhGia: Number(data.diemDanhGia || 0),
+        soQuyen: Number(data.soQuyen || 0),
+        soSachMuonConLai: Number(data.soSachMuonConLai || 0),
+        soLuongCoTheMua: Number(data.soLuongCoTheMua || 0), // Thêm field mới
       });
       axios
         .get(`/api/sach/goi-y/${maSach}`)
@@ -167,6 +173,24 @@ export default function BookDetails() {
       return;
     }
 
+    // 2. Kiểm tra số lượng có thể mua
+    if (book.soLuongCoTheMua <= 0) {
+      setMessage({
+        text: "Sách đã hết hàng, không thể thêm vào giỏ hàng.",
+        type: "error",
+      });
+      return;
+    }
+
+    // 3. Kiểm tra số lượng muốn mua
+    if (quantity > book.soLuongCoTheMua) {
+      setMessage({
+        text: `Chỉ còn ${book.soLuongCoTheMua} cuốn sách, không thể thêm ${quantity} cuốn.`,
+        type: "error",
+      });
+      return;
+    }
+
     const token =
       localStorage.getItem("authToken") || localStorage.getItem("token");
     if (!token) {
@@ -177,7 +201,7 @@ export default function BookDetails() {
       return;
     }
 
-    // 2. Lấy maDocGia (Subject) từ token
+    // 4. Lấy maDocGia từ token
     const maDocGia = getSubjectFromToken();
     if (!maDocGia) {
       setMessage({
@@ -194,16 +218,26 @@ export default function BookDetails() {
     };
 
     try {
-      console.log("Adding to cart:", payload); // Debug log
+      console.log("Adding to cart:", payload);
 
       const response = await axios.post("/api/giohang/add", payload, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Đảm bảo có token
+          Authorization: `Bearer ${token}`,
         },
       });
 
       console.log("Add to cart success:", response.data);
+
+      // 5. Cập nhật số lượng có thể mua trong state
+      setBook((prev) =>
+        prev
+          ? {
+              ...prev,
+              soLuongCoTheMua: Math.max(0, prev.soLuongCoTheMua - quantity),
+            }
+          : null
+      );
 
       setMessage({
         text: "Đã thêm sản phẩm vào giỏ hàng thành công!",
@@ -253,8 +287,17 @@ export default function BookDetails() {
       return;
     }
 
+    // 2. Kiểm tra số sách mượn còn lại trước
+    if (book.soSachMuonConLai <= 0) {
+      setMessage({
+        text: "Sách đã được mượn hết, vui lòng quay lại sau.",
+        type: "error",
+      });
+      return;
+    }
+
     try {
-      // 2. Kiểm tra trạng thái mượn trước
+      // 3. Kiểm tra trạng thái mượn từ server
       const checkResponse = await axios.get(
         `/api/theodoimuonsach/check-borrow-status?maSach=${maSach}`
       );
@@ -267,7 +310,7 @@ export default function BookDetails() {
         return;
       }
 
-      // 3. Lấy maDocGia từ token
+      // 4. Lấy maDocGia từ token
       const maDocGia = getSubjectFromToken();
       if (!maDocGia) {
         setMessage({
@@ -287,8 +330,19 @@ export default function BookDetails() {
         maNhanVien: null,
       };
 
-      // 4. Gửi yêu cầu mượn
+      // 5. Gửi yêu cầu mượn
       await axios.post("/api/theodoimuonsach", payload);
+
+      // 6. Cập nhật số sách mượn còn lại trong state
+      setBook((prev) =>
+        prev
+          ? {
+              ...prev,
+              soSachMuonConLai: Math.max(0, prev.soSachMuonConLai - 1),
+            }
+          : null
+      );
+
       setMessage({
         text: "Yêu cầu mượn sách đã được gửi thành công. Vui lòng chờ phê duyệt!",
         type: "success",
@@ -407,8 +461,16 @@ export default function BookDetails() {
             <button className={styles.addCart} onClick={handleAddToCart}>
               Thêm vào giỏ hàng
             </button>
-            <button className={styles.borrow} onClick={handleBorrow}>
-              Mượn
+            <button
+              className={styles.borrow}
+              onClick={handleBorrow}
+              disabled={book.soSachMuonConLai <= 0}
+              style={{
+                opacity: book.soSachMuonConLai <= 0 ? 0.6 : 1,
+                cursor: book.soSachMuonConLai <= 0 ? "not-allowed" : "pointer",
+              }}
+            >
+              {book.soSachMuonConLai <= 0 ? "Hết sách mượn" : "Mượn"}
             </button>
           </div>
 
@@ -451,16 +513,12 @@ export default function BookDetails() {
               <td>{book.theLoais.join(", ")}</td>
             </tr>
             <tr>
-              <th>Trọng lượng</th>
-              <td>420g</td>
+              <th>Số sách mượn còn lại</th>
+              <td>{book.soSachMuonConLai || 0} quyển</td>
             </tr>
             <tr>
-              <th>Kích thước</th>
-              <td>20.5 x 13.5 x 2.8 cm</td>
-            </tr>
-            <tr>
-              <th>Số trang</th>
-              <td>700</td>
+              <th>Số lượng</th>
+              <td>{book.soLuong} quyển</td>
             </tr>
           </tbody>
         </table>

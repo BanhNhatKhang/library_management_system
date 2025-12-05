@@ -10,9 +10,18 @@ public class SachDTO {
     private Integer soQuyen;
     private BigDecimal donGia;
     private Integer soLuong;
+    private Integer soLuongCoTheMua;
+    public Integer getSoLuongCoTheMua() {
+        return soLuongCoTheMua;
+    }
+
+    public void setSoLuongCoTheMua(Integer soLuongCoTheMua) {
+        this.soLuongCoTheMua = soLuongCoTheMua;
+    }
     private LocalDate namXuatBan; // SỬA: Đổi từ Integer sang LocalDate
     private String tacGia;
     private String moTa;
+    private Integer soSachMuonConLai;
     private String anhBia;
     private Double diemDanhGia; // SỬA: Đổi từ BigDecimal sang Double
     private Double giamGia; // SỬA: Đổi từ BigDecimal sang Double
@@ -25,6 +34,9 @@ public class SachDTO {
     // Getters and Setters
     public String getMaSach() { return maSach; }
     public void setMaSach(String maSach) { this.maSach = maSach; }
+
+    public Integer getSoSachMuonConLai() { return soSachMuonConLai; }
+    public void setSoSachMuonConLai(Integer soSachMuonConLai) { this.soSachMuonConLai = soSachMuonConLai; }
 
     public String getTenSach() { return tenSach; }
     public void setTenSach(String tenSach) { this.tenSach = tenSach; }
