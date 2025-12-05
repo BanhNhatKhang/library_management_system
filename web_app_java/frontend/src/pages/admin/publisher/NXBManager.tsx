@@ -159,7 +159,7 @@ const NXBManager = () => {
             className={styles["add-btn"]}
             onClick={() => navigate("/admin/nxb/add")}
           >
-            + Thêm nhà xuất bản
+            <i className="fa-solid fa-file-circle-plus"></i>
           </button>
         </div>
 

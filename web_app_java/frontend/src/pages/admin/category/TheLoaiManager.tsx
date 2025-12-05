@@ -185,7 +185,7 @@ const TheLoaiManager = () => {
             className={styles["add-btn"]}
             onClick={() => navigate("/admin/theloai/add")}
           >
-            + Thêm thể loại
+            <i className="fa-solid fa-file-circle-plus"></i>
           </button>
         </div>
 

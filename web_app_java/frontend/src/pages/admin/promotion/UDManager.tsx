@@ -268,7 +268,7 @@ const UDManager: React.FC = () => {
           className={styles["add-btn"]}
           onClick={() => navigate("/admin/uudai/add")}
         >
-          + Thêm ưu đãi
+          <i className="fa-solid fa-file-circle-plus"></i>
         </button>
 
         <div className={styles["search-box"]}>

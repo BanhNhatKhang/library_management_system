@@ -530,7 +530,7 @@ const MuonManager: React.FC = () => {
           className={styles["add-btn"]}
           onClick={() => navigate("/admin/muon/add")}
         >
-          + Thêm yêu cầu mượn
+          <i className="fa-solid fa-file-circle-plus"></i>
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

@@ -176,7 +176,7 @@ const NVManager: React.FC = () => {
           className={styles["add-btn"]}
           onClick={() => navigate("/admin/nhanvien/add")}
         >
-          + Thêm nhân viên
+          <i className="fa-solid fa-file-circle-plus"></i>
         </button>
 
         <div className={styles["search-box"]}>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
 import styles from "../../../css/admins/category/TheLoaiAdd.module.css";
 
@@ -8,14 +8,11 @@ const TheLoaiAdd = () => {
   const [loading, setLoading] = useState(false);
 
   const [prefix, setPrefix] = useState<"TL" | "FB">("TL");
-
   const [formData, setFormData] = useState({
     tenTheLoai: "",
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -29,25 +26,15 @@ const TheLoaiAdd = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
     try {
-      // send tenTheLoai in body and prefix as query param; backend will generate maTheLoai
       await axios.post(`/api/theloai?prefix=${prefix}`, {
         tenTheLoai: formData.tenTheLoai,
       });
-
       alert("Thêm thể loại thành công!");
       navigate("/admin/theloai");
-    } catch (error) {
-      console.error("Lỗi khi thêm thể loại:", error);
-
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || error.message;
-        alert(`Có lỗi xảy ra: ${errorMessage}`);
-      } else {
-        alert("Có lỗi xảy ra khi thêm thể loại!");
-      }
+    } catch {
+      alert("Có lỗi xảy ra khi thêm thể loại!");
     } finally {
       setLoading(false);
     }
@@ -55,60 +42,52 @@ const TheLoaiAdd = () => {
 
   return (
     <div className={styles["add-theloai"]}>
-      <h2>🏷️ Thêm Thể Loại Mới</h2>
-
-      <form onSubmit={handleSubmit} className={styles["add-theloai-form"]}>
-        <div className={styles["form-container"]}>
-          {/* Form chính */}
-          <div className={styles["form-main"]}>
-            <div className={styles["form-row"]}>
-              <div className={styles["form-group"]}>
-                <label htmlFor="loai">Loại</label>
-                <select
-                  id="loai"
-                  name="loai"
-                  value={prefix}
-                  onChange={handlePrefixChange}
-                  style={{ padding: 10, borderRadius: 8 }}
-                >
-                  <option value="TL">Trong nước (TL)</option>
-                  <option value="FB">Ngoài nước (FB)</option>
-                </select>
-              </div>
-
-              <div className={styles["form-group"]}>
-                <label htmlFor="tenTheLoai">Tên thể loại</label>
-                <input
-                  type="text"
-                  id="tenTheLoai"
-                  name="tenTheLoai"
-                  value={formData.tenTheLoai}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={30}
-                  placeholder="Nhập tên thể loại"
-                />
-              </div>
-            </div>
+      <Link to="/admin/theloai" className="btn btn-secondary mb-3">
+        ← Quay lại danh sách
+      </Link>
+      <h4>🏷️ Thêm thể loại</h4>
+      <form
+        onSubmit={handleSubmit}
+        className={`mt-3 ${styles["add-theloai-form"]} p-3 rounded`}
+      >
+        <div className="row">
+          <div className="col-md-4 mb-2">
+            <label className={styles["form-group"]}>Loại</label>
+            <select
+              name="loai"
+              className="form-select"
+              value={prefix}
+              onChange={handlePrefixChange}
+            >
+              <option value="TL">Trong nước (TL)</option>
+              <option value="FB">Ngoài nước (FB)</option>
+            </select>
+          </div>
+          <div className="col-md-8 mb-2">
+            <label className={styles["form-group"]}>Tên thể loại</label>
+            <input
+              type="text"
+              name="tenTheLoai"
+              className="form-control"
+              value={formData.tenTheLoai}
+              onChange={handleInputChange}
+              required
+              maxLength={30}
+              placeholder="Nhập tên thể loại"
+            />
           </div>
         </div>
-
-        {/* Form actions */}
-        <div className={styles["form-actions"]}>
+        <div className="mt-3">
           <button
-            type="button"
-            onClick={() => navigate("/admin/theloai")}
-            className={styles["cancel-btn"]}
-          >
-            ✖ Hủy
-          </button>
-          <button
-            type="submit"
+            className="btn btn-primary me-2"
             disabled={loading}
-            className={styles["submit-btn"]}
+            type="submit"
           >
-            {loading ? "⏳ Đang thêm..." : "✓ Thêm thể loại"}
+            {loading ? "Đang thêm..." : "Lưu"}
           </button>
+          <Link to="/admin/theloai" className="btn btn-outline-secondary">
+            Hủy
+          </Link>
         </div>
       </form>
     </div>

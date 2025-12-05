@@ -176,7 +176,7 @@ const DHManager: React.FC = () => {
           className={styles["add-btn"]}
           onClick={() => navigate("/admin/donhang/add")}
         >
-          + Thêm đơn hàng
+          <i className="fa-solid fa-file-circle-plus"></i>
         </button>
 
         <div className={styles["search-box"]}>

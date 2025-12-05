@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
 import styles from "../../../css/admins/publisher/NXBAdd.module.css";
 
@@ -7,15 +7,12 @@ const NXBAdd = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  // frontend chỉ lưu tên và địa chỉ, backend sẽ sinh mã
   const [formData, setFormData] = useState({
     tenNhaXuatBan: "",
     diaChi: "",
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -25,26 +22,13 @@ const NXBAdd = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
     try {
-      // gửi chỉ tên và địa chỉ; backend sẽ tạo maNhaXuatBan
-      await axios.post("/api/nhaxuatban", {
-        tenNhaXuatBan: formData.tenNhaXuatBan,
-        diaChi: formData.diaChi,
-      });
-
+      await axios.post("/api/nhaxuatban", formData);
       alert("Thêm nhà xuất bản thành công!");
       navigate("/admin/nxb");
-    } catch (error) {
-      console.error("Lỗi khi thêm nhà xuất bản:", error);
-
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || error.message;
-        alert(`Có lỗi xảy ra: ${errorMessage}`);
-      } else {
-        alert("Có lỗi xảy ra khi thêm nhà xuất bản!");
-      }
+    } catch {
+      alert("Có lỗi xảy ra khi thêm nhà xuất bản!");
     } finally {
       setLoading(false);
     }
@@ -52,65 +36,51 @@ const NXBAdd = () => {
 
   return (
     <div className={styles["add-nxb"]}>
-      <h2>🏢 Thêm Nhà Xuất Bản Mới</h2>
-
-      <form onSubmit={handleSubmit} className={styles["add-nxb-form"]}>
-        <div className={styles["form-container"]}>
-          {/* Form chính */}
-          <div className={styles["form-main"]}>
-            <div className={styles["form-row"]}>
-              <div className={styles["form-group"]}>
-                <label htmlFor="tenNhaXuatBan">Tên nhà xuất bản</label>
-                <input
-                  type="text"
-                  id="tenNhaXuatBan"
-                  name="tenNhaXuatBan"
-                  value={formData.tenNhaXuatBan}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={100}
-                  placeholder="Nhập tên nhà xuất bản"
-                />
-              </div>
-            </div>
-
-            <div className={styles["form-row"]}>
-              <div
-                className={styles["form-group"]}
-                style={{ gridColumn: "1 / -1" }}
-              >
-                <label htmlFor="diaChi">Địa chỉ</label>
-                <input
-                  type="text"
-                  id="diaChi"
-                  name="diaChi"
-                  value={formData.diaChi}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={200}
-                  placeholder="Nhập địa chỉ nhà xuất bản"
-                />
-              </div>
-            </div>
+      <Link to="/admin/nxb" className="btn btn-secondary mb-3">
+        ← Quay lại danh sách
+      </Link>
+      <h4>➕ Thêm nhà xuất bản</h4>
+      <form
+        onSubmit={handleSubmit}
+        className={`mt-3 ${styles["bg-white"]} p-3 rounded`}
+      >
+        <div className="row">
+          <div className="col-md-6 mb-2">
+            <label className={styles["label"]}>Tên nhà xuất bản</label>
+            <input
+              name="tenNhaXuatBan"
+              className={`form-control ${styles["input"]}`}
+              value={formData.tenNhaXuatBan}
+              onChange={handleInputChange}
+              required
+              maxLength={100}
+              placeholder="Nhập tên nhà xuất bản"
+            />
+          </div>
+          <div className="col-md-6 mb-2">
+            <label className={styles["label"]}>Địa chỉ</label>
+            <input
+              name="diaChi"
+              className={`form-control ${styles["input"]}`}
+              value={formData.diaChi}
+              onChange={handleInputChange}
+              required
+              maxLength={200}
+              placeholder="Nhập địa chỉ nhà xuất bản"
+            />
           </div>
         </div>
-
-        {/* Form actions */}
-        <div className={styles["form-actions"]}>
+        <div className="mt-3">
           <button
-            type="button"
-            onClick={() => navigate("/admin/nxb")}
-            className={styles["cancel-btn"]}
-          >
-            ✖ Hủy
-          </button>
-          <button
-            type="submit"
+            className="btn btn-primary me-2"
             disabled={loading}
-            className={styles["submit-btn"]}
+            type="submit"
           >
-            {loading ? "⏳ Đang thêm..." : "✓ Thêm nhà xuất bản"}
+            {loading ? "Đang lưu..." : "Lưu"}
           </button>
+          <Link to="/admin/nxb" className="btn btn-outline-secondary">
+            Hủy
+          </Link>
         </div>
       </form>
     </div>

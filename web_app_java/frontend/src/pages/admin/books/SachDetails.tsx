@@ -342,7 +342,7 @@ const SachDetails = () => {
               ) : (
                 <>
                   <div className={styles["table-container"]}>
-                    <table className={styles["phieu-muon-table"]}>
+                    <table className={styles["data-table"]}>
                       <thead>
                         <tr>
                           <th>STT</th>
@@ -354,11 +354,17 @@ const SachDetails = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {/* SỬA: Sử dụng currentPhieuMuon thay vì phieuMuonList */}
                         {currentPhieuMuon.map((pm, idx) => (
                           <tr key={idx}>
-                            <td>{startIndex + idx + 1}</td> {/* THÊM: STT */}
-                            <td>{pm.maDocGia}</td>
+                            <td>{startIndex + idx + 1}</td>
+                            <td>
+                              <span
+                                className={styles["ma-docgia"]}
+                                title={pm.maDocGia}
+                              >
+                                {pm.maDocGia}
+                              </span>
+                            </td>
                             <td>{formatDate(pm.ngayMuon)}</td>
                             <td>
                               {pm.ngayTra ? formatDate(pm.ngayTra) : "Chưa trả"}
@@ -372,7 +378,14 @@ const SachDetails = () => {
                                 {pm.trangThaiMuon}
                               </span>
                             </td>
-                            <td>{pm.maNhanVien}</td>
+                            <td>
+                              <span
+                                className={styles["ma-nhanvien"]}
+                                title={pm.maNhanVien}
+                              >
+                                {pm.maNhanVien}
+                              </span>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -381,85 +394,36 @@ const SachDetails = () => {
 
                   {/* THÊM: Pagination Controls */}
                   {totalPages > 1 && (
-                    <div className={styles["pagination-container"]}>
-                      <div className={styles["pagination"]}>
-                        {/* Previous button */}
-                        <button
-                          className={`${styles["pagination-btn"]} ${
-                            currentPage === 1 ? styles["disabled"] : ""
-                          }`}
-                          onClick={handlePrevPage}
-                          disabled={currentPage === 1}
-                          title="Trang trước"
-                        >
-                          ◀
-                        </button>
-
-                        {/* First page */}
-                        {currentPage > 3 && totalPages > 5 && (
-                          <>
-                            <button
-                              className={styles["pagination-btn"]}
-                              onClick={() => handlePageChange(1)}
-                            >
-                              1
-                            </button>
-                            {currentPage > 4 && (
-                              <span className={styles["pagination-dots"]}>
-                                ...
-                              </span>
-                            )}
-                          </>
-                        )}
-
-                        {/* Page numbers */}
-                        {getPageNumbers().map((page) => (
+                    <nav aria-label="Phân trang phiếu mượn">
+                      <ul className={styles["pagination"]}>
+                        <li>
                           <button
-                            key={page}
-                            className={`${styles["pagination-btn"]} ${
-                              page === currentPage ? styles["active"] : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
+                            disabled={currentPage === 1}
+                            onClick={handlePrevPage}
                           >
-                            {page}
+                            &laquo; Trước
                           </button>
-                        ))}
-
-                        {/* Last page */}
-                        {currentPage < totalPages - 2 && totalPages > 5 && (
-                          <>
-                            {currentPage < totalPages - 3 && (
-                              <span className={styles["pagination-dots"]}>
-                                ...
-                              </span>
-                            )}
+                        </li>
+                        {getPageNumbers().map((pageNum) => (
+                          <li key={pageNum}>
                             <button
-                              className={styles["pagination-btn"]}
-                              onClick={() => handlePageChange(totalPages)}
+                              onClick={() => handlePageChange(pageNum)}
+                              disabled={pageNum === currentPage}
                             >
-                              {totalPages}
+                              {pageNum}
                             </button>
-                          </>
-                        )}
-
-                        {/* Next button */}
-                        <button
-                          className={`${styles["pagination-btn"]} ${
-                            currentPage === totalPages ? styles["disabled"] : ""
-                          }`}
-                          onClick={handleNextPage}
-                          disabled={currentPage === totalPages}
-                          title="Trang sau"
-                        >
-                          ▶
-                        </button>
-                      </div>
-
-                      {/* THÊM: Items per page info */}
-                      <div className={styles["pagination-info"]}>
-                        <span>Hiển thị {itemsPerPage} phiếu mỗi trang</span>
-                      </div>
-                    </div>
+                          </li>
+                        ))}
+                        <li>
+                          <button
+                            disabled={currentPage === totalPages}
+                            onClick={handleNextPage}
+                          >
+                            Sau &raquo;
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
                   )}
                 </>
               )}

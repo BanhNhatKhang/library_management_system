@@ -9,6 +9,7 @@ interface Sach {
   tacGia: string;
   anhBia: string;
   soLuong: number;
+  donGia: number;
   theLoais: string[];
   nhaXuatBan?: string;
 }
@@ -209,7 +210,17 @@ const SachManager = () => {
                       : sortIcon(null)}
                   </span>
                 </th>
-                <th>Bìa</th>
+                <th
+                  onClick={() => handleSort("donGia")}
+                  style={{ cursor: "pointer" }}
+                >
+                  Đơn giá{" "}
+                  <span>
+                    {sortKey === "donGia"
+                      ? sortIcon(sortOrder)
+                      : sortIcon(null)}
+                  </span>
+                </th>
                 <th
                   onClick={() => handleSort("tacGia")}
                   style={{ cursor: "pointer" }}
@@ -252,19 +263,11 @@ const SachManager = () => {
                   <td>{sach.maSach}</td>
                   <td>{sach.tenSach}</td>
                   <td>
-                    <img
-                      src={
-                        sach.anhBia
-                          ? (() => {
-                              const pathParts = sach.anhBia.split("/");
-                              const folder = pathParts[0];
-                              const filename = pathParts[1];
-                              return `http://localhost:8080/api/sach/image/${folder}/${filename}`;
-                            })()
-                          : "/images/no-image.png"
-                      }
-                      alt={sach.tenSach}
-                    />
+                    {/* Hiển thị đơn giá, ví dụ: */}
+                    {sach.donGia?.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }) || "Chưa có"}
                   </td>
                   <td>{sach.tacGia}</td>
                   <td>{sach.theLoais?.join(", ")}</td>

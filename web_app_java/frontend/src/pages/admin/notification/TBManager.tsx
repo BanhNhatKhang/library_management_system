@@ -170,7 +170,7 @@ const TBManager: React.FC = () => {
           className={styles["add-btn"]}
           onClick={() => navigate("/admin/thongbao/add")}
         >
-          + Tạo Thông báo mới
+          <i className="fa-solid fa-file-circle-plus"></i>
         </button>
         <div className={styles["search-box"]}>
           <input
