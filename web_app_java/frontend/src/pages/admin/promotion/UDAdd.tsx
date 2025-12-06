@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../../../axiosConfig";
 import styles from "../../../css/admins/promotion/UDAdd.module.css";
+
+interface Sach {
+  maSach: string;
+  tenSach: string;
+}
 
 const UDAdd: React.FC = () => {
   const navigate = useNavigate();
@@ -11,8 +16,18 @@ const UDAdd: React.FC = () => {
     phanTramGiam: "0",
     ngayBatDau: "",
     ngayKetThuc: "",
+    sachIds: [] as string[], // Thêm trường này
   });
   const [loading, setLoading] = useState(false);
+  const [sachList, setSachList] = useState<Sach[]>([]);
+
+  useEffect(() => {
+    // Lấy danh sách sách
+    axios
+      .get("/api/sach")
+      .then((res) => setSachList(res.data))
+      .catch(() => setSachList([]));
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -24,17 +39,28 @@ const UDAdd: React.FC = () => {
     }));
   };
 
+  const handleSachChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    setForm((p) => ({
+      ...p,
+      sachIds: selected,
+    }));
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const requestBody = {
-        // không gửi maUuDai — service sẽ tự sinh nếu thiếu
         tenUuDai: form.tenUuDai,
         moTa: form.moTa,
         phanTramGiam: Number(form.phanTramGiam),
         ngayBatDau: form.ngayBatDau,
         ngayKetThuc: form.ngayKetThuc,
+        maSachList: form.sachIds,
       };
 
       await axios.post("/api/uudai", requestBody);
@@ -47,6 +73,46 @@ const UDAdd: React.FC = () => {
       setLoading(false);
     }
   };
+
+  function toDateInputString(
+    dateStr:
+      | string
+      | Date
+      | { year: number; month: number; day: number }
+      | undefined
+      | null
+  ): string {
+    if (!dateStr) return "";
+    if (typeof dateStr === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      const parts = dateStr.split(",");
+      if (parts.length === 3) {
+        const [y, m, d] = parts;
+        return `${y.trim()}-${m.trim().padStart(2, "0")}-${d
+          .trim()
+          .padStart(2, "0")}`;
+      }
+      return "";
+    }
+    // Nếu là đối tượng Date
+    if (dateStr instanceof Date) {
+      if (isNaN(dateStr.getTime())) return "";
+      return dateStr.toISOString().slice(0, 10);
+    }
+    // Nếu là object LocalDate (có year, month, day)
+    if (
+      typeof dateStr === "object" &&
+      "year" in dateStr &&
+      "month" in dateStr &&
+      "day" in dateStr
+    ) {
+      return `${dateStr.year}-${String(dateStr.month).padStart(
+        2,
+        "0"
+      )}-${String(dateStr.day).padStart(2, "0")}`;
+    }
+    return "";
+  }
 
   return (
     <div className={`${styles["ud-add"]} p-3`}>
@@ -79,7 +145,7 @@ const UDAdd: React.FC = () => {
               name="ngayBatDau"
               type="date"
               className="form-control"
-              value={form.ngayBatDau}
+              value={toDateInputString(form.ngayBatDau)}
               onChange={handleChange}
               required
             />
@@ -90,7 +156,7 @@ const UDAdd: React.FC = () => {
               name="ngayKetThuc"
               type="date"
               className="form-control"
-              value={form.ngayKetThuc}
+              value={toDateInputString(form.ngayKetThuc)}
               onChange={handleChange}
               required
             />
@@ -121,6 +187,25 @@ const UDAdd: React.FC = () => {
               value={form.moTa}
               onChange={handleChange}
             />
+          </div>
+
+          <div className="col-12 mb-2">
+            <label>
+              Chọn sách áp dụng (có thể chọn nhiều, để trống nếu là ưu đãi toàn
+              shop)
+            </label>
+            <select
+              multiple
+              className="form-control"
+              value={form.sachIds}
+              onChange={handleSachChange}
+            >
+              {sachList.map((sach) => (
+                <option key={sach.maSach} value={sach.maSach}>
+                  {sach.tenSach}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

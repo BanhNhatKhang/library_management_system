@@ -26,7 +26,7 @@ public class DocGia {
         DOCGIA
     }
     @Enumerated(EnumType.STRING)
-    @Column(name = "VAITRO", columnDefinition = "VAITRO_DOCGIA")
+    @Column(name = "VAITRO")
     private VaiTroDocGia vaiTro = VaiTroDocGia.DOCGIA;
 
     public enum GioiTinh {
@@ -35,7 +35,7 @@ public class DocGia {
     }
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "GIOITINH", columnDefinition = "GIOI_TINH", nullable = false)
+    @Column(name = "GIOITINH", nullable = false)
     private GioiTinh gioiTinh;
 
     @Column(name = "DIACHI", columnDefinition = "TEXT")
@@ -63,7 +63,7 @@ public class DocGia {
         CAM
     }
     @Enumerated(EnumType.STRING)
-    @Column(name = "TRANGTHAI", columnDefinition = "TRANGTHAI_DOCGIA")
+    @Column(name = "TRANGTHAI")
     private TrangThaiDocGia trangThai = TrangThaiDocGia.HOATDONG;
 
     // THÊM: Quan hệ Many-to-Many với UuDai đã lưu

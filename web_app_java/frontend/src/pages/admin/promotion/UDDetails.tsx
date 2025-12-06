@@ -35,7 +35,7 @@ const UDDetails: React.FC = () => {
     if (!maUuDai) return;
     setLoading(true);
     axios
-      .get(`/api/uudai/id/${maUuDai}`)
+      .get(`/api/uudai/${maUuDai}`)
       .then((res) => setUuDai(res.data))
       .catch(() => setUuDai(null))
       .finally(() => setLoading(false));

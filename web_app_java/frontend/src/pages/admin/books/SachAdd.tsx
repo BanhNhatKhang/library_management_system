@@ -11,6 +11,7 @@ interface TheLoai {
 interface NhaXuatBan {
   maNhaXuatBan: string;
   tenNhaXuatBan: string;
+  trangThai: string;
 }
 
 const SachAdd = () => {
@@ -188,11 +189,13 @@ const SachAdd = () => {
                   required
                 >
                   <option value="">Chọn nhà xuất bản</option>
-                  {nhaXuatBans.map((nxb) => (
-                    <option key={nxb.maNhaXuatBan} value={nxb.maNhaXuatBan}>
-                      {nxb.tenNhaXuatBan}
-                    </option>
-                  ))}
+                  {nhaXuatBans
+                    .filter((nxb) => nxb.trangThai !== "DAKHOA")
+                    .map((nxb) => (
+                      <option key={nxb.maNhaXuatBan} value={nxb.maNhaXuatBan}>
+                        {nxb.tenNhaXuatBan}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>

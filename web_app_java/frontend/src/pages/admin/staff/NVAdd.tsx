@@ -11,10 +11,16 @@ const NVAdd: React.FC = () => {
     dienThoai: "",
     email: "",
     matKhau: "",
+    ngaySinh: "",
+    diaChi: "",
+    vaiTro: "NHANVIEN",
+    trangThai: "HOATDONG",
   });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -22,7 +28,18 @@ const NVAdd: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post("/api/nhanvien", form);
+      // Gộp họ lót và tên thành hoTen
+      const payload = {
+        hoTen: `${form.hoLot} ${form.ten}`.trim(),
+        dienThoai: form.dienThoai,
+        email: form.email,
+        matKhau: form.matKhau,
+        ngaySinh: form.ngaySinh, // Định dạng YYYY-MM-DD
+        diaChi: form.diaChi,
+        vaiTro: form.vaiTro,
+        trangThai: form.trangThai,
+      };
+      await axios.post("/api/nhanvien", payload);
       alert("Thêm nhân viên thành công");
       navigate("/admin/nhanvien");
     } catch (err) {
@@ -94,6 +111,56 @@ const NVAdd: React.FC = () => {
               onChange={handleChange}
               required
             />
+          </div>
+          <div className="col-md-6 mb-2">
+            <label>Ngày sinh</label>
+            <input
+              name="ngaySinh"
+              type="date"
+              className="form-control"
+              value={form.ngaySinh}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="col-md-6 mb-2">
+            <label>Địa chỉ</label>
+            <input
+              name="diaChi"
+              className="form-control"
+              value={form.diaChi}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="col-md-6 mb-2">
+            <label>Vai trò</label>
+            <select
+              name="vaiTro"
+              className="form-select"
+              value={form.vaiTro}
+              onChange={handleChange}
+              required
+            >
+              <option value="NHANVIEN">Nhân viên</option>
+              <option value="THUTHU">Thủ thư</option>
+              <option value="QUANLY">Quản lý</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+          <div className="col-md-6 mb-2">
+            <label>Trạng thái</label>
+            <select
+              name="trangThai"
+              className="form-select"
+              value={form.trangThai}
+              onChange={handleChange}
+              required
+            >
+              <option value="HOATDONG">Hoạt động</option>
+              <option value="NGHI">Nghỉ</option>
+              <option value="KHOA">Khóa</option>
+            </select>
           </div>
         </div>
 

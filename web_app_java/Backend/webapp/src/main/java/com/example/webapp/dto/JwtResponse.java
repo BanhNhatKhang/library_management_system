@@ -5,15 +5,17 @@ public class JwtResponse {
     private String refreshToken;
     private String role;
     private String name;
+    private String trangThai;
 
     public JwtResponse() {
     }
 
-    public JwtResponse(String token, String refreshToken, String role, String name) {
+    public JwtResponse(String token, String refreshToken, String role, String name, String trangThai) {
         this.token = token;
         this.refreshToken = refreshToken;
         this.role = role;
         this.name = name;
+        this.trangThai = trangThai;
     }
 
     public String getToken() {
@@ -47,4 +49,13 @@ public class JwtResponse {
     public String getName() {
         return name;
     }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
 }

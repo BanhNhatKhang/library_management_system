@@ -11,6 +11,7 @@ public class SachDTO {
     private BigDecimal donGia;
     private Integer soLuong;
     private Integer soLuongCoTheMua;
+    
     public Integer getSoLuongCoTheMua() {
         return soLuongCoTheMua;
     }

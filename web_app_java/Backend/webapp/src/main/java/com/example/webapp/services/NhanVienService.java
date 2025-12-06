@@ -51,7 +51,7 @@ public class NhanVienService {
         return nhanVienRepository.save(nhanVien);
     }
 
-        public NhanVien toEntity(NhanVienDangKyDTO dto) {
+    public NhanVien toEntity(NhanVienDangKyDTO dto) {
         NhanVien entity = new NhanVien();
         entity.setMaNhanVien(dto.getMaNhanVien());
         entity.setHoTenNV(dto.getHoTen());
@@ -59,21 +59,19 @@ public class NhanVienService {
         entity.setDienThoai(dto.getDienThoai());
         entity.setDiaChi(dto.getDiaChi());
         entity.setNgaySinh(dto.getNgaySinh());
-        
-        // SỬA: Set password cho registration
-        if (dto.getMatKhau() != null) {
-            entity.setMatKhau(dto.getMatKhau()); // Có thể cần hash password
-        }
-        
-        // Convert String sang enum
+        entity.setMatKhau(dto.getMatKhau());
+
+        // Ép kiểu String sang Enum
         if (dto.getVaiTro() != null) {
             try {
                 entity.setVaiTro(NhanVien.VaiTroNhanVien.valueOf(dto.getVaiTro()));
             } catch (IllegalArgumentException e) {
                 entity.setVaiTro(NhanVien.VaiTroNhanVien.NHANVIEN); // Default
             }
+        } else {
+            entity.setVaiTro(NhanVien.VaiTroNhanVien.NHANVIEN); // Default
         }
-        
+
         if (dto.getTrangThai() != null) {
             try {
                 entity.setTrangThai(NhanVien.TrangThaiNhanVien.valueOf(dto.getTrangThai()));
@@ -81,9 +79,10 @@ public class NhanVienService {
                 entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default
             }
         } else {
-            entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default cho nhân viên mới
+            entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default
         }
-        
+        System.out.println("DTO trangThai: " + dto.getTrangThai());
+
         return entity;
     }
 
@@ -139,7 +138,7 @@ public class NhanVienService {
         return nhanVien;
     }
 
-        public NhanVienDTO toDTO(NhanVien entity) {
+    public NhanVienDTO toDTO(NhanVien entity) {
         NhanVienDTO dto = new NhanVienDTO();
         dto.setMaNhanVien(entity.getMaNhanVien());
         dto.setHoTen(entity.getHoTenNV()); // SỬA: Map từ hoTenNV
@@ -156,11 +155,12 @@ public class NhanVienService {
         if (entity.getTrangThai() != null) {
             dto.setTrangThai(entity.getTrangThai().name()); // Hoặc .toString()
         }
+        System.out.println("DTO trangThai: " + dto.getTrangThai());
         
         return dto;
     }
 
-        public NhanVien toEntity(NhanVienDTO dto) {
+    public NhanVien toEntity(NhanVienDTO dto) {
         NhanVien entity = new NhanVien();
         entity.setMaNhanVien(dto.getMaNhanVien());
         entity.setHoTenNV(dto.getHoTen()); // SỬA: Map sang hoTenNV
@@ -185,6 +185,9 @@ public class NhanVienService {
                 entity.setTrangThai(NhanVien.TrangThaiNhanVien.HOATDONG); // Default
             }
         }
+
+        System.out.println("Entity trangThai: " + entity.getTrangThai());
+        System.out.println("Entity trangThai class: " + (entity.getTrangThai() != null ? entity.getTrangThai().getClass().getName() : "null"));
         
         return entity;
     }

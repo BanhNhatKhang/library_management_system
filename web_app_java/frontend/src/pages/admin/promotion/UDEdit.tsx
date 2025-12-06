@@ -10,6 +10,12 @@ interface UuDai {
   phanTramGiam: number | string; // Use string/number for form input
   ngayBatDau: string;
   ngayKetThuc: string;
+  maSachList: string[];
+}
+
+interface Sach {
+  maSach: string;
+  tenSach: string;
 }
 
 const UDEdit: React.FC = () => {
@@ -22,12 +28,14 @@ const UDEdit: React.FC = () => {
     phanTramGiam: 0,
     ngayBatDau: "",
     ngayKetThuc: "",
+    maSachList: [],
   });
+  const [sachList, setSachList] = useState<Sach[]>([]);
 
   useEffect(() => {
     if (maUuDai) {
       axios
-        .get(`/api/uudai/id/${maUuDai}`)
+        .get(`/api/uudai/${maUuDai}`)
         .then((res) => {
           // Format date for input[type="date"]
           const data = res.data;
@@ -39,6 +47,10 @@ const UDEdit: React.FC = () => {
         })
         .catch(console.error);
     }
+    axios
+      .get("/api/sach")
+      .then((res) => setSachList(res.data))
+      .catch(() => setSachList([]));
   }, [maUuDai]);
 
   const handleChange = (
@@ -65,6 +77,46 @@ const UDEdit: React.FC = () => {
       alert("Lưu thất bại!");
     }
   };
+
+  function toDateInputString(
+    dateStr:
+      | string
+      | Date
+      | { year: number; month: number; day: number }
+      | undefined
+      | null
+  ): string {
+    if (!dateStr) return "";
+    if (typeof dateStr === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      const parts = dateStr.split(",");
+      if (parts.length === 3) {
+        const [y, m, d] = parts;
+        return `${y.trim()}-${m.trim().padStart(2, "0")}-${d
+          .trim()
+          .padStart(2, "0")}`;
+      }
+      return "";
+    }
+    // Nếu là đối tượng Date
+    if (dateStr instanceof Date) {
+      if (isNaN(dateStr.getTime())) return "";
+      return dateStr.toISOString().slice(0, 10);
+    }
+    // Nếu là object LocalDate (có year, month, day)
+    if (
+      typeof dateStr === "object" &&
+      "year" in dateStr &&
+      "month" in dateStr &&
+      "day" in dateStr
+    ) {
+      return `${dateStr.year}-${String(dateStr.month).padStart(
+        2,
+        "0"
+      )}-${String(dateStr.day).padStart(2, "0")}`;
+    }
+    return "";
+  }
 
   return (
     <div className={styles["ud-edit"]}>
@@ -113,7 +165,7 @@ const UDEdit: React.FC = () => {
           <input
             type="date"
             name="ngayBatDau"
-            value={form.ngayBatDau || ""}
+            value={toDateInputString(form.ngayBatDau)}
             onChange={handleChange}
             required
           />
@@ -124,7 +176,7 @@ const UDEdit: React.FC = () => {
           <input
             type="date"
             name="ngayKetThuc"
-            value={form.ngayKetThuc || ""}
+            value={toDateInputString(form.ngayKetThuc)}
             onChange={handleChange}
             required
           />
@@ -138,6 +190,28 @@ const UDEdit: React.FC = () => {
             onChange={handleChange}
             rows={3}
           />
+        </div>
+
+        <div className={styles["form-group"]}>
+          <label>Chọn sách áp dụng (có thể chọn nhiều)</label>
+          <select
+            multiple
+            className="form-control"
+            value={form.maSachList}
+            onChange={(e) => {
+              const selected = Array.from(
+                e.target.selectedOptions,
+                (opt) => opt.value
+              );
+              setForm({ ...form, maSachList: selected });
+            }}
+          >
+            {sachList.map((sach) => (
+              <option key={sach.maSach} value={sach.maSach}>
+                {sach.tenSach}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className={styles["form-actions"]}>

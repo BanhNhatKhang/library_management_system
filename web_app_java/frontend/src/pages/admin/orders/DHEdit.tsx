@@ -54,6 +54,46 @@ const DHEdit: React.FC = () => {
     }
   };
 
+  function toDateInputString(
+    dateStr:
+      | string
+      | Date
+      | { year: number; month: number; day: number }
+      | undefined
+      | null
+  ): string {
+    if (!dateStr) return "";
+    if (typeof dateStr === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      const parts = dateStr.split(",");
+      if (parts.length === 3) {
+        const [y, m, d] = parts;
+        return `${y.trim()}-${m.trim().padStart(2, "0")}-${d
+          .trim()
+          .padStart(2, "0")}`;
+      }
+      return "";
+    }
+    // Nếu là đối tượng Date
+    if (dateStr instanceof Date) {
+      if (isNaN(dateStr.getTime())) return "";
+      return dateStr.toISOString().slice(0, 10);
+    }
+    // Nếu là object LocalDate (có year, month, day)
+    if (
+      typeof dateStr === "object" &&
+      "year" in dateStr &&
+      "month" in dateStr &&
+      "day" in dateStr
+    ) {
+      return `${dateStr.year}-${String(dateStr.month).padStart(
+        2,
+        "0"
+      )}-${String(dateStr.day).padStart(2, "0")}`;
+    }
+    return "";
+  }
+
   return (
     <div className={styles["dh-edit"]}>
       <h2>{maDonHang ? "Cập nhật đơn hàng" : "Thêm đơn hàng mới"}</h2>
@@ -75,7 +115,7 @@ const DHEdit: React.FC = () => {
           <input
             type="date"
             name="ngayDat"
-            value={form.ngayDat?.split("T")[0] || ""}
+            value={toDateInputString(form.ngayDat)}
             onChange={handleChange}
             required
           />

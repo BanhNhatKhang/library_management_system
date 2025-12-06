@@ -125,6 +125,7 @@ export default function BookDetails() {
   const [book, setBook] = useState<SachDetailsDTO | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [recommendedBooks, setRecommendedBooks] = useState<SachDTO[]>([]);
+  const trangThai = localStorage.getItem("trangThai");
   const [message, setMessage] = useState<{
     text: string;
     type: "success" | "error" | "";
@@ -163,6 +164,11 @@ export default function BookDetails() {
 
   const handleAddToCart = async () => {
     if (!book || !maSach) return;
+
+    if (trangThai === "TAMKHOA") {
+      alert("Tài khoản của bạn đang tạm khóa, không thể thêm vào giỏ hàng.");
+      return;
+    }
 
     // 1. Kiểm tra vai trò và token
     if (role !== "DOCGIA") {
@@ -277,6 +283,11 @@ export default function BookDetails() {
 
   const handleBorrow = async () => {
     if (!book || !maSach) return;
+
+    if (trangThai === "TAMKHOA") {
+      alert("Tài khoản của bạn đang tạm khóa, không thể mượn sách.");
+      return;
+    }
 
     // 1. Kiểm tra vai trò
     if (role !== "DOCGIA") {

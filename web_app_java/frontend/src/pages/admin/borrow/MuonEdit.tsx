@@ -58,6 +58,46 @@ const MuonEdit: React.FC = () => {
     }
   };
 
+  function toDateInputString(
+    dateStr:
+      | string
+      | Date
+      | { year: number; month: number; day: number }
+      | undefined
+      | null
+  ): string {
+    if (!dateStr) return "";
+    if (typeof dateStr === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      const parts = dateStr.split(",");
+      if (parts.length === 3) {
+        const [y, m, d] = parts;
+        return `${y.trim()}-${m.trim().padStart(2, "0")}-${d
+          .trim()
+          .padStart(2, "0")}`;
+      }
+      return "";
+    }
+    // Nếu là đối tượng Date
+    if (dateStr instanceof Date) {
+      if (isNaN(dateStr.getTime())) return "";
+      return dateStr.toISOString().slice(0, 10);
+    }
+    // Nếu là object LocalDate (có year, month, day)
+    if (
+      typeof dateStr === "object" &&
+      "year" in dateStr &&
+      "month" in dateStr &&
+      "day" in dateStr
+    ) {
+      return `${dateStr.year}-${String(dateStr.month).padStart(
+        2,
+        "0"
+      )}-${String(dateStr.day).padStart(2, "0")}`;
+    }
+    return "";
+  }
+
   return (
     <div
       className={`${styles["library-loan-management-muon-edit"]} ${
@@ -94,7 +134,7 @@ const MuonEdit: React.FC = () => {
             type="date"
             id="ngayMuon"
             name="ngayMuon"
-            value={form.ngayMuon}
+            value={toDateInputString(form.ngayMuon)}
             onChange={handleChange}
             required
           />
@@ -105,7 +145,7 @@ const MuonEdit: React.FC = () => {
             type="date"
             id="ngayTra"
             name="ngayTra"
-            value={form.ngayTra}
+            value={toDateInputString(form.ngayTra)}
             onChange={handleChange}
           />
         </div>

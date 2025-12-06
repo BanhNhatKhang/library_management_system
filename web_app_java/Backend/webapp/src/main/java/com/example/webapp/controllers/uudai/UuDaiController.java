@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.example.webapp.dto.*;
 import com.example.webapp.services.UuDaiService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.security.Principal;
 import java.util.List;
@@ -20,6 +22,9 @@ public class UuDaiController {
 
     @Autowired
     private UuDaiService uuDaiService;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     // THÊM ENDPOINT NÀY CHO DASHBOARD VÀ UDMANAGER
     @GetMapping
@@ -45,10 +50,16 @@ public class UuDaiController {
 
     // THÊM ENDPOINT TẠO ƯU ĐÃI MỚI
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'QUANLY')")
-    public ResponseEntity<?> createUuDai(@RequestBody UuDaiDTO uuDaiDTO) {
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'QUANLY', 'NHANVIEN', 'THUTHU')")
+    public ResponseEntity<?> createUuDai(@RequestBody Map<String, Object> requestBody) {
         try {
-            UuDaiDTO result = uuDaiService.saveUuDai(uuDaiDTO);
+            Map<String, Object> uuDaiFields = new HashMap<>(requestBody);
+            uuDaiFields.remove("maSachList");
+            uuDaiFields.remove("maUuDai");
+            UuDaiDTO uuDaiDTO = mapper.convertValue(uuDaiFields, UuDaiDTO.class);
+            List<String> maSachList = mapper.convertValue(requestBody.get("maSachList"), new TypeReference<List<String>>() {});
+
+            UuDaiDTO result = uuDaiService.saveUuDai(uuDaiDTO, maSachList);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -57,12 +68,16 @@ public class UuDaiController {
         }
     }
 
-    // THÊM ENDPOINT CẬP NHẬT ƯU ĐÃI
     @PutMapping("/{maUuDai}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'QUANLY')")
-    public ResponseEntity<?> updateUuDai(@PathVariable String maUuDai, @RequestBody UuDaiDTO uuDaiDTO) {
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'QUANLY', 'NHANVIEN', 'THUTHU')")
+    public ResponseEntity<?> updateUuDai(@PathVariable String maUuDai, @RequestBody Map<String, Object> requestBody) {
         try {
-            UuDaiDTO result = uuDaiService.updateUuDai(maUuDai, uuDaiDTO);
+            Map<String, Object> uuDaiFields = new HashMap<>(requestBody);
+            uuDaiFields.remove("maSachList");
+            UuDaiDTO uuDaiDTO = mapper.convertValue(uuDaiFields, UuDaiDTO.class);
+            List<String> maSachList = mapper.convertValue(requestBody.get("maSachList"), new TypeReference<List<String>>() {});
+
+            UuDaiDTO result = uuDaiService.updateUuDai(maUuDai, uuDaiDTO, maSachList);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -166,5 +181,11 @@ public class UuDaiController {
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
         }
+    }
+
+    @GetMapping("/sach/{maUuDai}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'NHANVIEN', 'THUTHU', 'QUANLY')")
+    public List<SachDTO> getSachByUuDaiId(@PathVariable String maUuDai) {
+        return uuDaiService.getSachByUuDaiId(maUuDai);
     }
 }

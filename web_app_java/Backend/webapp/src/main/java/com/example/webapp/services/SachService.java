@@ -217,6 +217,8 @@ public class SachService {
             sach.setTacGia(tacGia);
             sach.setMoTa(moTa);
 
+
+            
             // Set nhà xuất bản
             NhaXuatBan nxb = nhaXuatBanRepository.findById(nhaXuatBan).orElse(null);
             sach.setNhaXuatBan(nxb);
@@ -456,8 +458,16 @@ public class SachService {
         dto.setDiemDanhGia(sach.getDiemDanhGia());
         dto.setGiamGia(sach.getGiamGia());
 
-        dto.setSoSachMuonConLai(getAvailableBooksCount(sach.getMaSach()));
-        dto.setSoLuongCoTheMua(getAvailableStockCount(sach.getMaSach()));
+        try {
+            dto.setSoSachMuonConLai(getAvailableBooksCount(sach.getMaSach()));
+        } catch (Exception e) {
+            dto.setSoSachMuonConLai(0);
+        }
+        try {
+            dto.setSoLuongCoTheMua(getAvailableStockCount(sach.getMaSach()));
+        } catch (Exception e) {
+            dto.setSoLuongCoTheMua(0);
+        }
         
         if (sach.getNhaXuatBan() != null) {
             dto.setNhaXuatBan(sach.getNhaXuatBan().getTenNhaXuatBan());

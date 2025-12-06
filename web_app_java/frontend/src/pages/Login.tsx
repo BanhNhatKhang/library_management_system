@@ -8,6 +8,7 @@ interface JwtResponse {
   token: string;
   role: string;
   name: string;
+  trangThai?: string;
 }
 
 const Login = () => {
@@ -32,7 +33,17 @@ const Login = () => {
 
       const data = response.data;
 
+      // Kiểm tra trạng thái tài khoản
+      if (data.role === "DOCGIA") {
+        if (data.trangThai === "CAM") {
+          setError("Tài khoản của bạn đã bị cấm.");
+          setLoading(false);
+          return;
+        }
+      }
+
       localStorage.setItem("authToken", data.token);
+      localStorage.setItem("trangThai", data.trangThai ?? "");
 
       if (
         data.role === "ADMIN" ||

@@ -7,11 +7,14 @@ import com.example.webapp.dto.SachDTO;
 import com.example.webapp.dto.UuDaiDTO;
 import com.example.webapp.repository.UuDaiRepository;
 import com.example.webapp.repository.DocGiaRepository;
+import com.example.webapp.repository.SachRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Optional;
@@ -26,6 +29,9 @@ public class UuDaiService {
 
     @Autowired
     private DocGiaRepository docGiaRepository;
+
+    @Autowired
+    private SachRepository sachRepository;
 
     @Autowired
     private SachService sachService;
@@ -63,21 +69,69 @@ public class UuDaiService {
                     .collect(Collectors.toList());
     }
 
-    public UuDaiDTO saveUuDai(UuDaiDTO uuDaiDTO) {
-        // nếu client không cung cấp mã ưu đãi, tự sinh mã ở service
+    public UuDaiDTO saveUuDai(UuDaiDTO uuDaiDTO, List<String> maSachList) {
         if (uuDaiDTO.getMaUuDai() == null || uuDaiDTO.getMaUuDai().trim().isEmpty()) {
             uuDaiDTO.setMaUuDai(generateNextMaUD());
         }
         UuDai uuDai = toEntity(uuDaiDTO);
+
+        // Liên kết sách với ưu đãi
+        Set<Sach> sachSet = new HashSet<>();
+        if (maSachList != null) {
+            for (String maSach : maSachList) {
+                Optional<Sach> sachOpt = sachRepository.findById(maSach);
+                if (sachOpt.isPresent()) {
+                    Sach sach = sachOpt.get();
+                    sach.getUuDais().add(uuDai);
+                    // Cập nhật giảm giá cho sách
+                    sach.setGiamGia(uuDai.getPhanTramGiam().doubleValue() / 100.0);
+                    sachRepository.save(sach);
+                    sachSet.add(sach);
+                }
+            }
+        }
+        uuDai.setSachs(sachSet);
+
         return toDTO(uuDaiRepository.save(uuDai));
     }
 
-    public UuDaiDTO updateUuDai(String maUuDai, UuDaiDTO uuDaiDTO) {
+    @Transactional
+    public UuDaiDTO updateUuDai(String maUuDai, UuDaiDTO uuDaiDTO, List<String> maSachList) {
         if (!uuDaiRepository.existsByMaUuDai(maUuDai)) {
             throw new RuntimeException("Thông tin ưu đãi không hợp lệ hoặc không tồn tại");
         }
         UuDai uuDai = toEntity(uuDaiDTO);
         uuDai.setMaUuDai(maUuDai);
+
+        // Lấy ưu đãi cũ để xử lý sách cũ
+        Optional<UuDai> oldUuDaiOpt = uuDaiRepository.findByMaUuDai(maUuDai);
+        Set<Sach> oldSachSet = oldUuDaiOpt.map(UuDai::getSachs).orElse(new HashSet<>());
+
+        // Sách mới được chọn
+        Set<Sach> newSachSet = new HashSet<>();
+        if (maSachList != null) {
+            for (String maSach : maSachList) {
+                Optional<Sach> sachOpt = sachRepository.findById(maSach);
+                if (sachOpt.isPresent()) {
+                    Sach sach = sachOpt.get();
+                    sach.getUuDais().add(uuDai);
+                    sach.setGiamGia(uuDai.getPhanTramGiam().doubleValue() / 100.0);
+                    sachRepository.save(sach);
+                    newSachSet.add(sach);
+                }
+            }
+        }
+        uuDai.setSachs(newSachSet);
+
+        // Xóa giảm giá khỏi các sách không còn thuộc ưu đãi này
+        for (Sach sach : oldSachSet) {
+            if (!newSachSet.contains(sach)) {
+                sach.getUuDais().remove(uuDai);
+                sach.setGiamGia(null);
+                sachRepository.save(sach);
+            }
+        }
+
         return toDTO(uuDaiRepository.save(uuDai));
     }
 

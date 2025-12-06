@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import styles from "../../css/users/profile/Profile.module.css";
 import axios from "../../../axiosConfig";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   hoLot: string;
@@ -180,6 +182,8 @@ function Profile() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [editableData, setEditableData] = useState<UserProfile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [changePasswordData, setChangePasswordData] =
     useState<ChangePasswordData>({
       matKhauHienTai: "",
@@ -412,9 +416,15 @@ function Profile() {
 
       if (response.data.success) {
         alert("Thanh toán phạt thành công!");
+        alert(
+          "Thanh toán phạt thành công!\nBạn sẽ được đăng xuất để cập nhật trạng thái tài khoản. Vui lòng đăng nhập lại để tiếp tục sử dụng dịch vụ."
+        );
+        logout();
+        navigate("/login");
+        return;
         // Refresh danh sách phạt và thông tin tổng hợp
-        fetchPhatList(finesPagination.currentPage);
-        fetchFineStatusInfo();
+        // fetchPhatList(finesPagination.currentPage);
+        // fetchFineStatusInfo();
       } else {
         alert(response.data.message || "Có lỗi xảy ra khi thanh toán");
       }
@@ -1235,9 +1245,44 @@ function Profile() {
     if (!currentData) return null;
 
     // Xử lý ngày sinh
-    const ngaySinhParts = currentData.ngaySinh
-      ? currentData.ngaySinh.split("-").reverse()
-      : ["", "", ""];
+    const ngaySinhParts = (() => {
+      const ns = currentData.ngaySinh;
+      if (!ns) return ["", "", ""];
+      if (typeof ns === "string") {
+        // Đúng định dạng "YYYY-MM-DD"
+        return ns.split("-").reverse();
+      }
+      // Nếu là object LocalDate (có year, month, day)
+      if (
+        typeof ns === "object" &&
+        ns !== null &&
+        "year" in ns &&
+        "month" in ns &&
+        "day" in ns
+      ) {
+        // Ép kiểu cho TypeScript an toàn
+        const localDate = ns as { year: number; month: number; day: number };
+        return [
+          String(localDate.day).padStart(2, "0"),
+          String(localDate.month).padStart(2, "0"),
+          String(localDate.year),
+        ];
+      }
+      // Nếu là Date object
+      if (
+        typeof ns === "object" &&
+        ns !== null &&
+        typeof (ns as Date).getDate === "function"
+      ) {
+        const dateObj = ns as Date;
+        return [
+          String(dateObj.getDate()).padStart(2, "0"),
+          String(dateObj.getMonth() + 1).padStart(2, "0"),
+          String(dateObj.getFullYear()),
+        ];
+      }
+      return ["", "", ""];
+    })();
 
     // Xử lý giới tính từ enum string
     const gioiTinh = currentData.gioiTinh; // "NAM", "NU", hoặc null

@@ -36,8 +36,9 @@ public class XacThucController {
             
             String token = JwtUtil.generateToken(docGia.getEmail(), "DOCGIA");
             String refreshToken = JwtUtil.generateRefreshToken(docGia.getEmail());
+            String trangThai = docGia.getTrangThai().name();
             
-            return ResponseEntity.ok(new JwtResponse(token, refreshToken, "DOCGIA", docGia.getTen()));
+            return ResponseEntity.ok(new JwtResponse(token, refreshToken, "DOCGIA", docGia.getTen(), trangThai));
             
         } catch (RuntimeException e) {
             try {
@@ -48,7 +49,7 @@ public class XacThucController {
                 String token = JwtUtil.generateToken(nhanVien.getEmail(), role);
                 String refreshToken = JwtUtil.generateRefreshToken(nhanVien.getEmail());
 
-                return ResponseEntity.ok(new JwtResponse(token, refreshToken, role, nhanVien.getHoTenNV()));
+                return ResponseEntity.ok(new JwtResponse(token, refreshToken, role, nhanVien.getHoTenNV(), null));
                 
             } catch (RuntimeException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Tài khoản hoặc mật khẩu không đúng");
@@ -94,7 +95,7 @@ public class XacThucController {
             String newToken = JwtUtil.generateToken(username, role);
             String newRefreshToken = JwtUtil.generateRefreshToken(username);
 
-            return ResponseEntity.ok(new JwtResponse(newToken, newRefreshToken, role, name));
+            return ResponseEntity.ok(new JwtResponse(newToken, newRefreshToken, role, name, null));
             
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

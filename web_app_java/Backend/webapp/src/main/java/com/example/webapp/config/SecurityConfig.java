@@ -85,7 +85,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/docgia/theodoimuon/**").hasRole("DOCGIA")
                 
                 // Cho phép độc giả tạo yêu cầu mượn sách
-                .requestMatchers(HttpMethod.POST, "/api/theodoimuonsach").hasRole("DOCGIA")
+                .requestMatchers(HttpMethod.POST, "/api/theodoimuonsach").hasAnyAuthority("DOCGIA", "NHANVIEN", "ADMIN", "THUTHU", "QUANLY")
                 .requestMatchers(HttpMethod.GET, "/api/theodoimuonsach/check-borrow-status").hasRole("DOCGIA")
                 // Thêm quyền cho DOCGIA truy cập thông báo 
                 .requestMatchers(HttpMethod.GET, "/api/thongbao/current-user").hasRole("DOCGIA")

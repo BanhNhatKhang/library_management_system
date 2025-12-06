@@ -25,7 +25,7 @@ public class TheoDoiMuonSach {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    @Column(name = "TRANGTHAIMUON", columnDefinition = "TRANGTHAI_MUON", nullable = false)
+    @Column(name = "TRANGTHAIMUON", nullable = false)
     private TrangThaiMuon trangThaiMuon;
 
     @ManyToOne(optional = false)

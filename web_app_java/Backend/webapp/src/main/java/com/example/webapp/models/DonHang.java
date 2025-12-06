@@ -30,7 +30,7 @@ public class DonHang {
         GIAOTHATBAI
     }
     @Enumerated(EnumType.STRING)
-    @Column(name = "TRANGTHAI", columnDefinition = "TRANGTHAI_DONHANG", nullable = false)
+    @Column(name = "TRANGTHAI", nullable = false)
     private TrangThaiDonHang trangThai;
 
     @ManyToOne(optional = false)

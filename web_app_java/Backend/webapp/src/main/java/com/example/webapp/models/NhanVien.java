@@ -1,6 +1,8 @@
 package com.example.webapp.models;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
 
@@ -34,27 +36,36 @@ public class NhanVien {
         NHANVIEN,
         ADMIN
     }
-
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "VAITRO", columnDefinition = "VAITRO_NHANVIEN", nullable = false)
-    private VaiTroNhanVien vaiTro = VaiTroNhanVien.NHANVIEN;
+    @Column(
+        name = "VAITRO",
+        nullable = false
+    )
+    private VaiTroNhanVien vaiTro;
 
-    @Column(name = "DIACHI", columnDefinition = "TEXT")
-    private String diaChi;
 
     public enum TrangThaiNhanVien {
         HOATDONG,
         NGHI,
         KHOA
     }
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "TRANGTHAI", columnDefinition = "TRANGTHAI_NHANVIEN", nullable = false)
-    private TrangThaiNhanVien trangThai = TrangThaiNhanVien.HOATDONG;
+    @Column(
+        name = "TRANGTHAI",
+        nullable = false
+        // KHÔNG cần columnDefinition ở đây, Hibernate sẽ tự map
+    )
+    private TrangThaiNhanVien trangThai;
 
     @NotNull
     @Column(name = "NGAYSINH", nullable = false)
     private LocalDate ngaySinh;
+
+    @NotNull
+    @Column(name = "DIACHI", length = 255, nullable = false)
+    private String diaChi;
 
     public NhanVien() {}
 
