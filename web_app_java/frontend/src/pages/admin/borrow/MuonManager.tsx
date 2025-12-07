@@ -94,11 +94,84 @@ const MuonManager: React.FC = () => {
     fetchMuonRequests();
   }, []);
 
+  // -------------------------
+  // helper: chuẩn hoá mọi dạng ngày -> "yyyy-MM-dd"
+  // -------------------------
+  function normalizeToDateString(val: unknown): string {
+    if (val === undefined || val === null || val === "") return "";
+    if (typeof val === "string") {
+      const iso = val.match(/^\d{4}-\d{2}-\d{2}/);
+      if (iso) return iso[0];
+      const comma = val.match(/^(\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})$/);
+      if (comma)
+        return `${comma[1]}-${String(Number(comma[2])).padStart(
+          2,
+          "0"
+        )}-${String(Number(comma[3])).padStart(2, "0")}`;
+      const parsed = new Date(val);
+      if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+      return val;
+    }
+
+    if (Array.isArray(val) && val.length >= 3) {
+      const [yRaw, mRaw, dRaw] = val;
+      const y = Number(yRaw),
+        m = Number(mRaw),
+        d = Number(dRaw);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return `${String(y)}-${String(m).padStart(2, "0")}-${String(d).padStart(
+          2,
+          "0"
+        )}`;
+      }
+      return "";
+    }
+
+    if (typeof val === "object") {
+      const obj = val as Record<string, unknown>;
+      const y = obj["year"] ?? obj["Y"];
+      const m = obj["month"] ?? obj["monthValue"];
+      const d = obj["day"] ?? obj["dayOfMonth"];
+      const yN =
+        typeof y === "number"
+          ? y
+          : typeof y === "string"
+          ? parseInt(y as string, 10)
+          : NaN;
+      const mN =
+        typeof m === "number"
+          ? m
+          : typeof m === "string"
+          ? parseInt(m as string, 10)
+          : NaN;
+      const dN =
+        typeof d === "number"
+          ? d
+          : typeof d === "string"
+          ? parseInt(d as string, 10)
+          : NaN;
+      if (!isNaN(yN) && !isNaN(mN) && !isNaN(dN)) {
+        return `${String(yN)}-${String(mN).padStart(2, "0")}-${String(
+          dN
+        ).padStart(2, "0")}`;
+      }
+    }
+
+    if (typeof val === "number") {
+      const dt = new Date(val);
+      if (!isNaN(dt.getTime())) return dt.toISOString().slice(0, 10);
+      return String(val);
+    }
+
+    return String(val);
+  }
+
   const handleApprove = async (
     maDocGia: string,
     maSach: string,
-    ngayMuon: string
+    ngayMuonRaw: unknown
   ) => {
+    const ngayMuon = normalizeToDateString(ngayMuonRaw);
     try {
       await axios.put(`/api/theodoimuonsach/admin/update-status`, {
         maDocGia,
@@ -110,13 +183,14 @@ const MuonManager: React.FC = () => {
 
       alert("Duyệt yêu cầu mượn thành công.");
       setMuonRequests(
-        MuonRequests.map((r) =>
-          r.maDocGia === maDocGia &&
-          r.maSach === maSach &&
-          r.ngayMuon === ngayMuon
+        MuonRequests.map((r) => {
+          const rNgay = normalizeToDateString(r.ngayMuon);
+          return r.maDocGia === maDocGia &&
+            r.maSach === maSach &&
+            rNgay === ngayMuon
             ? { ...r, trangThaiMuon: "DADUYET" }
-            : r
-        )
+            : r;
+        })
       );
     } catch (error) {
       console.error("Error approving loan request:", error);
@@ -127,8 +201,9 @@ const MuonManager: React.FC = () => {
   const handleReject = async (
     maDocGia: string,
     maSach: string,
-    ngayMuon: string
+    ngayMuonRaw: unknown
   ) => {
+    const ngayMuon = normalizeToDateString(ngayMuonRaw);
     try {
       await axios.put(`/api/theodoimuonsach/admin/update-status`, {
         maDocGia,
@@ -140,13 +215,14 @@ const MuonManager: React.FC = () => {
 
       alert("Từ chối yêu cầu mượn thành công.");
       setMuonRequests(
-        MuonRequests.map((r) =>
-          r.maDocGia === maDocGia &&
-          r.maSach === maSach &&
-          r.ngayMuon === ngayMuon
+        MuonRequests.map((r) => {
+          const rNgay = normalizeToDateString(r.ngayMuon);
+          return r.maDocGia === maDocGia &&
+            r.maSach === maSach &&
+            rNgay === ngayMuon
             ? { ...r, trangThaiMuon: "TUCHOI" }
-            : r
-        )
+            : r;
+        })
       );
     } catch (error) {
       console.error("Error rejecting loan request:", error);
@@ -235,7 +311,8 @@ const MuonManager: React.FC = () => {
         const batch = selectedList.slice(i, i + batchSize);
         const promises = batch.map(async (requestKey) => {
           // SỬA: Sử dụng separator |
-          const [maDocGia, maSach, ngayMuon] = requestKey.split("|");
+          const [maDocGia, maSach, ngayMuonRaw] = requestKey.split("|");
+          const ngayMuon = normalizeToDateString(ngayMuonRaw);
 
           console.log(`Processing: ${maDocGia}, ${maSach}, ${ngayMuon}`); // Debug log
 
@@ -318,7 +395,8 @@ const MuonManager: React.FC = () => {
         const batch = selectedList.slice(i, i + batchSize);
         const promises = batch.map(async (requestKey) => {
           // SỬA: Sử dụng separator |
-          const [maDocGia, maSach, ngayMuon] = requestKey.split("|");
+          const [maDocGia, maSach, ngayMuonRaw] = requestKey.split("|");
+          const ngayMuon = normalizeToDateString(ngayMuonRaw);
 
           console.log(`Processing: ${maDocGia}, ${maSach}, ${ngayMuon}`); // Debug log
 
