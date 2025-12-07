@@ -37,12 +37,18 @@ const UDEdit: React.FC = () => {
       axios
         .get(`/api/uudai/${maUuDai}`)
         .then((res) => {
-          // Format date for input[type="date"]
-          const data = res.data;
+          const data = res.data || {};
+
           setForm({
-            ...data,
-            // Ensure phanTramGiam is treated as a string for input value
-            phanTramGiam: String(data.phanTramGiam || 0),
+            maUuDai: String(data.maUuDai ?? ""),
+            tenUuDai: String(data.tenUuDai ?? ""),
+            moTa: String(data.moTa ?? ""),
+            phanTramGiam: String(data.phanTramGiam ?? "0"),
+            ngayBatDau: toDateInputString(data.ngayBatDau ?? data.ngayBatDau),
+            ngayKetThuc: toDateInputString(
+              data.ngayKetThuc ?? data.ngayKetThuc
+            ),
+            maSachList: Array.isArray(data.maSachList) ? data.maSachList : [],
           });
         })
         .catch(console.error);
@@ -81,12 +87,30 @@ const UDEdit: React.FC = () => {
   function toDateInputString(
     dateStr:
       | string
+      | number
       | Date
-      | { year: number; month: number; day: number }
+      | Array<number | string>
+      | { year?: number; month?: number; day?: number }
       | undefined
       | null
   ): string {
-    if (!dateStr) return "";
+    if (!dateStr && dateStr !== 0) return "";
+
+    // array [yyyy, MM, dd]
+    if (Array.isArray(dateStr) && dateStr.length >= 3) {
+      const [yRaw, mRaw, dRaw] = dateStr;
+      const y = Number(yRaw);
+      const m = Number(mRaw);
+      const d = Number(dRaw);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return `${String(y)}-${String(m).padStart(2, "0")}-${String(d).padStart(
+          2,
+          "0"
+        )}`;
+      }
+      return "";
+    }
+
     if (typeof dateStr === "string") {
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
       const parts = dateStr.split(",");
@@ -96,25 +120,57 @@ const UDEdit: React.FC = () => {
           .trim()
           .padStart(2, "0")}`;
       }
+      const isoMatch = dateStr.match(/^\d{4}-\d{2}-\d{2}/);
+      if (isoMatch) return isoMatch[0];
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
       return "";
     }
-    // Nếu là đối tượng Date
+
     if (dateStr instanceof Date) {
       if (isNaN(dateStr.getTime())) return "";
       return dateStr.toISOString().slice(0, 10);
     }
-    // Nếu là object LocalDate (có year, month, day)
-    if (
-      typeof dateStr === "object" &&
-      "year" in dateStr &&
-      "month" in dateStr &&
-      "day" in dateStr
-    ) {
-      return `${dateStr.year}-${String(dateStr.month).padStart(
-        2,
-        "0"
-      )}-${String(dateStr.day).padStart(2, "0")}`;
+
+    if (typeof dateStr === "object" && dateStr !== null) {
+      // dùng Record<string, unknown> thay vì any
+      const obj = dateStr as Record<string, unknown>;
+      const maybeY = obj["year"] ?? obj["Y"];
+      const maybeM = obj["month"] ?? obj["monthValue"];
+      const maybeD = obj["day"] ?? obj["dayOfMonth"];
+
+      const y =
+        typeof maybeY === "number"
+          ? maybeY
+          : typeof maybeY === "string"
+          ? parseInt(maybeY, 10)
+          : NaN;
+      const m =
+        typeof maybeM === "number"
+          ? maybeM
+          : typeof maybeM === "string"
+          ? parseInt(maybeM, 10)
+          : NaN;
+      const d =
+        typeof maybeD === "number"
+          ? maybeD
+          : typeof maybeD === "string"
+          ? parseInt(maybeD, 10)
+          : NaN;
+
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return `${String(y)}-${String(m).padStart(2, "0")}-${String(d).padStart(
+          2,
+          "0"
+        )}`;
+      }
     }
+
+    if (typeof dateStr === "number") {
+      const dt = new Date(dateStr);
+      if (!isNaN(dt.getTime())) return dt.toISOString().slice(0, 10);
+    }
+
     return "";
   }
 

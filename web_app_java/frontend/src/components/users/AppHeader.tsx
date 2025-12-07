@@ -488,7 +488,7 @@ const Header = () => {
               <div className={styles["logo-container"]}>
                 <a href="/">
                   <i className="fas fa-book-open me-2"></i>
-                  BookShare
+                  Mubasa
                 </a>
               </div>
 

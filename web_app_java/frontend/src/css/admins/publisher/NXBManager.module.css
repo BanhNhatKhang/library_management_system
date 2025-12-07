@@ -123,16 +123,22 @@ select:focus {
   font-style: italic;
 }
 
-/* Pagination */
+/* Pagination (copied from TBManager.module.css) */
 .pagination {
+  /* ensure list-style from browser/Bootstrap doesn't show bullets when module class used */
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
-  margin: 1.5rem 0 0;
 }
 
-.pagination button {
+.pagination .page-item {
+  display: inline-block;
+}
+
+.pagination .page-link {
   background: #2563eb;
   color: #fff;
   border: none;
@@ -143,14 +149,29 @@ select:focus {
   transition: background 0.2s;
 }
 
-.pagination button:disabled {
+.pagination .page-item.active .page-link {
+  background: #1e40af;
+  color: #fff;
+}
+
+.pagination .page-item.disabled .page-link,
+.pagination .page-link:disabled {
   background: #a5b4fc;
+  color: #fff;
   cursor: not-allowed;
 }
 
-.pagination span {
+.pagination span,
+.pagination .page-link span {
   font-weight: 500;
   color: #1f2937;
+}
+
+/* Responsive nhỏ */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 0.25rem;
+  }
 }
 
 /* Modal styles */
@@ -261,4 +282,30 @@ select:focus {
 .confirm-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Trạng thái */
+.status-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-cell i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* icon màu cho unlock / lock */
+.status-green {
+  color: #10b981; /* xanh lá */
+}
+
+.status-red {
+  color: #ef4444; /* đỏ */
+}
+
+.status-label {
+  font-size: 0.9rem;
+  color: #374151;
 }

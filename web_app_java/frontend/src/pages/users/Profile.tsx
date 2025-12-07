@@ -1019,6 +1019,13 @@ function Profile() {
       return;
     }
 
+    // Debug: In ra mật khẩu trước khi gửi
+    console.log("DEBUG - Passwords before sending:", {
+      matKhauHienTai: changePasswordData.matKhauHienTai,
+      matKhauMoi: changePasswordData.matKhauMoi,
+      nhapLaiMatKhauMoi: changePasswordData.nhapLaiMatKhauMoi,
+    });
+
     if (
       changePasswordData.matKhauMoi !== changePasswordData.nhapLaiMatKhauMoi
     ) {

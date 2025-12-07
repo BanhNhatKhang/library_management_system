@@ -103,7 +103,7 @@ public class DocGiaService {
         return docGiaRepository.save(docGia);
     }
 
-        public String changePassword(Principal principal, DoiMatKhauRequestDTO request) {
+    public String changePassword(Principal principal, DoiMatKhauRequestDTO request) {
         String username = principal.getName();
         
         // Tìm DocGia hiện tại
@@ -115,6 +115,10 @@ public class DocGiaService {
         if (existingDocGia == null) {
             throw new RuntimeException("Không tìm thấy thông tin độc giả");
         }
+
+            // Debug: In ra mật khẩu hiện tại (đã mã hóa) và mật khẩu mới (plain text)
+        System.out.println("DEBUG - Mật khẩu hiện tại (DB): " + existingDocGia.getMatKhau());
+        System.out.println("DEBUG - Mật khẩu mới (plain): " + request.getMatKhauMoi());
         
         // Kiểm tra mật khẩu hiện tại
         if (!passwordEncoder.matches(request.getMatKhauHienTai(), existingDocGia.getMatKhau())) {

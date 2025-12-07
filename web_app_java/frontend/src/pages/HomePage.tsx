@@ -69,15 +69,15 @@ function HomePage() {
   }, [allTheLoai]);
 
   const categoryImages: Record<string, string> = {
-    TL001: "/category-icons/banner6.jpg",
-    TL002: "/category-icons/banner1.webp",
-    TL003: "/category-icons/banner1.webp",
-    FB001: "/category-icons/banner7.webp",
-    FB002: "/category-icons/banner3.webp",
-    FB003: "/category-icons/banner2.webp",
-    TL004: "/category-icons/banner6.jpg",
-    TL005: "/category-icons/banner6.jpg",
-    TL006: "/category-icons/banner2.webp",
+    TL001: "/category-icons/kinhte.webp",
+    TL002: "/category-icons/lichsu.jpg",
+    TL003: "/category-icons/tamly.jpg",
+    TL007: "/category-icons/tongiao.jpg",
+    TL008: "/category-icons/vanhoc.webp",
+    TL009: "/category-icons/triethoc.webp",
+    TL004: "/category-icons/yhoc.webp",
+    TL005: "/category-icons/khoahoc.webp",
+    TL006: "/category-icons/phapluat.webp",
   };
 
   useEffect(() => {

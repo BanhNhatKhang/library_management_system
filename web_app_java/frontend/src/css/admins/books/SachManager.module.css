@@ -156,7 +156,11 @@ select:focus {
   margin: 1.5rem 0 0;
 }
 
-.pagination button {
+.pagination .page-item {
+  display: inline-block;
+}
+
+.pagination .page-link {
   background: #2563eb;
   color: #fff;
   border: none;
@@ -167,20 +171,29 @@ select:focus {
   transition: background 0.2s;
 }
 
-.pagination button:disabled {
+.pagination .page-item.active .page-link {
+  background: #1e40af;
+  color: #fff;
+}
+
+.pagination .page-item.disabled .page-link,
+.pagination .page-link:disabled {
   background: #a5b4fc;
+  color: #fff;
   cursor: not-allowed;
 }
 
-.pagination span {
+.pagination span,
+.pagination .page-link span {
   font-weight: 500;
   color: #1f2937;
 }
 
-/* Modal styles giữ nguyên như cũ */
-
 /* Responsive nhỏ */
 @media (max-width: 768px) {
+  .pagination {
+    gap: 0.25rem;
+  }
   .sach-table th,
   .sach-table td {
     font-size: 0.9rem;
@@ -193,4 +206,179 @@ select:focus {
   .search-box {
     width: 100%;
   }
+}
+
+/* Modal - improved layout */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 9, 15, 0.52);
+  z-index: 9999;
+  padding: 24px;
+}
+
+/* hộp modal chính: 2 cột */
+.delete-modal {
+  background: #ffffff;
+  border-radius: 10px;
+  max-width: 760px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.45);
+  padding: 0;
+  display: flex;
+  flex-direction: column; /* <-- stack header, content, actions vertically */
+  gap: 0;
+  position: relative;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  transform: translateY(0);
+}
+
+/* header */
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef2f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* title left, optional close/action right */
+  gap: 12px;
+  width: 100%;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* content area: confirmation text above, then book-info row */
+.modal-content {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  padding: 20px 24px;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ensure the confirmation paragraph sits above the book info and is centered */
+.modal-content > p {
+  order: -1;
+  width: 100%;
+  text-align: center;
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 0.98rem;
+}
+
+/* wrapper for image + details */
+.book-info {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* image col */
+.book-image {
+  flex: 0 0 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* details col */
+.book-details {
+  flex: 1 1 auto;
+  padding-right: 8px;
+}
+
+/* actions: full width footer aligned right */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 22px;
+  border-top: 1px solid #eef2f6;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+}
+.cancel-btn,
+.confirm-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.cancel-btn {
+  background: #fff;
+  color: #111827;
+}
+.confirm-btn {
+  background: #dc2626;
+  color: #fff;
+  border-color: transparent;
+}
+.cancel-btn:disabled,
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* close button (optional placement) */
+.delete-modal .close-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+}
+
+/* responsive: stack vertically on small screens */
+@media (max-width: 640px) {
+  .delete-modal {
+    flex-direction: column;
+    max-width: 520px;
+  }
+  .modal-content {
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  .book-image {
+    flex: 0 0 auto;
+  }
+  .book-image img {
+    width: 130px;
+    height: 190px;
+  }
+  .book-details p strong {
+    width: 80px;
+  }
+}
+
+/* Modal confirm */
+.modal-confirm {
+  width: 100%;
+  padding: 18px 24px 0;
+  box-sizing: border-box;
+  text-align: center;
+}
+.modal-confirm p {
+  margin: 0;
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.4;
 }

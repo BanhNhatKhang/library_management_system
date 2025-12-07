@@ -5,8 +5,7 @@ import styles from "../../../css/admins/staff/NVEdit.module.css";
 
 interface NhanVien {
   maNhanVien: string;
-  hoLot: string;
-  ten: string;
+  hoTen: string; // dùng tên đầy đủ như backend trả về
   dienThoai: string;
   email: string;
   matKhau?: string;
@@ -65,17 +64,13 @@ const NVEdit: React.FC = () => {
           <input type="text" value={form.maNhanVien} readOnly />
         </div>
         <div className={styles["form-group"]}>
-          <label>Họ lót</label>
+          <label>Họ và tên</label>
           <input
-            name="hoLot"
-            value={form.hoLot}
+            name="hoTen"
+            value={form.hoTen}
             onChange={handleChange}
             required
           />
-        </div>
-        <div className={styles["form-group"]}>
-          <label>Tên</label>
-          <input name="ten" value={form.ten} onChange={handleChange} required />
         </div>
         <div className={styles["form-group"]}>
           <label>Điện thoại</label>

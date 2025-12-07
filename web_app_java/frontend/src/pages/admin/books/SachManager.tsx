@@ -26,7 +26,9 @@ const SachManager = () => {
   const [loading, setLoading] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>("maSach");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  // Pagination states (thay thế phần phân trang cũ bằng logic của TBManager)
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(9); // Hiển thị 9 dòng mỗi trang
 
   // Trường tìm kiếm
   const [query, setQuery] = useState("");
@@ -124,13 +126,46 @@ const SachManager = () => {
     return 0;
   });
 
-  // Phân trang
-  const rowsPerPage = 4;
-  const totalPages = Math.max(1, Math.ceil(sortedList.length / rowsPerPage));
-  const paginatedList = sortedList.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const totalItems = sortedList.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedList = sortedList.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+    } else {
+      const startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push("...");
+      }
+
+      for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
 
   // Xử lý khi click icon sắp xếp
   const handleSort = (key: SortKey) => {
@@ -312,33 +347,51 @@ const SachManager = () => {
             </tbody>
           </table>
 
+          {/* Pagination (thay thế bằng pagination của TBManager) */}
           {totalPages > 1 && (
             <nav aria-label="Phân trang sách">
-              <ul className={styles["pagination"]}>
-                <li>
+              <ul className="pagination justify-content-center">
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
                   <button
+                    className="page-link"
+                    onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
                   >
                     &laquo; Trước
                   </button>
                 </li>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (pageNum) => (
-                    <li key={pageNum}>
+
+                {getPageNumbers().map((pageNum, index) => (
+                  <li
+                    key={index}
+                    className={`page-item ${
+                      pageNum === currentPage ? "active" : ""
+                    } ${pageNum === "..." ? "disabled" : ""}`}
+                  >
+                    {pageNum === "..." ? (
+                      <span className="page-link">...</span>
+                    ) : (
                       <button
-                        onClick={() => setCurrentPage(pageNum)}
-                        disabled={pageNum === currentPage}
+                        className="page-link"
+                        onClick={() => handlePageChange(pageNum as number)}
                       >
                         {pageNum}
                       </button>
-                    </li>
-                  )
-                )}
-                <li>
+                    )}
+                  </li>
+                ))}
+
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
+                >
                   <button
+                    className="page-link"
+                    onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
                   >
                     Sau &raquo;
                   </button>
@@ -360,9 +413,12 @@ const SachManager = () => {
               <h3>⚠️ Xác nhận xóa sách</h3>
             </div>
 
-            <div className={styles["modal-content"]}>
+            {/* -> moved confirmation line here (full width, centered) */}
+            <div className={styles["modal-confirm"]}>
               <p>Bạn có chắc chắn muốn xóa sách này không?</p>
+            </div>
 
+            <div className={styles["modal-content"]}>
               <div className={styles["book-info"]}>
                 <div className={styles["book-image"]}>
                   <img

@@ -89,7 +89,7 @@
 }
 
 .discounted {
-  color: #c92127;
+  color: #043747;
   font-size: 32px;
   font-weight: 700;
 }
@@ -101,7 +101,7 @@
 }
 
 .badge {
-  background: #c92127;
+  background: #043747;
   color: white;
   padding: 3px 8px;
   border-radius: 4px;
@@ -145,8 +145,8 @@
 
 .addCart {
   background-color: #fff;
-  color: #c92127;
-  border: 2px solid #c92127;
+  color: #043747;
+  border: 2px solid #043747;
 }
 
 .addCart:hover {
@@ -154,13 +154,13 @@
 }
 
 .borrow {
-  background-color: #c92127;
+  background-color: #043747;
   color: #fff;
   border: none;
 }
 
 .borrow:hover {
-  background-color: #a8181d;
+  background-color: #043747;
 }
 
 /* Chính sách */

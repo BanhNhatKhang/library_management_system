@@ -12,6 +12,60 @@ interface LoanRequest {
   maNhanVien?: string;
 }
 
+/* Thêm các kiểu cho response từ backend để tránh `any` */
+interface DocGiaApi {
+  maDocGia: string;
+  hoLot?: string;
+  ten?: string;
+  dienThoai?: string;
+  email?: string;
+  diaChi?: string;
+}
+
+interface NhanVienApi {
+  maNhanVien?: string;
+  hoTenNV?: string;
+  diaChi?: string;
+  dienThoai?: string;
+  email?: string;
+}
+
+interface SachApi {
+  maSach?: string;
+  tenSach?: string;
+  anhBia?: string;
+  tacGia?: string;
+  theLoais?: Array<{ ten?: string }>;
+}
+
+type DateLike =
+  | string
+  | number
+  | Array<number | string>
+  | {
+      year?: number;
+      month?: number;
+      day?: number;
+      monthValue?: number;
+      dayOfMonth?: number;
+    }
+  | null
+  | undefined;
+
+interface TheoDoiMuonApi {
+  id?: { maDocGia?: string; maSach?: string; ngayMuon?: DateLike };
+  maDocGia?: string;
+  maSach?: string;
+  ngayMuon?: DateLike;
+  ngayTra?: DateLike;
+  docGia?: DocGiaApi;
+  nhanVien?: NhanVienApi;
+  sach?: SachApi;
+  maNhanVien?: string;
+  trangThaiMuon?: string;
+  trangThai?: string; // thêm để tránh lỗi truy cập
+}
+
 const MuonEdit: React.FC = () => {
   const { maDocGia, maSach, ngayMuon } = useParams<{
     maDocGia: string;
@@ -29,14 +83,54 @@ const MuonEdit: React.FC = () => {
   });
 
   useEffect(() => {
-    if (maDocGia && maSach && ngayMuon) {
-      axios
-        .get(
-          `/api/theodoimuonsach/item?maDocGia=${maDocGia}&maSach=${maSach}&ngayMuon=${ngayMuon}`
-        )
-        .then((res) => setForm(res.data))
-        .catch(console.error);
-    }
+    if (!maDocGia || !maSach || !ngayMuon) return;
+
+    const fetchItem = async () => {
+      try {
+        const url = `/api/theodoimuonsach/item?maDocGia=${encodeURIComponent(
+          maDocGia
+        )}&maSach=${encodeURIComponent(maSach)}&ngayMuon=${encodeURIComponent(
+          ngayMuon
+        )}`;
+
+        // Sử dụng generic để axios trả về kiểu đã định
+        const res = await axios.get<TheoDoiMuonApi>(url);
+        console.log("DEBUG /api/theodoimuonsach/item response:", res.data);
+
+        const data = res.data ?? ({} as TheoDoiMuonApi);
+        const id = data.id ?? {};
+
+        const rawMaDocGia =
+          data.maDocGia ?? id.maDocGia ?? data.docGia?.maDocGia ?? "";
+        const rawMaSach = data.maSach ?? id.maSach ?? data.sach?.maSach ?? "";
+        const rawNgayMuon =
+          data.ngayMuon && data.ngayMuon !== ""
+            ? data.ngayMuon
+            : id.ngayMuon ?? data.id?.ngayMuon;
+        const rawNgayTra = data.ngayTra ?? data.ngayTra;
+        const rawMaNhanVien =
+          data.maNhanVien ??
+          data.nhanVien?.maNhanVien ??
+          data.nhanVien?.maNhanVien ??
+          "";
+        const rawTrangThai =
+          data.trangThaiMuon ?? data.trangThai ?? data.trangThaiMuon ?? "";
+
+        setForm((prev) => ({
+          ...prev,
+          maDocGia: String(rawMaDocGia),
+          maSach: String(rawMaSach),
+          ngayMuon: toDateInputString(rawNgayMuon),
+          ngayTra: toDateInputString(rawNgayTra),
+          maNhanVien: String(rawMaNhanVien),
+          trangThaiMuon: String(rawTrangThai),
+        }));
+      } catch (err) {
+        console.error("GET /api/theodoimuonsach/item failed:", err);
+      }
+    };
+
+    fetchItem();
   }, [maDocGia, maSach, ngayMuon]);
 
   const handleChange = (
@@ -58,43 +152,75 @@ const MuonEdit: React.FC = () => {
     }
   };
 
-  function toDateInputString(
-    dateStr:
-      | string
-      | Date
-      | { year: number; month: number; day: number }
-      | undefined
-      | null
-  ): string {
-    if (!dateStr) return "";
-    if (typeof dateStr === "string") {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-      const parts = dateStr.split(",");
-      if (parts.length === 3) {
-        const [y, m, d] = parts;
-        return `${y.trim()}-${m.trim().padStart(2, "0")}-${d
-          .trim()
-          .padStart(2, "0")}`;
+  function toDateInputString(dateVal: DateLike): string {
+    if (dateVal === undefined || dateVal === null || dateVal === "") return "";
+
+    // string "yyyy-MM-dd" or ISO
+    if (typeof dateVal === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) return dateVal;
+      const isoMatch = dateVal.match(/^\d{4}-\d{2}-\d{2}/);
+      if (isoMatch) return isoMatch[0];
+      const dm = dateVal.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (dm) return `${dm[3]}-${dm[2]}-${dm[1]}`;
+      const parsed = new Date(dateVal);
+      if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+      return "";
+    }
+
+    // array [yyyy, MM, dd] or mixed strings
+    if (Array.isArray(dateVal) && dateVal.length >= 3) {
+      const [yRaw, mRaw, dRaw] = dateVal;
+      const y = Number(yRaw);
+      const m = Number(mRaw);
+      const d = Number(dRaw);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return `${String(y)}-${String(m).padStart(2, "0")}-${String(d).padStart(
+          2,
+          "0"
+        )}`;
       }
       return "";
     }
-    // Nếu là đối tượng Date
-    if (dateStr instanceof Date) {
-      if (isNaN(dateStr.getTime())) return "";
-      return dateStr.toISOString().slice(0, 10);
+
+    // object { year, month, day } or { year, monthValue, dayOfMonth }
+    if (typeof dateVal === "object") {
+      const obj = dateVal as Record<string, unknown>;
+      const maybeY = obj["year"];
+      const maybeM = obj["month"] ?? obj["monthValue"];
+      const maybeD = obj["day"] ?? obj["dayOfMonth"];
+      const y =
+        typeof maybeY === "number"
+          ? maybeY
+          : typeof maybeY === "string"
+          ? parseInt(maybeY, 10)
+          : NaN;
+      const m =
+        typeof maybeM === "number"
+          ? maybeM
+          : typeof maybeM === "string"
+          ? parseInt(maybeM, 10)
+          : NaN;
+      const d =
+        typeof maybeD === "number"
+          ? maybeD
+          : typeof maybeD === "string"
+          ? parseInt(maybeD, 10)
+          : NaN;
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return `${String(y)}-${String(m).padStart(2, "0")}-${String(d).padStart(
+          2,
+          "0"
+        )}`;
+      }
     }
-    // Nếu là object LocalDate (có year, month, day)
-    if (
-      typeof dateStr === "object" &&
-      "year" in dateStr &&
-      "month" in dateStr &&
-      "day" in dateStr
-    ) {
-      return `${dateStr.year}-${String(dateStr.month).padStart(
-        2,
-        "0"
-      )}-${String(dateStr.day).padStart(2, "0")}`;
+
+    // number timestamp
+    const num = Number(dateVal as unknown);
+    if (!isNaN(num)) {
+      const dt = new Date(num);
+      if (!isNaN(dt.getTime())) return dt.toISOString().slice(0, 10);
     }
+
     return "";
   }
 

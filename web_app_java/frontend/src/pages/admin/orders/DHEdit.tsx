@@ -25,72 +25,139 @@ const DHEdit: React.FC = () => {
     if (maDonHang) {
       axios
         .get(`/api/donhang/id/${maDonHang}`)
-        .then((res) => setForm(res.data))
+        .then((res) => {
+          console.log("DEBUG GET /api/donhang:", res.data.ngayDat); // <- xem shape thực tế
+          const data = res.data;
+          // Chuẩn hóa ngayDat về "yyyy-MM-dd" trước khi setForm
+          data.ngayDat = toDateInputString(data.ngayDat);
+          setForm(data);
+        })
         .catch(console.error);
     }
   }, [maDonHang]);
 
+  // cập nhật form khi thay đổi input/select
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: name === "tongTien" ? Number(value) : value });
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "tongTien"
+          ? // đảm bảo là number cho trường số
+            Number(value === "" ? 0 : value)
+          : value,
+    }));
   };
 
+  // submit form: PUT khi đang edit, POST khi tạo mới
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (maDonHang) {
         await axios.put(`/api/donhang/${maDonHang}`, form);
-        alert("Cập nhật đơn hàng thành công!");
       } else {
         await axios.post("/api/donhang", form);
-        alert("Thêm đơn hàng mới thành công!");
       }
       navigate("/admin/donhang");
     } catch (err) {
-      console.error(err);
-      alert("Lưu thất bại!");
+      console.error("Lỗi lưu đơn hàng:", err);
+      alert("Lưu đơn hàng thất bại. Kiểm tra console để biết thêm chi tiết.");
     }
   };
 
+  // robust type-guard + converter
+  function isLocalDateLike(
+    v: unknown
+  ): v is { year: number; month: number; day: number } {
+    if (typeof v !== "object" || v === null) return false;
+    const obj = v as Record<string, unknown>;
+    // handle different shapes: {year, month, day} OR {year, monthValue, dayOfMonth}
+    return (
+      (typeof obj.year === "number" &&
+        (typeof obj.month === "number" || typeof obj.monthValue === "number") &&
+        (typeof obj.day === "number" || typeof obj.dayOfMonth === "number")) ||
+      // also allow strings that look like numbers
+      (typeof obj.year === "string" &&
+        (typeof obj.month === "string" || typeof obj.monthValue === "string") &&
+        (typeof obj.day === "string" || typeof obj.dayOfMonth === "string"))
+    );
+  }
+
   function toDateInputString(
-    dateStr:
+    dateVal:
       | string
+      | number
       | Date
-      | { year: number; month: number; day: number }
+      | {
+          year?: number | string;
+          month?: number | string;
+          day?: number | string;
+          monthValue?: number | string;
+          dayOfMonth?: number | string;
+        }
+      | Array<number | string>
       | undefined
       | null
   ): string {
-    if (!dateStr) return "";
-    if (typeof dateStr === "string") {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-      const parts = dateStr.split(",");
-      if (parts.length === 3) {
-        const [y, m, d] = parts;
-        return `${y.trim()}-${m.trim().padStart(2, "0")}-${d
-          .trim()
-          .padStart(2, "0")}`;
+    if (dateVal === undefined || dateVal === null) return "";
+
+    // If it's already a yyyy-MM-dd string
+    if (typeof dateVal === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) return dateVal;
+      // ISO datetime -> take date part
+      const isoMatch = dateVal.match(/^\d{4}-\d{2}-\d{2}/);
+      if (isoMatch) return isoMatch[0];
+      // formats like "yyyy,MM,dd" or "yyyy, M, d"
+      const parts = dateVal.split(",");
+      if (parts.length >= 3) {
+        const y = parts[0].trim();
+        const m = String(Number(parts[1])).padStart(2, "0");
+        const d = String(Number(parts[2])).padStart(2, "0");
+        return `${y}-${m}-${d}`;
       }
+      // dd/MM/yyyy -> convert
+      const dm = dateVal.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (dm) return `${dm[3]}-${dm[2]}-${dm[1]}`;
+      // fallback parse
+      const parsed = new Date(dateVal);
+      if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
       return "";
     }
-    // Nếu là đối tượng Date
-    if (dateStr instanceof Date) {
-      if (isNaN(dateStr.getTime())) return "";
-      return dateStr.toISOString().slice(0, 10);
+
+    // If it's a numeric timestamp (ms)
+    if (typeof dateVal === "number") {
+      const d = new Date(dateVal);
+      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+      return "";
     }
-    // Nếu là object LocalDate (có year, month, day)
-    if (
-      typeof dateStr === "object" &&
-      "year" in dateStr &&
-      "month" in dateStr &&
-      "day" in dateStr
-    ) {
-      return `${dateStr.year}-${String(dateStr.month).padStart(
-        2,
-        "0"
-      )}-${String(dateStr.day).padStart(2, "0")}`;
+
+    // If array [y,m,d]
+    if (Array.isArray(dateVal) && dateVal.length >= 3) {
+      const [y, m, d] = dateVal;
+      return `${String(y)}-${String(Number(m)).padStart(2, "0")}-${String(
+        Number(d)
+      ).padStart(2, "0")}`;
     }
+
+    // If LocalDate-like object (various shapes)
+    if (isLocalDateLike(dateVal)) {
+      const obj = dateVal as Record<string, unknown>;
+      const y = obj.year ?? obj.Y ?? obj.y;
+      const m = obj.month ?? obj.monthValue ?? obj.m;
+      const d = obj.day ?? obj.dayOfMonth ?? obj.d;
+      return `${String(y)}-${String(Number(m)).padStart(2, "0")}-${String(
+        Number(d)
+      ).padStart(2, "0")}`;
+    }
+
+    // If native Date
+    if (dateVal instanceof Date) {
+      if (isNaN(dateVal.getTime())) return "";
+      return dateVal.toISOString().slice(0, 10);
+    }
+
     return "";
   }
 
@@ -115,7 +182,7 @@ const DHEdit: React.FC = () => {
           <input
             type="date"
             name="ngayDat"
-            value={toDateInputString(form.ngayDat)}
+            value={form.ngayDat}
             onChange={handleChange}
             required
           />

@@ -27,6 +27,53 @@ interface Sach {
   theLoais: string[];
 }
 
+// helper: convert nhiều dạng (string với dấu phẩy, array, object) -> "yyyy-MM-dd"
+const formatToInputDate = (value: unknown): string => {
+  if (value === undefined || value === null) return "";
+
+  if (typeof value === "string") {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    const parts = value.split(",");
+    if (parts.length >= 3) {
+      const y = parts[0].trim();
+      const m = String(Number(parts[1])).padStart(2, "0");
+      const d = String(Number(parts[2])).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    // Try parse Date fallback
+    const dObj = new Date(value);
+    if (!isNaN(dObj.getTime())) {
+      return dObj.toISOString().slice(0, 10);
+    }
+    return "";
+  }
+
+  if (Array.isArray(value) && value.length >= 3) {
+    const [y, m, d] = value as (string | number)[];
+    return `${String(y)}-${String(Number(m)).padStart(2, "0")}-${String(
+      Number(d)
+    ).padStart(2, "0")}`;
+  }
+
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "object" && value !== null) {
+    const obj = value as Record<string, unknown>;
+    const y = obj.year ?? obj.y ?? obj.Y;
+    const m = obj.month ?? obj.m;
+    const d = obj.day ?? obj.d;
+    if (y != null && m != null && d != null) {
+      return `${String(y)}-${String(Number(m)).padStart(2, "0")}-${String(
+        Number(d)
+      ).padStart(2, "0")}`;
+    }
+  }
+
+  return "";
+};
+
 const SachEdit = () => {
   const navigate = useNavigate();
   const { maSach } = useParams<{ maSach: string }>();
@@ -94,7 +141,7 @@ const SachEdit = () => {
           soQuyen: sachData.soQuyen,
           donGia: sachData.donGia.toString(),
           soLuong: sachData.soLuong,
-          namXuatBan: sachData.namXuatBan,
+          namXuatBan: formatToInputDate(sachData.namXuatBan),
           tacGia: sachData.tacGia,
           moTa: sachData.moTa || "",
           nhaXuatBan: nxbId,

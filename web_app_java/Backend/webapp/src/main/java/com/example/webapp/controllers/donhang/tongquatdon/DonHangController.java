@@ -1,6 +1,8 @@
 package com.example.webapp.controllers.donhang.tongquatdon;
 
+import com.example.webapp.models.DocGia;
 import com.example.webapp.models.DonHang;
+import com.example.webapp.repository.DocGiaRepository;
 import com.example.webapp.services.DonHangService;
 import com.example.webapp.dto.*;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,8 @@ public class DonHangController {
 
     @Autowired
     private DonHangService donHangService;
+    @Autowired
+    private DocGiaRepository docGiaRepository;
 
     @GetMapping
     public List<DonHangDTO> getAllDonHang() {
@@ -73,8 +77,30 @@ public class DonHangController {
     }
 
     @PutMapping("/{maDonHang}")
-    public DonHang updateDonHang(@PathVariable String maDonHang, @RequestBody DonHang donHang) {
-        return donHangService.updateDonHang(maDonHang, donHang);
+    public ResponseEntity<?> updateDonHang(@PathVariable String maDonHang, @RequestBody DonHangUpdateDTO updateDTO) {
+        try {
+            DonHang donHang = donHangService.findById(maDonHang);
+            if (donHang == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Tìm DocGia từ maDocGia
+            DocGia docGia = docGiaRepository.findByMaDocGia(updateDTO.getMaDocGia()).orElse(null);
+            if (docGia == null) {
+                return ResponseEntity.badRequest().body("Độc giả không tồn tại");
+            }
+
+            // Cập nhật DonHang
+            donHang.setDocGia(docGia);
+            donHang.setNgayDat(updateDTO.getNgayDat());
+            donHang.setTongTien(updateDTO.getTongTien());
+            donHang.setTrangThai(DonHang.TrangThaiDonHang.valueOf(updateDTO.getTrangThai()));
+
+            DonHang updatedDonHang = donHangService.save(donHang);
+            return ResponseEntity.ok(updatedDonHang);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi cập nhật đơn hàng: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{maDonHang}")

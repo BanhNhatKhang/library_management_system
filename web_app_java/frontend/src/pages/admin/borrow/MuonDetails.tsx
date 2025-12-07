@@ -45,18 +45,30 @@ const MuonDetails: React.FC = () => {
   );
 
   useEffect(() => {
-    const fetchMuonSachDetails = async () => {
+    const fetchMuonSachDetails = async (
+      mDocGia: string,
+      mSach: string,
+      nMuon: string
+    ) => {
       try {
-        console.log("Fetching details for:", { maDocGia, maSach, ngayMuon });
+        const formattedNgayMuon = nMuon.includes(",")
+          ? nMuon
+              .split(",")
+              .map((p) => p.trim())
+              .join("-") // "yyyy,MM,dd" -> "yyyy-MM-dd"
+          : nMuon;
 
-        const response = await axios.get(
-          `/api/theodoimuonsach/item?maDocGia=${maDocGia}&maSach=${maSach}&ngayMuon=${ngayMuon}`
-        );
-
-        console.log("API Response:", response.data);
-        setMuonSach(response.data);
-      } catch (error) {
-        console.error("Error fetching loan details:", error);
+        const url = `/api/theodoimuonsach/item?maDocGia=${encodeURIComponent(
+          mDocGia
+        )}&maSach=${encodeURIComponent(mSach)}&ngayMuon=${encodeURIComponent(
+          formattedNgayMuon
+        )}`;
+        console.log("GET", url);
+        const res = await axios.get(url);
+        console.log("Muon item:", res.data);
+        setMuonSach(res.data);
+      } catch (err) {
+        console.error("Error fetching loan details:", err);
         setError("Không thể tải thông tin phiếu mượn");
       } finally {
         setLoading(false);
@@ -64,7 +76,7 @@ const MuonDetails: React.FC = () => {
     };
 
     if (maDocGia && maSach && ngayMuon) {
-      fetchMuonSachDetails();
+      fetchMuonSachDetails(maDocGia, maSach, ngayMuon);
     }
   }, [maDocGia, maSach, ngayMuon]);
 
@@ -254,22 +266,6 @@ const MuonDetails: React.FC = () => {
                   {sach?.theLoais?.join(", ") || "—"}
                 </span>
               </div>
-              {sach?.anhBia && (
-                <div className={styles["info-item"]}>
-                  <span className={styles["info-label"]}>Ảnh bìa:</span>
-                  <div className={styles["book-image"]}>
-                    <img
-                      src={sach.anhBia}
-                      alt={sach.tenSach}
-                      className={styles["book-cover"]}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "/default-book-cover.jpg";
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Action buttons cho sách */}
               <div className={styles["action-section"]}>
@@ -312,18 +308,6 @@ const MuonDetails: React.FC = () => {
                     : "Chưa có ngày trả"}
                 </span>
               </div>
-              <div className={styles["info-item"]}>
-                <span className={styles["info-label"]}>Trạng thái:</span>
-                <span className={styles["info-value"]}>
-                  <span
-                    className={`${styles["status"]} ${
-                      styles[muonSach.trangThaiMuon?.toLowerCase() || ""]
-                    }`}
-                  >
-                    {muonSach.trangThaiMuon || "—"}
-                  </span>
-                </span>
-              </div>
 
               {/* Thông tin tính toán */}
               <div className={styles["calculated-info"]}>
@@ -343,22 +327,6 @@ const MuonDetails: React.FC = () => {
                             new Date(muonSach.ngayMuon).getTime()) /
                             (1000 * 3600 * 24)
                         ) + " ngày (đang mượn)"
-                      : "—"}
-                  </span>
-                </div>
-                <div className={styles["info-item"]}>
-                  <span className={styles["info-label"]}>Tình trạng:</span>
-                  <span className={styles["info-value"]}>
-                    {muonSach.ngayMuon && !muonSach.ngayTra
-                      ? Math.ceil(
-                          (new Date().getTime() -
-                            new Date(muonSach.ngayMuon).getTime()) /
-                            (1000 * 3600 * 24)
-                        ) > 30
-                        ? "⚠️ Quá hạn"
-                        : "✅ Trong hạn"
-                      : muonSach.ngayTra
-                      ? "📚 Đã trả"
                       : "—"}
                   </span>
                 </div>

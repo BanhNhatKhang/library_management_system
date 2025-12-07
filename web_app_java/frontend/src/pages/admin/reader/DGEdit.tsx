@@ -22,11 +22,52 @@ const DGEdit: React.FC = () => {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const formatToInputDate = (value: unknown): string => {
+    if (value === undefined || value === null) return "";
+    if (typeof value === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      const parts = value.split(",");
+      if (parts.length >= 3) {
+        const y = parts[0].trim();
+        const m = String(Number(parts[1])).padStart(2, "0");
+        const d = String(Number(parts[2])).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      const dObj = new Date(value);
+      if (!isNaN(dObj.getTime())) return dObj.toISOString().slice(0, 10);
+      return "";
+    }
+    if (Array.isArray(value) && value.length >= 3) {
+      const [y, m, d] = value as (string | number)[];
+      return `${String(y)}-${String(Number(m)).padStart(2, "0")}-${String(
+        Number(d)
+      ).padStart(2, "0")}`;
+    }
+    if (value instanceof Date && !isNaN(value.getTime()))
+      return value.toISOString().slice(0, 10);
+    if (typeof value === "object" && value !== null) {
+      const obj = value as Record<string, unknown>;
+      const y = obj.year ?? obj.y;
+      const m = obj.month ?? obj.m;
+      const d = obj.day ?? obj.d;
+      if (y != null && m != null && d != null) {
+        return `${String(y)}-${String(Number(m)).padStart(2, "0")}-${String(
+          Number(d)
+        ).padStart(2, "0")}`;
+      }
+    }
+    return "";
+  };
+
   useEffect(() => {
     if (!maDocGia) return;
     axios
       .get(`/api/docgia/${maDocGia}`)
-      .then((r) => setForm(r.data))
+      .then((r) => {
+        const data = r.data;
+        data.ngaySinh = formatToInputDate(data.ngaySinh);
+        setForm(data);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [maDocGia]);
@@ -55,11 +96,34 @@ const DGEdit: React.FC = () => {
     }
   };
 
-  const toggleLock = () => {
+  const statusOptions = [
+    { value: "HOATDONG", label: "Hoạt động" },
+    { value: "TAMKHOA", label: "Tạm khóa" },
+    { value: "CAM", label: "Cấm" },
+  ];
+
+  const cycleLock = () => {
     if (!form) return;
+    const order = ["HOATDONG", "TAMKHOA", "CAM"];
     const current = form.trangThai || "HOATDONG";
-    const next = current === "HOATDONG" ? "TAMKHOA" : "HOATDONG";
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    if (next === "CAM") {
+      const ok = window.confirm(
+        "Bạn sắp đặt trạng thái thành CAM (khóa vĩnh viễn). Xác nhận?"
+      );
+      if (!ok) return;
+    }
     changeField("trangThai", next);
+  };
+
+  const handleStatusSelect = (value: string) => {
+    if (value === "CAM") {
+      const ok = window.confirm(
+        "Bạn sắp đặt trạng thái thành CAM (khóa vĩnh viễn). Xác nhận?"
+      );
+      if (!ok) return;
+    }
+    changeField("trangThai", value as DocGia["trangThai"]);
   };
 
   if (loading) return <div className="p-3">⏳ Đang tải...</div>;
@@ -149,21 +213,42 @@ const DGEdit: React.FC = () => {
           <div className={styles["form-group"]}>
             <label>Trạng thái tài khoản</label>
             <div className="d-flex align-items-center gap-2">
+              <select
+                value={form.trangThai || "HOATDONG"}
+                onChange={(e) => handleStatusSelect(e.target.value)}
+                className="form-select form-select-sm"
+                style={{ maxWidth: 180 }}
+              >
+                {statusOptions.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+
               <span
                 className={`${styles["status-badge"]} ${
                   form.trangThai === "HOATDONG"
                     ? styles["status-active"]
+                    : form.trangThai === "CAM"
+                    ? styles["status-ban"]
                     : styles["status-locked"]
                 }`}
               >
-                {form.trangThai === "HOATDONG" ? "Hoạt động" : "Tạm khóa"}
+                {form.trangThai === "HOATDONG"
+                  ? "Hoạt động"
+                  : form.trangThai === "TAMKHOA"
+                  ? "Tạm khóa"
+                  : "Cấm"}
               </span>
+
               <button
                 type="button"
                 className="btn btn-outline-warning btn-sm"
-                onClick={toggleLock}
+                onClick={cycleLock}
+                title="Chuyển trạng thái (HOATDONG → TAMKHOA → CAM)"
               >
-                {form.trangThai === "HOATDONG" ? "Khóa tài khoản" : "Mở khóa"}
+                Chuyển
               </button>
             </div>
           </div>

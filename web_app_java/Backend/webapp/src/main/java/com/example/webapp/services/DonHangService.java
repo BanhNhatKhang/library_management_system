@@ -502,4 +502,12 @@ public class DonHangService {
         
         return null; // Không có xung đột
     }
+
+    public DonHang findById(String maDonHang) {
+        return donHangRepository.findById(maDonHang).orElse(null);
+    }
+
+    public DonHang save(DonHang donHang) {
+        return donHangRepository.save(donHang);
+    }
 }

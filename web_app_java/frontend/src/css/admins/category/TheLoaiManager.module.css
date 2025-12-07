@@ -123,11 +123,14 @@ select:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
   margin: 1.5rem 0 0;
 }
 
-.pagination button {
+.pagination .page-item {
+  display: inline-block;
+}
+
+.pagination .page-link {
   background: #2563eb;
   color: #fff;
   border: none;
@@ -138,124 +141,22 @@ select:focus {
   transition: background 0.2s;
 }
 
-.pagination button:disabled {
+.pagination .page-item.active .page-link {
+  background: #1e40af;
+  color: #fff;
+}
+
+.pagination .page-item.disabled .page-link,
+.pagination .page-link:disabled {
   background: #a5b4fc;
+  color: #fff;
   cursor: not-allowed;
 }
 
-.pagination span {
+.pagination span,
+.pagination .page-link span {
   font-weight: 500;
   color: #1f2937;
-}
-
-/* Modal styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.delete-modal {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #ef4444;
-  font-size: 1.25rem;
-}
-
-.modal-content {
-  padding: 1.5rem;
-}
-
-.modal-content p {
-  margin: 0 0 1rem 0;
-  font-size: 1.1rem;
-  text-align: center;
-  color: #374151;
-}
-
-.theloai-info {
-  background: #f9fafb;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 2px solid #fee2e2;
-}
-
-.theloai-details h4 {
-  margin: 0 0 0.5rem 0;
-  color: #111827;
-  font-size: 1.1rem;
-}
-
-.theloai-details p {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
-  color: #6b7280;
-  text-align: left;
-}
-
-.modal-actions {
-  padding: 1rem 1.5rem 1.5rem;
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-}
-
-.cancel-btn,
-.confirm-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
-  min-width: 80px;
-}
-
-.cancel-btn {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.cancel-btn:hover:not(:disabled) {
-  background: #e5e7eb;
-}
-
-.confirm-btn {
-  background: #ef4444;
-  color: white;
-}
-
-.confirm-btn:hover:not(:disabled) {
-  background: #dc2626;
-}
-
-.cancel-btn:disabled,
-.confirm-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* Responsive nhỏ */
@@ -271,5 +172,179 @@ select:focus {
   .theloai-table th,
   .theloai-table td {
     font-size: 0.9rem;
+  }
+  .pagination {
+    gap: 0.25rem;
+  }
+}
+/* Modal */
+.modal-overlay {
+  position: fixed; /* bắt modal ra khỏi luồng tài liệu */
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999; /* đủ cao để nằm trên cùng */
+  padding: 20px;
+}
+
+/* hộp modal chính */
+.delete-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  position: relative;
+}
+
+/* nhỏ: ảnh sách + chi tiết */
+.book-image img {
+  max-width: 160px;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+/* các nút */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* optional: style badge/status để không bị che */
+.status-badge {
+  z-index: 10000;
+}
+
+/* Modal - same styles as sách modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 9, 15, 0.52);
+  z-index: 9999;
+  padding: 24px;
+}
+
+.delete-modal {
+  background: #ffffff;
+  border-radius: 10px;
+  max-width: 760px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.45);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef2f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-confirm {
+  width: 100%;
+  padding: 18px 24px 0;
+  box-sizing: border-box;
+  text-align: center;
+}
+.modal-confirm p {
+  margin: 0;
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  padding: 20px 24px;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.theloai-info {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.theloai-details {
+  flex: 1 1 auto;
+  padding-right: 8px;
+}
+.theloai-details h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+.theloai-details p {
+  margin: 6px 0;
+  color: #374151;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 22px;
+  border-top: 1px solid #eef2f6;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+}
+.cancel-btn,
+.confirm-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.cancel-btn {
+  background: #fff;
+  color: #111827;
+}
+.confirm-btn {
+  background: #dc2626;
+  color: #fff;
+  border-color: transparent;
+}
+/* responsive */
+@media (max-width: 640px) {
+  .delete-modal {
+    max-width: 520px;
+  }
+  .modal-content {
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
   }
 }

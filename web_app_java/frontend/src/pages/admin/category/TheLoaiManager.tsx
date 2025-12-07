@@ -109,13 +109,14 @@ const TheLoaiManager = () => {
     return 0;
   });
 
-  // Phân trang
-  const rowsPerPage = 9; // Hiển thị cứng 9 dòng mỗi trang
-  const totalPages = Math.max(1, Math.ceil(sortedList.length / rowsPerPage));
-  const paginatedList = sortedList.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  // Pagination (thay thế bằng logic của TBManager)
+  const [itemsPerPage] = useState(9); // Hiển thị 9 dòng mỗi trang
+
+  const totalItems = sortedList.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedList = sortedList.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -124,13 +125,11 @@ const TheLoaiManager = () => {
   };
 
   const getPageNumbers = () => {
-    const pageNumbers = [];
+    const pageNumbers: (number | string)[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
+      for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
     } else {
       const startPage = Math.max(
         1,
@@ -143,9 +142,7 @@ const TheLoaiManager = () => {
         if (startPage > 2) pageNumbers.push("...");
       }
 
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
-      }
+      for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
 
       if (endPage < totalPages) {
         if (endPage < totalPages - 1) pageNumbers.push("...");
@@ -308,31 +305,50 @@ const TheLoaiManager = () => {
 
           {totalPages > 1 && (
             <nav aria-label="Phân trang thể loại">
-              <ul className={styles["pagination"]}>
-                <li>
+              <ul
+                className={
+                  styles["pagination"] + " pagination justify-content-center"
+                }
+              >
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
                   <button
+                    className="page-link"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
                     &laquo; Trước
                   </button>
                 </li>
+
                 {getPageNumbers().map((pageNum, index) => (
-                  <li key={index}>
+                  <li
+                    key={index}
+                    className={`page-item ${
+                      pageNum === currentPage ? "active" : ""
+                    } ${pageNum === "..." ? "disabled" : ""}`}
+                  >
                     {pageNum === "..." ? (
-                      <span>...</span>
+                      <span className="page-link">...</span>
                     ) : (
                       <button
+                        className="page-link"
                         onClick={() => handlePageChange(pageNum as number)}
-                        disabled={pageNum === currentPage}
                       >
                         {pageNum}
                       </button>
                     )}
                   </li>
                 ))}
-                <li>
+
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
+                >
                   <button
+                    className="page-link"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
@@ -345,7 +361,7 @@ const TheLoaiManager = () => {
         </>
       )}
 
-      {/* Modal xác nhận xóa */}
+      {/* Modal xác nhận xóa (thay thế) */}
       {showDeleteModal && theLoaiToDelete && (
         <div className={styles["modal-overlay"]} onClick={handleCancelDelete}>
           <div
@@ -356,9 +372,11 @@ const TheLoaiManager = () => {
               <h3>⚠️ Xác nhận xóa thể loại</h3>
             </div>
 
-            <div className={styles["modal-content"]}>
+            <div className={styles["modal-confirm"]}>
               <p>Bạn có chắc chắn muốn xóa thể loại này không?</p>
+            </div>
 
+            <div className={styles["modal-content"]}>
               <div className={styles["theloai-info"]}>
                 <div className={styles["theloai-details"]}>
                   <h4>{theLoaiToDelete.tenTheLoai}</h4>
